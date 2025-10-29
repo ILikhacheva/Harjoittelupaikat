@@ -24,18 +24,24 @@ const userPassword = document.getElementById("UserPassword");
 
 function updateUserModalRole() {
   if (roleStudent.checked) {
+    // Показываем поля для студента
     studentSelectGroup.style.display = "block";
     teacherNameGroup.style.display = "none";
     teacherCodeGroup.style.display = "none";
     codeError.style.display = "none";
-    userEmailGroup.style.display = "block";
-    userPasswordGroup.style.display = "block";
+    // Управляем required атрибутами
+    userStudentSelect.setAttribute("required", "required");
+    userNimiTeacher.removeAttribute("required");
+    teacherCodeInput.removeAttribute("required");
   } else {
+    // Показываем поля для преподавателя
     studentSelectGroup.style.display = "none";
     teacherNameGroup.style.display = "block";
     teacherCodeGroup.style.display = "block";
-    userEmailGroup.style.display = "block";
-    userPasswordGroup.style.display = "block";
+    // Управляем required атрибутами
+    userStudentSelect.removeAttribute("required");
+    userNimiTeacher.setAttribute("required", "required");
+    teacherCodeInput.setAttribute("required", "required");
   }
 }
 
@@ -83,7 +89,9 @@ if (usersForm) {
           const { code: envCode } = await res.json();
           valid = code === envCode;
         }
-      } catch {}
+      } catch (err) {
+        console.error("Ошибка при проверке кода:", err);
+      }
       if (!valid) {
         codeError.style.display = "inline";
         teacherCodeInput.focus();

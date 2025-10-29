@@ -1,5 +1,8 @@
 //подключаемся к базе данных PostgreSQL и создаем сервер Express
 
+// Загружаем переменные окружения из .env файла
+require("dotenv").config();
+
 const express = require("express");
 const bcrypt = require("bcrypt");
 const cors = require("cors");
@@ -156,7 +159,8 @@ app.post("/add-workplace", async (req, res) => {
 
 // Endpoint для получения кодового слова преподавателя (для проверки)
 app.get("/api/teacher-code", (req, res) => {
-  res.json({ code: process.env.OppiKodi || "secret123" });
+  const code = process.env.OppiKodi || "secret123";
+  res.json({ code: code });
 });
 
 // Добавление пользователя с хешированием пароля
