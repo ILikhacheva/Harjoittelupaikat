@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Harjoittelupaikat</title>
+    <link rel="icon" type="image/png" href="clock.png" />
+    <link rel="stylesheet" href="app.css" />
+  </head>
+  <body>
+    <!-- Объединяем бургер меню и заголовок-->
+    <div class="header">
+      <h1>Tervetuloa Harjoittelupaikat sivustolle!</h1>
+      <div id="burgerMenu" onclick="openSideMenu()">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <!-- Side menu -->
+    <div
+      id="sideMenu"
+      class="side-menu"
+      style="display: none"
+      onmouseleave="closeSideMenu()"
+    >
+      <!-- Боковое меню кнопок -->
+      <button class="side-btn" onclick="openOppilasModal(); closeSideMenu();">
+        Lisää opiskelija
+      </button>
+      <button class="side-btn" onclick="openYritysModal(); closeSideMenu();">
+        Lisää yritys
+      </button>
+      <button class="side-btn" onclick="openPaikkaModal(); closeSideMenu();">
+        Lisää harjoittelupaikka
+      </button>
+      <button class="side-btn" onclick="openKirjauduModal(); closeSideMenu();">
+        Kirjaudu
+      </button>
+    </div>
+
+    <!-- Таблица данных с местами практики Заголовок-->
+    <div id="dataTable">
+      <h2>Harjoittelupaikat</h2>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Oppilas</th>
+            <th>Paikan nimi</th>
+            <th>Ohjaaja</th>
+            <th>Puhelin</th>
+            <th>Email</th>
+            <th>Alku</th>
+            <th>Loppu</th>
+            <th>Ruokaraha</th>
+            <th>Kaupunki</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- Данные будут подгружаться через JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Modal ikkuna: uusi opiskelija -->
+    <div id="OppilasModalOverlay" class="modal-overlay" style="display: none">
+      <div id="OppilasModal" class="modal-window">
+        <button class="close-btn" onclick="closeOppilasModal()" title="Close">
+          ×
+        </button>
+        <h2>Uusi opiskelija</h2>
+        <form id="oppilas-form" method="post" action="#">
+          <div class="form-group">
+            <label for="OppilasNimi">Oppilaan nimi:</label>
+            <input type="text" id="OppilasNimi" name="OppilasNimi" required />
+          </div>
+          <div class="form-group">
+            <label for="RyhmanNimi">Ryhmä:</label>
+            <input type="text" id="RyhmanNimi" name="RyhmanNimi" required />
+          </div>
+          <div class="buttons">
+            <button type="submit" class="btn btn-primary">Tallenna</button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeOppilasModal()"
+            >
+              Peruuta
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal ikkuna: uusi paikka -->
+    <div id="PaikkaModalOverlay" class="modal-overlay" style="display: none">
+      <div id="PaikkaModal" class="modal-window">
+        <button class="close-btn" onclick="closePaikkaModal()" title="Close">
+          ×
+        </button>
+        <h2>Uusi harjoittelupaikka</h2>
+        <form id="paikka-form" method="post" action="#">
+          <div class="form-group">
+            <label for="Oppilas">Oppilas:</label>
+            <select id="OppilasLista" name="Oppilas" required>
+              <option value="-1">Valitse opiskelija...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="PaikanNimi">Paikan nimi:</label>
+            <select id="PaikanNimi" name="PaikanNimi" required>
+              <option value="-1">Valitse paikka...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="Ohjaaja">Ohjaaja:</label>
+            <input type="text" id="Ohjaaja" name="Ohjaaja" />
+          </div>
+          <div class="form-group">
+            <label for="Puhelin">Puhelin:</label>
+            <input type="text" id="Puhelin" name="Puhelin" />
+          </div>
+          <div class="form-group">
+            <label for="Email">Email:</label>
+            <input type="email" id="Email" name="Email" />
+          </div>
+          <div class="form-group">
+            <label for="Alku">Alku:</label>
+            <input type="date" id="Alku" name="Alku" />
+          </div>
+          <div class="form-group">
+            <label for="Loppu">Loppu:</label>
+            <input type="date" id="Loppu" name="Loppu" />
+          </div>
+          <div class="form-group">
+            <label for="Ruokaraha">Ruokaraha:</label>
+            <select id="Ruokaraha" name="Ruokaraha" required>
+              <option value="">Valitse...</option>
+              <option value="true">Kyllä</option>
+              <option value="false">Ei</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="Kaupunki">Kaupunki:</label>
+            <input type="text" id="Kaupunki" name="Kaupunki" />
+          </div>
+          <div class="form-group">
+            <label for="Status">Status:</label>
+            <select id="Status" name="Status" required>
+              <option value="">Valitse...</option>
+              <option value="Есть">Есть</option>
+              <option value="В поиске">В поиске</option>
+              <option value="Нет">Нет</option>
+            </select>
+          </div>
+          <div class="buttons">
+            <button type="submit" class="btn btn-primary">Tallenna</button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closePaikkaModal()"
+            >
+              Peruuta
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal ikkuna: uusi yritys -->
+    <div id="YritysModalOverlay" class="modal-overlay" style="display: none">
+      <div id="YritysModal" class="modal-window">
+        <button class="close-btn" onclick="closeYritysModal()" title="Close">
+          ×
+        </button>
+        <h2>Uusi yritys</h2>
+        <form id="yritys-form" method="post" action="#">
+          <div class="form-group">
+            <label for="YrityksenNimi">Yrityksen nimi:</label>
+            <input
+              type="text"
+              id="YrityksenNimi"
+              name="YrityksenNimi"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="PaikkojenMaara">Paikkojen määrä:</label>
+            <input
+              type="number"
+              id="PaikkojenMaara"
+              name="PaikkojenMaara"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="YrityksenTunnus">Yrityksen tunnus:</label>
+            <input
+              type="text"
+              id="YrityksenTunnus"
+              name="YrityksenTunnus"
+              required
+            />
+          </div>
+          <div class="buttons">
+            <button type="submit" class="btn btn-primary">Tallenna</button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeYritysModal()"
+            >
+              Peruuta
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal ikkuna: uusi kayttaja -->
+    <div id="UsersModalOverlay" class="modal-overlay" style="display: none">
+      <div id="UsersModal" class="modal-window">
+        <button class="close-btn" onclick="closeUsersModal()" title="Close">
+          ×
+        </button>
+        <h2>Rekisteröinti</h2>
+        <form id="Users-form" method="post" action="#">
+          <div class="form-group">
+            <label>Rooli:</label>
+            <div style="display: flex; gap: 16px; align-items: center">
+              <label style="margin: 0">
+                <input
+                  type="radio"
+                  id="roleStudent"
+                  name="UserRole"
+                  value="student"
+                  checked
+                />
+                Oppilas
+              </label>
+              <label style="margin: 0">
+                <input
+                  type="radio"
+                  id="roleTeacher"
+                  name="UserRole"
+                  value="teacher"
+                />
+                Opettaja
+              </label>
+            </div>
+          </div>
+          <div class="form-group" id="studentSelectGroup">
+            <label for="UserStudentSelect">Valitse opiskelija:</label>
+            <select id="UserStudentSelect" name="UserStudentSelect" required>
+              <option value="">Valitse...</option>
+            </select>
+          </div>
+          <div class="form-group" id="teacherNameGroup" style="display: none">
+            <label for="UserNimiTeacher">Nimi:</label>
+            <input type="text" id="UserNimiTeacher" name="UserNimiTeacher" />
+          </div>
+          <div class="form-group" id="UserEmailGroup" style="display: none">
+            <label for="UserEmail">Sähköposti:</label>
+            <input type="text" id="UserEmail" name="UserEmail" required />
+          </div>
+          <div class="form-group" id="UserPasswordGroup" style="display: none">
+            <label for="UserPassword">Salasana:</label>
+            <input
+              type="password"
+              id="UserPassword"
+              name="UserPassword"
+              required
+            />
+          </div>
+          <div class="form-group" id="teacherCodeGroup" style="display: none">
+            <label for="TeacherCode">Koodisana:</label>
+            <input type="password" id="TeacherCode" name="TeacherCode" />
+            <span id="codeError" style="color: red; display: none"
+              >Koodisana ei ole oikea</span
+            >
+          </div>
+          <div class="buttons">
+            <button type="submit" class="btn btn-primary">Tallenna</button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeUsersModal()"
+            >
+              Peruuta
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <footer>
+      <ul>
+        <li>
+          <a href="https://www.kpedu.fi/" title="Meistä" target="_blank"
+            >https://www.kpedu.fi/</a
+          >
+        </li>
+        <li>
+          <a href="mailto:anders.wikberg@kpedu.fi" title="Lähetä sähköpostia">
+            anders.wikberg@kpedu.fi</a
+          >
+        </li>
+      </ul>
+      <p>© 2025 Harjoittelupaikat</p>
+    </footer>
+    <script src="app.js"></script>
+  </body>
+</html>

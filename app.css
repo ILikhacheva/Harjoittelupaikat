@@ -1,0 +1,223 @@
+/* Modal overlay and window styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+.modal-window {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  padding: 32px 28px 24px 28px;
+  min-width: 320px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  z-index: 2001;
+}
+.modal-window h2 {
+  text-align: center;
+  color: #4a4a4a;
+  margin-bottom: 30px;
+}
+.modal-window .close-btn {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #888;
+}
+/* Burger menu styles */
+#burgerMenu {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+#burgerMenu .bar {
+  width: 28px;
+  height: 4px;
+  background-color: #333;
+  margin: 3px 0;
+  border-radius: 2px;
+  transition: 0.3s;
+}
+
+/* Side menu styles */
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 220px;
+  height: 100vh;
+  background: #f7f7f7;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
+  padding: 24px 16px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 1002;
+}
+
+.close-side-menu {
+  align-self: flex-end;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+
+.side-btn {
+  background: #676b70;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 0;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-bottom: 6px;
+  transition: background 0.2s;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.side-btn:hover {
+  background: #357ab8;
+}
+
+/* Header flex layout: burger left, title center */
+.header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100vw;
+  background: none;
+  margin: 0;
+  padding-top: 16px;
+  padding-bottom: 8px;
+}
+
+#burgerMenu {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+}
+
+.header h1 {
+  flex: 1;
+  text-align: center;
+  margin: 0;
+}
+@media (max-width: 600px) {
+  body {
+    font-size: 16px;
+    padding: 10px;
+  }
+  .container {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  #dataTable {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0;
+    margin: 0;
+  }
+  table {
+    min-width: 700px;
+    font-size: 14px;
+    border-collapse: collapse;
+    width: 100%;
+    display: table;
+  }
+  thead,
+  tbody,
+  tr,
+  td,
+  th {
+    display: revert;
+  }
+  footer ul {
+    padding-left: 0;
+  }
+  footer li {
+    font-size: 14px;
+  }
+
+  /* Header: stack burger under title on small screens */
+  .header {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    position: relative;
+    padding-top: 12px;
+    padding-bottom: 8px;
+  }
+  .header h1 {
+    flex: none;
+    margin-bottom: 8px;
+    margin-top: 0;
+    font-size: 32px;
+  }
+  #burgerMenu {
+    position: static;
+    transform: none;
+    margin: 0 0 0 0;
+    align-self: flex-end;
+  }
+}
+
+h1 {
+  font-size: 48px;
+  color: #242323;
+  font-family: "Cinzel Decorative", "MedievalSharp", serif;
+  margin: 0;
+}
+
+/* Убираем .header, burgerMenu теперь абсолютный */
+#burgerMenu {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 1001;
+  margin: 8px 0 0 16px;
+}
+.divider {
+  width: 100vw;
+  height: 2mm;
+  background-color: #333;
+  margin: 0;
+  border: 0;
+  position: relative;
+  z-index: 2;
+}
