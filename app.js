@@ -105,7 +105,8 @@ if (usersForm) {
         return false;
       }
       // Получаем имя выбранного студента
-      const selectedOption = userStudentSelect.options[userStudentSelect.selectedIndex];
+      const selectedOption =
+        userStudentSelect.options[userStudentSelect.selectedIndex];
       nimi = selectedOption.textContent;
     }
 
@@ -119,12 +120,16 @@ if (usersForm) {
 
     // Отправка данных на сервер
     try {
+      let payload = { nimi, email, password, role };
+      if (role === 3 && userStudentSelect && userStudentSelect.value) {
+        payload.student_id = userStudentSelect.value;
+      }
       const res = await fetch("http://localhost:3000/add-user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nimi, email, password, role }),
+        body: JSON.stringify(payload),
       });
-
+      console.log(res);
       if (res.ok) {
         alert("Rekisteröinti onnistui!");
         closeUsersModal();

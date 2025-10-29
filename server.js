@@ -161,13 +161,22 @@ app.get("/api/teacher-code", (req, res) => {
 
 // Добавление пользователя с хешированием пароля
 app.post("/add-user", async (req, res) => {
-  const { nimi, email, password, role } = req.body;
+  const { nimi, email, password, role, student_id } = req.body;
   try {
     const hash = await bcrypt.hash(password, 10);
-    await pool.query(
-      "INSERT INTO users (user_email, user_password, user_name, user_role) VALUES ($1, $2, $3, $4)",
-      [email, hash, nimi, role]
-    );
+    let query, params;
+    if (role == 3 && student_id) {
+      // student
+      query =
+        "INSERT INTO users (user_email, user_password, user_name, user_role, student_id) VALUES ($1, $2, $3, $4, $5)";
+      params = [email, hash, nimi, role, student_id];
+    } else {
+      // teacher
+      query =
+        "INSERT INTO users (user_email, user_password, user_name, user_role, student_id) VALUES ($1, $2, $3, $4, NULL)";
+      params = [email, hash, nimi, role];
+    }
+    await pool.query(query, params);
     res.sendStatus(200);
   } catch (err) {
     console.error("DB ERROR /add-user:", err);
