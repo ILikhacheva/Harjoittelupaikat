@@ -67,7 +67,13 @@ populateUserStudentSelect();
 const usersForm = document.getElementById("Users-form");
 if (usersForm) {
   usersForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    let nimi = "";
+    let role = 3; // По умолчанию student
+
     if (roleTeacher && roleTeacher.checked) {
+      role = 2; // teacher
       // Проверка кодового слова
       const code = teacherCodeInput.value;
       let valid = false;
@@ -79,7 +85,6 @@ if (usersForm) {
         }
       } catch {}
       if (!valid) {
-        e.preventDefault();
         codeError.style.display = "inline";
         teacherCodeInput.focus();
         return false;
@@ -88,17 +93,48 @@ if (usersForm) {
       }
       // Проверка имени учителя
       if (!userNimiTeacher.value.trim()) {
-        e.preventDefault();
         userNimiTeacher.focus();
         return false;
       }
+      nimi = userNimiTeacher.value.trim();
     } else if (roleStudent && roleStudent.checked) {
+      role = 3; // student
       // Проверка выбора студента
       if (!userStudentSelect.value) {
-        e.preventDefault();
         userStudentSelect.focus();
         return false;
       }
+      // Получаем имя выбранного студента
+      const selectedOption = userStudentSelect.options[userStudentSelect.selectedIndex];
+      nimi = selectedOption.textContent;
+    }
+
+    const email = userEmail.value.trim();
+    const password = userPassword.value;
+
+    if (!email || !password) {
+      alert("Täytä kaikki kentät!");
+      return false;
+    }
+
+    // Отправка данных на сервер
+    try {
+      const res = await fetch("http://localhost:3000/add-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nimi, email, password, role }),
+      });
+
+      if (res.ok) {
+        alert("Rekisteröinti onnistui!");
+        closeUsersModal();
+        usersForm.reset();
+      } else {
+        const text = await res.text();
+        alert("Virhe rekisteröinnissä: " + text);
+      }
+    } catch (err) {
+      alert("Verkkovirhe: " + err.message);
     }
   });
 }

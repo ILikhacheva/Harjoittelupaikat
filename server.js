@@ -13,6 +13,8 @@ app.use(
 );
 
 app.use(express.static(__dirname));
+app.use(express.json());
+
 // Настройки подключения к базе данных PostgreSQL
 const pool = new Pool({
   host: process.env.DB_HOST || "localhost",
@@ -52,8 +54,6 @@ app.get("/workplace", async (req, res) => {
 app.listen(3000, () => {
   console.log("Server started on http://localhost:3000");
 });
-
-app.use(express.json());
 
 // Добавление нового студента
 app.post("/add-student", async (req, res) => {
