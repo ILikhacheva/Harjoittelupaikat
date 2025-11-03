@@ -39,13 +39,15 @@ pool.on("error", (err) => {
 // Получить список мест практики
 app.get("/workplace", async (req, res) => {
   try {
-    const result = await pool.query(`SELECT s.st_name,
-    c.company_name, w.boss_name, w.boss_phone, w.boss_email,
-    w.begin_date, w.end_date, w.lunch_money, w.city, w.status
-
-    FROM public.workplace w, public.students s, public.companies c
-    WHERE w.company_id=c.company_id
-    AND w.student_id=s.student_id`);
+    const result =
+      await pool.query(`SELECT w.row_id, w.student_id, w.company_id, s.st_name,
+  c.company_name, w.boss_name, w.boss_phone, w.boss_email,
+  TO_CHAR(w.begin_date, 'YYYY-MM-DD') as begin_date,
+  TO_CHAR(w.end_date, 'YYYY-MM-DD') as end_date,
+  w.lunch_money, w.city, w.status
+  FROM public.workplace w
+  JOIN public.students s ON w.student_id = s.student_id
+  JOIN public.companies c ON w.company_id = c.company_id`);
     res.json(result.rows);
   } catch (err) {
     console.error("SERVER ERROR:", err);
@@ -249,6 +251,65 @@ app.get("/students-full", async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error("DB ERROR /students-full:", err);
+    res.status(500).send("DB error");
+  }
+});
+
+// Обновление места практики
+app.put("/workplace", async (req, res) => {
+  const {
+    row_id,
+    company_id,
+    boss_name,
+    boss_phone,
+    boss_email,
+    begin_date,
+    end_date,
+    lunch_money,
+    city,
+    status,
+  } = req.body;
+  try {
+    console.log("PUT /workplace payload:", req.body);
+    const result = await pool.query(
+      `UPDATE workplace SET company_id=$2, boss_name=$3, boss_phone=$4, boss_email=$5, begin_date=$6, end_date=$7, lunch_money=$8, city=$9, status=$10
+       WHERE row_id=$1`,
+      [
+        row_id,
+        company_id,
+        boss_name,
+        boss_phone,
+        boss_email,
+        begin_date,
+        end_date,
+        lunch_money,
+        city,
+        status,
+      ]
+    );
+    console.log("PUT /workplace result:", result);
+    if (result.rowCount === 0) {
+      res.status(404).send("Не найдена строка для обновления (row_id)");
+    } else {
+      res.send("OK, обновлено строк: " + result.rowCount);
+    }
+  } catch (err) {
+    console.error("DB ERROR /workplace PUT:", err);
+    res.status(500).send("DB error: " + err.message);
+  }
+});
+
+// Удаление места практики
+app.delete("/workplace", async (req, res) => {
+  const { student_id, company_id } = req.body;
+  try {
+    await pool.query(
+      `DELETE FROM workplace WHERE student_id=$1 AND company_id=$2`,
+      [student_id, company_id]
+    );
+    res.sendStatus(200);
+  } catch (err) {
+    console.error("DB ERROR /workplace DELETE:", err);
     res.status(500).send("DB error");
   }
 });

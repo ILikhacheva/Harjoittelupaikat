@@ -1,3 +1,19 @@
+// Show/hide actions column header for teachers
+function updateActionsHeader() {
+  const actionsHeader = document.getElementById("actionsHeader");
+  if (!actionsHeader) return;
+  const isTeacher = localStorage.getItem("userRole") === "2";
+  actionsHeader.style.display = isTeacher ? "table-cell" : "none";
+}
+
+// Call after login/logout and on load
+window.addEventListener("DOMContentLoaded", updateActionsHeader);
+window.addEventListener("storage", updateActionsHeader);
+// Also call in updateAuthButtons
+function updateAuthButtons() {
+  // ...existing code...
+  updateActionsHeader();
+}
 // --- Student List Modal Logic ---
 function openStudentListModal() {
   document.getElementById("StudentListModalOverlay").style.display = "flex";
@@ -88,10 +104,13 @@ if (loginForm) {
     if (res.ok) {
       const user = await res.json();
       closeLoginModal();
-      // Сохраняем статус авторизации и имя
+      // Сохраняем статус авторизации, имя и роль
       localStorage.setItem("isLoggedIn", "1");
       if (user && user.user_name) {
         localStorage.setItem("userName", user.user_name);
+      }
+      if (user && user.user_role !== undefined) {
+        localStorage.setItem("userRole", String(user.user_role));
       }
       updateAuthButtons();
       updateGreeting();
@@ -106,6 +125,7 @@ function logoutUser() {
   closeLogoutModal();
   localStorage.removeItem("isLoggedIn");
   localStorage.removeItem("userName");
+  localStorage.removeItem("userRole");
   updateAuthButtons();
   updateGreeting();
 }
@@ -134,25 +154,48 @@ function updateAuthButtons() {
   const addPlaceBtn = document.getElementById("addPlaceBtn");
   const dataTable = document.getElementById("dataTable");
   const isLoggedIn = localStorage.getItem("isLoggedIn");
+  const userRole = localStorage.getItem("userRole");
   if (isLoggedIn) {
     if (loginBtn) loginBtn.style.display = "none";
     if (logoutBtn) logoutBtn.style.display = "block";
-    if (addStudentBtn) {
-      addStudentBtn.disabled = false;
-      addStudentBtn.setAttribute("aria-disabled", "false");
+    // Учитель (роль 2) — всё доступно
+    if (userRole === "2") {
+      if (addStudentBtn) {
+        addStudentBtn.disabled = false;
+        addStudentBtn.setAttribute("aria-disabled", "false");
+      }
+      if (listStudentBtn) {
+        listStudentBtn.disabled = false;
+        listStudentBtn.setAttribute("aria-disabled", "false");
+      }
+      if (addCompanyBtn) {
+        addCompanyBtn.disabled = false;
+        addCompanyBtn.setAttribute("aria-disabled", "false");
+      }
+      if (addPlaceBtn) {
+        addPlaceBtn.disabled = false;
+        addPlaceBtn.setAttribute("aria-disabled", "false");
+      }
+    } else {
+      // Студент — только просмотр списков
+      if (addStudentBtn) {
+        addStudentBtn.disabled = true;
+        addStudentBtn.setAttribute("aria-disabled", "true");
+      }
+      if (listStudentBtn) {
+        listStudentBtn.disabled = false;
+        listStudentBtn.setAttribute("aria-disabled", "false");
+      }
+      if (addCompanyBtn) {
+        addCompanyBtn.disabled = true;
+        addCompanyBtn.setAttribute("aria-disabled", "true");
+      }
+      if (addPlaceBtn) {
+        addPlaceBtn.disabled = true;
+        addPlaceBtn.setAttribute("aria-disabled", "true");
+      }
     }
-    if (listStudentBtn) {
-      listStudentBtn.disabled = false;
-      listStudentBtn.setAttribute("aria-disabled", "false");
-    }
-    if (addCompanyBtn) {
-      addCompanyBtn.disabled = false;
-      addCompanyBtn.setAttribute("aria-disabled", "false");
-    }
-    if (addPlaceBtn) {
-      addPlaceBtn.disabled = false;
-      addPlaceBtn.setAttribute("aria-disabled", "false");
-    }
+    // Показываем таблицу для всех залогиненных
     if (dataTable) dataTable.style.display = "block";
   } else {
     if (loginBtn) loginBtn.style.display = "block";
@@ -422,32 +465,286 @@ function closePaikkaModal() {
 }
 
 // Fetch and display workplace data
-fetch("http://localhost:3000/workplace")
-  .then((response) => response.json())
-  .then((data) => {
-    // Здесь data — это массив объектов из вашего SQL-запроса
-    // Например, вывести в таблицу:
-    const tbody = document.getElementById("tableBody");
-    tbody.innerHTML = "";
-    data.forEach((row) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${row.st_name}</td>
-        <td>${row.company_name}</td>
-        <td>${row.boss_name}</td>
-        <td>${row.boss_phone}</td>
-        <td>${row.boss_email}</td>
-        <td>${row.begin_date}</td>
-        <td>${row.end_date}</td>
-        <td>${row.lunch_money}</td>
-        <td>${row.city}</td>
-        <td><span class="${getStatusClass(row.status)}">${
-        row.status
-      }</span></td>
-      `;
-      tbody.appendChild(tr);
+function loadWorkplaceTable() {
+  fetch("http://localhost:3000/workplace")
+    .then((response) => response.json())
+    .then((data) => {
+      const tbody = document.getElementById("tableBody");
+      tbody.innerHTML = "";
+      const isTeacher = localStorage.getItem("userRole") === "2";
+      // Получаем список компаний для select (один раз)
+      let companiesList = [];
+      fetch("http://localhost:3000/companies")
+        .then((r) => r.json())
+        .then((companies) => {
+          companiesList = companies;
+          renderRows();
+        });
+      function renderRows() {
+        data.forEach((row, idx) => {
+          const tr = document.createElement("tr");
+          // Сохраняем row_id, student_id, company_id как data-атрибуты (row_id обязательно)
+          tr.setAttribute("data-row-id", row.row_id);
+          tr.setAttribute("data-student-id", row.student_id);
+          tr.setAttribute("data-company-id", row.company_id);
+          // Найти название компании по company_id
+          let companyName = row.company_name;
+          if (
+            (!companyName || companyName === String(row.company_id)) &&
+            Array.isArray(companiesList)
+          ) {
+            const found = companiesList.find(
+              (c) => String(c.company_id) === String(row.company_id)
+            );
+            if (found) companyName = found.company_name;
+          }
+          // Форматировать даты в YYYY-MM-DD без смещения (UTC -> local)
+          function formatDateOnly(date) {
+            if (!date) return "";
+            // Если это уже строка в формате YYYY-MM-DD, возвращаем как есть
+            if (typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+              return date;
+            }
+            // Если это строка с временем (например, 2025-03-17T00:00:00.000Z)
+            if (typeof date === "string" && date.length >= 10) {
+              return date.slice(0, 10);
+            }
+            // Если это Date объект (fallback)
+            if (date instanceof Date) {
+              // Добавляем 12 часов чтобы избежать смещения
+              const adjustedDate = new Date(
+                date.getTime() + 12 * 60 * 60 * 1000
+              );
+              const year = adjustedDate.getUTCFullYear();
+              const month = String(adjustedDate.getUTCMonth() + 1).padStart(
+                2,
+                "0"
+              );
+              const day = String(adjustedDate.getUTCDate()).padStart(2, "0");
+              return `${year}-${month}-${day}`;
+            }
+            return "";
+          }
+          const beginDate = formatDateOnly(row.begin_date);
+          const endDate = formatDateOnly(row.end_date);
+          // lunch_money: показывать Kyllä/Ei
+          let lunchText =
+            row.lunch_money === true || row.lunch_money === "true"
+              ? "Kyllä"
+              : "Ei";
+          tr.innerHTML = `
+            <td style="display:none;">${
+              row.row_id
+            }</td> <!-- скрытый столбец row_id -->
+            <td style="display:none;">${
+              row.student_id
+            }</td> <!-- скрытый столбец student_id -->
+            <td style="display:none;">${
+              row.company_id
+            }</td> <!-- скрытый столбец company_id -->
+            <td data-student-id="${row.student_id || ""}">${row.st_name}</td>
+            <td data-company-id="${row.company_id || ""}">${
+            companyName || ""
+          }</td>
+            <td>${row.boss_name}</td>
+            <td>${row.boss_phone}</td>
+            <td>${row.boss_email}</td>
+            <td>${beginDate}</td>
+            <td>${endDate}</td>
+            <td>${lunchText}</td>
+            <td>${row.city}</td>
+            <td><span class="${getStatusClass(row.status)}">${
+            row.status
+          }</span></td>
+            ${
+              isTeacher
+                ? `<td><button class='edit-btn' data-idx='${idx}'>✏️</button> <button class='delete-btn' data-idx='${idx}'>🗑️</button></td>`
+                : ""
+            }
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+      // Add event delegation for edit/delete/inline save/cancel
+      tbody.onclick = function (e) {
+        const btn = e.target.closest("button");
+        if (!btn) return;
+        const idx = btn.getAttribute("data-idx");
+        if (btn.classList.contains("edit-btn")) {
+          const tr = btn.closest("tr");
+          if (!tr) return;
+          const originalHTML = tr.innerHTML;
+          const rowData = data[idx];
+          // Получаем row_id из data-атрибута строки
+          const rowId = tr.getAttribute("data-row-id") || rowData.row_id;
+          // Форматировать даты для input[type='date']
+          function formatDateInput(dateStr) {
+            if (!dateStr) return "";
+            const d = new Date(dateStr);
+            if (isNaN(d)) return "";
+            return d.toISOString().slice(0, 10);
+          }
+          const beginDateInputValue = formatDateInput(rowData.begin_date);
+          const endDateInputValue = formatDateInput(rowData.end_date);
+
+          // Найти корректный company_id для выбора
+          let companyId = rowData.company_id;
+          if (
+            (!companyId || companyId === "" || companyId === undefined) &&
+            rowData.company_name
+          ) {
+            const found = companiesList.find(
+              (c) => c.company_name === rowData.company_name
+            );
+            if (found) companyId = found.company_id;
+          }
+          // Список компаний для select
+          let companyOptions = companiesList
+            .map(
+              (c) =>
+                `<option value="${c.company_id}" ${
+                  String(c.company_id) === String(companyId) ? "selected" : ""
+                }>${c.company_name}</option>`
+            )
+            .join("");
+          // Select для ruokaraha
+          let lunchOptions = `<option value="true" ${
+            rowData.lunch_money == true || rowData.lunch_money === "true"
+              ? "selected"
+              : ""
+          }>Kyllä</option><option value="false" ${
+            rowData.lunch_money == false || rowData.lunch_money === "false"
+              ? "selected"
+              : ""
+          }>Ei</option>`;
+          // Select для статуса
+          let statusOptions = `<option value="On" ${
+            rowData.status === "On" ? "selected" : ""
+          }>On</option><option value="Odottaa" ${
+            rowData.status === "Odottaa" ? "selected" : ""
+          }>Odottaa</option><option value="Ei" ${
+            rowData.status === "Ei" ? "selected" : ""
+          }>Ei</option>`;
+          tr.innerHTML = `
+            <td><input type='text' value="${rowData.st_name}" disabled style="width:90px;"></td>
+            <td><select class='edit-company' style="width:110px;">${companyOptions}</select></td>
+            <td><input type='text' class='edit-boss-name' value="${rowData.boss_name}" style="width:90px;"></td>
+            <td><input type='text' class='edit-boss-phone' value="${rowData.boss_phone}" style="width:90px;"></td>
+            <td><input type='text' class='edit-boss-email' value="${rowData.boss_email}" style="width:110px;"></td>
+            <td><input type='date' class='edit-begin-date' value="${beginDateInputValue}" style="width:110px;"></td>
+            <td><input type='date' class='edit-end-date' value="${endDateInputValue}" style="width:110px;"></td>
+            <td><select class='edit-lunch' style="width:70px;">${lunchOptions}</select></td>
+            <td><input type='text' class='edit-city' value="${rowData.city}" style="width:90px;"></td>
+            <td><select class='edit-status' style="width:90px;">${statusOptions}</select></td>
+            <td>
+              <button class='save-btn' data-idx='${idx}'>💾</button>
+              <button class='cancel-btn' data-idx='${idx}'>✖️</button>
+            </td>
+          `;
+          tr._originalHTML = originalHTML;
+        } else if (btn.classList.contains("cancel-btn")) {
+          // Restore original row
+          const tr = btn.closest("tr");
+          if (tr && tr._originalHTML) {
+            tr.innerHTML = tr._originalHTML;
+          } else {
+            // fallback: reload table
+            loadWorkplaceTable();
+          }
+        } else if (btn.classList.contains("save-btn")) {
+          // Диагностика: срабатывает ли обработчик
+          console.log("save-btn clicked");
+          // Если кнопка внутри формы, предотвратить submit
+          if (e && typeof e.preventDefault === "function") e.preventDefault();
+          const tr = btn.closest("tr");
+          const rowData = data[idx];
+          // Получаем row_id из data-атрибута строки
+          const rowId = tr.getAttribute("data-row-id") || rowData.row_id;
+          // Получаем значения по уникальным классам
+          const companyInput = tr.querySelector(".edit-company");
+          const bossNameInput = tr.querySelector(".edit-boss-name");
+          const bossPhoneInput = tr.querySelector(".edit-boss-phone");
+          const bossEmailInput = tr.querySelector(".edit-boss-email");
+          const beginDateInput = tr.querySelector(".edit-begin-date");
+          const endDateInput = tr.querySelector(".edit-end-date");
+          const lunchInput = tr.querySelector(".edit-lunch");
+          const cityInput = tr.querySelector(".edit-city");
+          const statusInput = tr.querySelector(".edit-status");
+
+          const payload = {
+            row_id: rowId,
+            company_id: companyInput
+              ? Number(companyInput.value)
+              : Number(rowData.company_id),
+            boss_name: bossNameInput ? bossNameInput.value : rowData.boss_name,
+            boss_phone: bossPhoneInput
+              ? bossPhoneInput.value
+              : rowData.boss_phone,
+            boss_email: bossEmailInput
+              ? bossEmailInput.value
+              : rowData.boss_email,
+            begin_date: beginDateInput
+              ? beginDateInput.value
+              : rowData.begin_date,
+            end_date: endDateInput ? endDateInput.value : rowData.end_date,
+            lunch_money: lunchInput ? lunchInput.value : rowData.lunch_money,
+            city: cityInput ? cityInput.value : rowData.city,
+            status: statusInput ? statusInput.value : rowData.status,
+          };
+          // Диагностика: выводим все данные
+          alert(
+            "Отправляемые данные (PUT):\n" + JSON.stringify(payload, null, 2)
+          );
+          fetch("http://localhost:3000/workplace", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          })
+            .then(async (res) => {
+              const text = await res.text();
+              // Диагностика: показываем ответ сервера
+              alert("Ответ сервера (PUT):\n" + text);
+              if (res.ok) {
+                location.reload();
+              } else {
+                throw new Error(text);
+              }
+            })
+            .catch((err) => {
+              alert("Virhe tallennuksessa: " + err.message);
+            });
+        } else if (btn.classList.contains("delete-btn")) {
+          if (confirm("Удалить строку " + idx + "?")) {
+            const rowData = data[idx];
+            fetch("http://localhost:3000/workplace", {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                student_id: rowData.student_id,
+                company_id: rowData.company_id,
+              }),
+            })
+              .then((res) => {
+                if (res.ok) {
+                  loadWorkplaceTable();
+                } else {
+                  return res.text().then((text) => {
+                    throw new Error(text);
+                  });
+                }
+              })
+              .catch((err) => {
+                alert("Virhe poistossa: " + err.message);
+              });
+          }
+        }
+      };
     });
-  });
+}
+// Call on load and after login/logout
+window.addEventListener("DOMContentLoaded", loadWorkplaceTable);
+window.addEventListener("storage", loadWorkplaceTable);
+// Also reload table after login/logout
 
 // Lisaaminen oppilasta
 document
