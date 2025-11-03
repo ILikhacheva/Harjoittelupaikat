@@ -283,12 +283,47 @@ app.get("/companies-full", async (req, res) => {
 app.get("/students-full", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT student_id, st_name, st_group FROM students ORDER BY st_name"
+      "SELECT student_id as st_id, st_name, st_group FROM students ORDER BY st_name"
     );
     res.json(result.rows);
   } catch (err) {
     console.error("DB ERROR /students-full:", err);
     res.status(500).send("DB error");
+  }
+});
+
+// Обновить студента (только для учителей)
+app.put("/students/:id", async (req, res) => {
+  try {
+    const userRole = req.headers["x-user-role"];
+
+    // Проверяем, что это учитель
+    if (userRole !== "2") {
+      return res
+        .status(403)
+        .send("Только учителя могут редактировать студентов");
+    }
+
+    const studentId = req.params.id;
+    const { st_name, st_group } = req.body;
+
+    if (!st_name || !st_group) {
+      return res.status(400).send("Nimi ja ryhmä ovat pakollisia");
+    }
+
+    const result = await pool.query(
+      "UPDATE students SET st_name = $1, st_group = $2 WHERE student_id = $3 RETURNING *",
+      [st_name, st_group, studentId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).send("Opiskelijaa ei löytynyt");
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("DB ERROR PUT /students/:id:", err);
+    res.status(500).send("Tietokantavirhe");
   }
 });
 

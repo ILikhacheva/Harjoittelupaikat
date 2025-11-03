@@ -27,23 +27,49 @@ function closeStudentListModal() {
 
 async function loadStudentList() {
   const tbody = document.getElementById("studentListTableBody");
-  tbody.innerHTML = "<tr><td colspan='2'>Ladataan...</td></tr>";
+  const isTeacher = localStorage.getItem("userRole") === "2";
+  const actionsHeader = document.getElementById("studentActionsHeader");
+
+  // Show/hide actions column for teachers
+  if (actionsHeader) {
+    actionsHeader.style.display = isTeacher ? "table-cell" : "none";
+  }
+
+  const colspan = isTeacher ? "3" : "2";
+  tbody.innerHTML = `<tr><td colspan='${colspan}'>Ladataan...</td></tr>`;
+
   try {
     const res = await fetch("http://localhost:3000/students-full");
     if (!res.ok) throw new Error("Virhe haettaessa opiskelijoita");
     const students = await res.json();
     if (!students.length) {
-      tbody.innerHTML = "<tr><td colspan='2'>Ei opiskelijoita</td></tr>";
+      tbody.innerHTML = `<tr><td colspan='${colspan}'>Ei opiskelijoita</td></tr>`;
       return;
     }
     tbody.innerHTML = "";
-    students.forEach((s) => {
+    students.forEach((s, idx) => {
       const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${s.st_name}</td><td>${s.st_group}</td>`;
+      tr.setAttribute("data-student-id", s.st_id);
+      const actionButtons = isTeacher
+        ? `<td><button class='edit-student-btn' data-idx='${idx}'>✏️</button></td>`
+        : "";
+      tr.innerHTML = `<td>${s.st_name}</td><td>${s.st_group}</td>${actionButtons}`;
       tbody.appendChild(tr);
     });
+
+    // Add event delegation for edit buttons
+    if (isTeacher) {
+      tbody.onclick = function (e) {
+        const btn = e.target.closest("button");
+        if (!btn || !btn.classList.contains("edit-student-btn")) return;
+        const idx = btn.getAttribute("data-idx");
+        const tr = btn.closest("tr");
+        const student = students[idx];
+        editStudentRow(tr, student, students, idx);
+      };
+    }
   } catch (e) {
-    tbody.innerHTML = `<tr><td colspan='3'>Virhe: ${e.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan='${colspan}'>Virhe: ${e.message}</td></tr>`;
   }
 }
 // --- Company List Modal Logic ---
@@ -159,6 +185,60 @@ function editCompanyRow(tr, company, companies, idx) {
 
       if (res.ok) {
         loadCompanyList(); // Reload the list
+      } else {
+        const text = await res.text();
+        alert("Virhe tallennuksessa: " + text);
+      }
+    } catch (err) {
+      alert("Virhe tallennuksessa: " + err.message);
+    }
+  };
+
+  cancelBtn.onclick = function () {
+    tr.innerHTML = originalHTML;
+  };
+}
+
+// Function to edit student row
+function editStudentRow(tr, student, students, idx) {
+  const originalHTML = tr.innerHTML;
+  tr.innerHTML = `
+    <td><input type='text' class='edit-student-name' value="${student.st_name}" style="width:150px;"></td>
+    <td><input type='text' class='edit-student-group' value="${student.st_group}" style="width:120px;"></td>
+    <td>
+      <button class='save-student-btn' data-idx='${idx}'>💾</button>
+      <button class='cancel-student-btn' data-idx='${idx}'>✖️</button>
+    </td>
+  `;
+  tr._originalHTML = originalHTML;
+
+  // Add event listeners for save/cancel
+  const saveBtn = tr.querySelector(".save-student-btn");
+  const cancelBtn = tr.querySelector(".cancel-student-btn");
+
+  saveBtn.onclick = async function (e) {
+    e.preventDefault();
+    const studentName = tr.querySelector(".edit-student-name").value;
+    const studentGroup = tr.querySelector(".edit-student-group").value;
+
+    try {
+      const res = await fetch(
+        `http://localhost:3000/students/${student.st_id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "x-user-role": localStorage.getItem("userRole") || "",
+          },
+          body: JSON.stringify({
+            st_name: studentName,
+            st_group: studentGroup,
+          }),
+        }
+      );
+
+      if (res.ok) {
+        loadStudentList(); // Reload the list
       } else {
         const text = await res.text();
         alert("Virhe tallennuksessa: " + text);
