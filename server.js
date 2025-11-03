@@ -39,19 +39,26 @@ pool.on("error", (err) => {
 // Получить список мест практики
 app.get("/workplace", async (req, res) => {
   try {
-    const result =
-      await pool.query(`SELECT w.row_id, w.student_id, w.company_id, s.st_name,
-  c.company_name, w.boss_name, w.boss_phone, w.boss_email,
-  TO_CHAR(w.begin_date, 'YYYY-MM-DD') as begin_date,
-  TO_CHAR(w.end_date, 'YYYY-MM-DD') as end_date,
-  w.lunch_money, w.city, w.status
-  FROM public.workplace w
-  JOIN public.students s ON w.student_id = s.student_id
-  JOIN public.companies c ON w.company_id = c.company_id`);
+    // Check for student restriction
+    const userRole = req.headers["x-user-role"];
+    const studentId = req.headers["x-student-id"];
+    let query = `SELECT w.row_id, w.student_id, w.company_id, s.st_name,
+      c.company_name, w.boss_name, w.boss_phone, w.boss_email,
+      TO_CHAR(w.begin_date, 'YYYY-MM-DD') as begin_date,
+      TO_CHAR(w.end_date, 'YYYY-MM-DD') as end_date,
+      w.lunch_money, w.city, w.status
+      FROM public.workplace w
+      JOIN public.students s ON w.student_id = s.student_id
+      JOIN public.companies c ON w.company_id = c.company_id`;
+    let params = [];
+    if (userRole === "3" && studentId) {
+      query += " WHERE w.student_id = $1";
+      params = [studentId];
+    }
+    const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (err) {
     console.error("SERVER ERROR:", err);
-
     res.status(500).json({ error: err.message });
   }
 });
@@ -121,7 +128,7 @@ app.get("/companies", async (req, res) => {
 
 // Добавление нового места практики
 app.post("/add-workplace", async (req, res) => {
-  const {
+  let {
     student_id,
     company_id,
     ohjaaja,
@@ -133,7 +140,12 @@ app.post("/add-workplace", async (req, res) => {
     kaupunki,
     status,
   } = req.body;
-  // company_id должен быть числом
+  // If student, force student_id from header
+  const userRole = req.headers["x-user-role"];
+  const studentIdHeader = req.headers["x-student-id"];
+  if (userRole === "3" && studentIdHeader) {
+    student_id = studentIdHeader;
+  }
   const companyIdInt = parseInt(company_id, 10);
   try {
     await pool.query(
@@ -205,24 +217,27 @@ app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
   try {
     const result = await pool.query(
-      "SELECT user_id, user_email, user_password, user_name, user_role FROM users WHERE user_email = $1",
+      "SELECT user_id, user_email, user_password, user_name, user_role, student_id FROM users WHERE user_email = $1",
       [email]
     );
     if (result.rows.length === 0) {
       return res.status(401).json({ error: "Käyttäjää ei löydy" });
     }
     const user = result.rows[0];
+    console.log("User from DB:", user);
     const match = await bcrypt.compare(password, user.user_password);
     if (!match) {
       return res.status(401).json({ error: "Väärä salasana" });
     }
-    // Можно добавить сессию или токен здесь
-    res.json({
+    const response = {
       user_id: user.user_id,
       user_email: user.user_email,
       user_name: user.user_name,
       user_role: user.user_role,
-    });
+      student_id: user.student_id || null,
+    };
+    console.log("Login response:", response);
+    res.json(response);
   } catch (err) {
     console.error("DB ERROR /api/login:", err);
     res.status(500).json({ error: "DB error" });
@@ -269,24 +284,29 @@ app.put("/workplace", async (req, res) => {
     city,
     status,
   } = req.body;
+  const userRole = req.headers["x-user-role"];
+  const studentIdHeader = req.headers["x-student-id"];
   try {
     console.log("PUT /workplace payload:", req.body);
-    const result = await pool.query(
-      `UPDATE workplace SET company_id=$2, boss_name=$3, boss_phone=$4, boss_email=$5, begin_date=$6, end_date=$7, lunch_money=$8, city=$9, status=$10
-       WHERE row_id=$1`,
-      [
-        row_id,
-        company_id,
-        boss_name,
-        boss_phone,
-        boss_email,
-        begin_date,
-        end_date,
-        lunch_money,
-        city,
-        status,
-      ]
-    );
+    let query = `UPDATE workplace SET company_id=$2, boss_name=$3, boss_phone=$4, boss_email=$5, begin_date=$6, end_date=$7, lunch_money=$8, city=$9, status=$10 WHERE row_id=$1`;
+    let params = [
+      row_id,
+      company_id,
+      boss_name,
+      boss_phone,
+      boss_email,
+      begin_date,
+      end_date,
+      lunch_money,
+      city,
+      status,
+    ];
+    // If student, only allow update if row belongs to them
+    if (userRole === "3" && studentIdHeader) {
+      query += " AND student_id = $11";
+      params.push(studentIdHeader);
+    }
+    const result = await pool.query(query, params);
     console.log("PUT /workplace result:", result);
     if (result.rowCount === 0) {
       res.status(404).send("Не найдена строка для обновления (row_id)");

@@ -1,9 +1,11 @@
-// Show/hide actions column header for teachers
+// Show/hide actions column header for teachers and students
 function updateActionsHeader() {
   const actionsHeader = document.getElementById("actionsHeader");
   if (!actionsHeader) return;
   const isTeacher = localStorage.getItem("userRole") === "2";
-  actionsHeader.style.display = isTeacher ? "table-cell" : "none";
+  const isStudent = localStorage.getItem("userRole") === "3";
+  // Показываем столбец действий для учителей и студентов
+  actionsHeader.style.display = isTeacher || isStudent ? "table-cell" : "none";
 }
 
 // Call after login/logout and on load
@@ -95,7 +97,6 @@ if (loginForm) {
     e.preventDefault();
     const email = document.getElementById("loginEmail").value;
     const password = document.getElementById("loginPassword").value;
-    // TODO: заменить URL на ваш реальный эндпоинт
     const res = await fetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -103,6 +104,7 @@ if (loginForm) {
     });
     if (res.ok) {
       const user = await res.json();
+      console.log("Login response user:", user);
       closeLoginModal();
       // Сохраняем статус авторизации, имя и роль
       localStorage.setItem("isLoggedIn", "1");
@@ -112,8 +114,16 @@ if (loginForm) {
       if (user && user.user_role !== undefined) {
         localStorage.setItem("userRole", String(user.user_role));
       }
+      // Store student_id if present (for students)
+      if (user && user.student_id) {
+        localStorage.setItem("studentId", String(user.student_id));
+      } else {
+        localStorage.removeItem("studentId");
+      }
       updateAuthButtons();
       updateGreeting();
+      // Перезагружаем таблицу после логина
+      loadWorkplaceTable();
     } else {
       alert("Virhe kirjautumisessa!");
     }
@@ -126,6 +136,7 @@ function logoutUser() {
   localStorage.removeItem("isLoggedIn");
   localStorage.removeItem("userName");
   localStorage.removeItem("userRole");
+  localStorage.removeItem("studentId");
   updateAuthButtons();
   updateGreeting();
 }
@@ -177,7 +188,7 @@ function updateAuthButtons() {
         addPlaceBtn.setAttribute("aria-disabled", "false");
       }
     } else {
-      // Студент — только просмотр списков
+      // Студент — просмотр списков + добавление компании
       if (addStudentBtn) {
         addStudentBtn.disabled = true;
         addStudentBtn.setAttribute("aria-disabled", "true");
@@ -187,8 +198,8 @@ function updateAuthButtons() {
         listStudentBtn.setAttribute("aria-disabled", "false");
       }
       if (addCompanyBtn) {
-        addCompanyBtn.disabled = true;
-        addCompanyBtn.setAttribute("aria-disabled", "true");
+        addCompanyBtn.disabled = false;
+        addCompanyBtn.setAttribute("aria-disabled", "false");
       }
       if (addPlaceBtn) {
         addPlaceBtn.disabled = true;
@@ -412,18 +423,36 @@ async function YritysSelect() {
 async function populateStudentsSelect() {
   const select = document.getElementById("OppilasLista");
   if (!select) return;
+  const isStudent = localStorage.getItem("userRole") === "3";
+  const studentId = localStorage.getItem("studentId");
   try {
     const res = await fetch("http://localhost:3000/students");
     if (!res.ok) return;
     const students = await res.json();
     // Удалить старые опции, кроме первой
     while (select.options.length > 1) select.remove(1);
-    students.forEach((st) => {
-      const opt = document.createElement("option");
-      opt.value = st.student_id;
-      opt.textContent = st.st_name;
-      select.appendChild(opt);
-    });
+    if (isStudent && studentId) {
+      // Найти только себя
+      const st = students.find(
+        (s) => String(s.student_id) === String(studentId)
+      );
+      if (st) {
+        const opt = document.createElement("option");
+        opt.value = st.student_id;
+        opt.textContent = st.st_name;
+        select.appendChild(opt);
+        select.value = st.student_id;
+        select.disabled = true; // нельзя выбрать другого
+      }
+    } else {
+      students.forEach((st) => {
+        const opt = document.createElement("option");
+        opt.value = st.student_id;
+        opt.textContent = st.st_name;
+        select.appendChild(opt);
+      });
+      select.disabled = false;
+    }
   } catch (e) {
     // можно добавить обработку ошибки
   }
@@ -472,6 +501,8 @@ function loadWorkplaceTable() {
       const tbody = document.getElementById("tableBody");
       tbody.innerHTML = "";
       const isTeacher = localStorage.getItem("userRole") === "2";
+      const isStudent = localStorage.getItem("userRole") === "3";
+      const studentId = localStorage.getItem("studentId");
       // Получаем список компаний для select (один раз)
       let companiesList = [];
       fetch("http://localhost:3000/companies")
@@ -481,13 +512,20 @@ function loadWorkplaceTable() {
           renderRows();
         });
       function renderRows() {
-        data.forEach((row, idx) => {
+        // If student, filter data to only own records
+        let filteredData = data;
+        if (isStudent && studentId) {
+          filteredData = data.filter(
+            (row) => String(row.student_id) === String(studentId)
+          );
+        }
+        filteredData.forEach((row, idx) => {
+          // Найти исходный индекс в data
+          const originalIdx = data.findIndex((d) => d.row_id === row.row_id);
           const tr = document.createElement("tr");
-          // Сохраняем row_id, student_id, company_id как data-атрибуты (row_id обязательно)
           tr.setAttribute("data-row-id", row.row_id);
           tr.setAttribute("data-student-id", row.student_id);
           tr.setAttribute("data-company-id", row.company_id);
-          // Найти название компании по company_id
           let companyName = row.company_name;
           if (
             (!companyName || companyName === String(row.company_id)) &&
@@ -498,20 +536,15 @@ function loadWorkplaceTable() {
             );
             if (found) companyName = found.company_name;
           }
-          // Форматировать даты в YYYY-MM-DD без смещения (UTC -> local)
           function formatDateOnly(date) {
             if (!date) return "";
-            // Если это уже строка в формате YYYY-MM-DD, возвращаем как есть
             if (typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
               return date;
             }
-            // Если это строка с временем (например, 2025-03-17T00:00:00.000Z)
             if (typeof date === "string" && date.length >= 10) {
               return date.slice(0, 10);
             }
-            // Если это Date объект (fallback)
             if (date instanceof Date) {
-              // Добавляем 12 часов чтобы избежать смещения
               const adjustedDate = new Date(
                 date.getTime() + 12 * 60 * 60 * 1000
               );
@@ -527,21 +560,28 @@ function loadWorkplaceTable() {
           }
           const beginDate = formatDateOnly(row.begin_date);
           const endDate = formatDateOnly(row.end_date);
-          // lunch_money: показывать Kyllä/Ei
           let lunchText =
             row.lunch_money === true || row.lunch_money === "true"
               ? "Kyllä"
               : "Ei";
+          // Показывать кнопки только если:
+          // - учитель (isTeacher)
+          // - студент и это его запись (isStudent && row.student_id == studentId)
+          let actionButtons = "";
+          if (
+            isTeacher ||
+            (isStudent && String(row.student_id) === String(studentId))
+          ) {
+            actionButtons = `<button class='edit-btn' data-idx='${originalIdx}'>✏️</button> <button class='delete-btn' data-idx='${originalIdx}'>🗑️</button>`;
+          }
+
+          // Для залогиненных пользователей всегда показываем столбец действий
+          const showActionsColumn = isTeacher || isStudent;
+
           tr.innerHTML = `
-            <td style="display:none;">${
-              row.row_id
-            }</td> <!-- скрытый столбец row_id -->
-            <td style="display:none;">${
-              row.student_id
-            }</td> <!-- скрытый столбец student_id -->
-            <td style="display:none;">${
-              row.company_id
-            }</td> <!-- скрытый столбец company_id -->
+            <td style="display:none;">${row.row_id}</td>
+            <td style="display:none;">${row.student_id}</td>
+            <td style="display:none;">${row.company_id}</td>
             <td data-student-id="${row.student_id || ""}">${row.st_name}</td>
             <td data-company-id="${row.company_id || ""}">${
             companyName || ""
@@ -556,11 +596,7 @@ function loadWorkplaceTable() {
             <td><span class="${getStatusClass(row.status)}">${
             row.status
           }</span></td>
-            ${
-              isTeacher
-                ? `<td><button class='edit-btn' data-idx='${idx}'>✏️</button> <button class='delete-btn' data-idx='${idx}'>🗑️</button></td>`
-                : ""
-            }
+            ${showActionsColumn ? `<td>${actionButtons}</td>` : ""}
           `;
           tbody.appendChild(tr);
         });
@@ -697,7 +733,11 @@ function loadWorkplaceTable() {
           );
           fetch("http://localhost:3000/workplace", {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              "x-user-role": localStorage.getItem("userRole") || "",
+              "x-student-id": localStorage.getItem("studentId") || "",
+            },
             body: JSON.stringify(payload),
           })
             .then(async (res) => {
@@ -823,7 +863,11 @@ document
 
     const res = await fetch("http://localhost:3000/add-workplace", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-user-role": localStorage.getItem("userRole") || "",
+        "x-student-id": localStorage.getItem("studentId") || "",
+      },
       body: JSON.stringify({
         student_id,
         company_id,
