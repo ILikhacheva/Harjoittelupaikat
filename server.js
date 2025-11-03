@@ -167,6 +167,16 @@ app.get("/api/teacher-code", (req, res) => {
 app.post("/add-user", async (req, res) => {
   const { nimi, email, password, role, student_id } = req.body;
   try {
+    // Проверка на существование email
+    const check = await pool.query(
+      "SELECT user_id FROM users WHERE user_email = $1",
+      [email]
+    );
+    if (check.rows.length > 0) {
+      return res
+        .status(409)
+        .json({ error: "A user with this email already exists." });
+    }
     const hash = await bcrypt.hash(password, 10);
     let query, params;
     if (role == 3 && student_id) {
@@ -184,6 +194,61 @@ app.post("/add-user", async (req, res) => {
     res.sendStatus(200);
   } catch (err) {
     console.error("DB ERROR /add-user:", err);
+    res.status(500).send("DB error");
+  }
+});
+
+// Логин пользователя
+app.post("/api/login", async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const result = await pool.query(
+      "SELECT user_id, user_email, user_password, user_name, user_role FROM users WHERE user_email = $1",
+      [email]
+    );
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: "Käyttäjää ei löydy" });
+    }
+    const user = result.rows[0];
+    const match = await bcrypt.compare(password, user.user_password);
+    if (!match) {
+      return res.status(401).json({ error: "Väärä salasana" });
+    }
+    // Можно добавить сессию или токен здесь
+    res.json({
+      user_id: user.user_id,
+      user_email: user.user_email,
+      user_name: user.user_name,
+      user_role: user.user_role,
+    });
+  } catch (err) {
+    console.error("DB ERROR /api/login:", err);
+    res.status(500).json({ error: "DB error" });
+  }
+});
+
+// Получить полный список компаний для списка (company_name, count_place, tunnus)
+app.get("/companies-full", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT company_id, company_name, count_place, tunnus FROM companies ORDER BY company_name"
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("DB ERROR /companies-full:", err);
+    res.status(500).send("DB error");
+  }
+});
+
+// Получить полный список студентов для списка (student_id, st_name, st_group)
+app.get("/students-full", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT student_id, st_name, st_group FROM students ORDER BY st_name"
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("DB ERROR /students-full:", err);
     res.status(500).send("DB error");
   }
 });

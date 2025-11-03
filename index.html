@@ -17,6 +17,17 @@
         <div class="bar"></div>
       </div>
     </div>
+    <div
+      id="userGreeting"
+      style="
+        width: 100%;
+        text-align: right;
+        font-size: 28px;
+        color: #242323;
+        display: none;
+      "
+    ></div>
+    </div>
     <div class="divider"></div>
     <!-- Side menu -->
     <div
@@ -26,18 +37,81 @@
       onmouseleave="closeSideMenu()"
     >
       <!-- Боковое меню кнопок -->
-      <button class="side-btn" onclick="openOppilasModal(); closeSideMenu();">
-        Lisää opiskelija
-      </button>
-      <button class="side-btn" onclick="openYritysModal(); closeSideMenu();">
-        Lisää yritys
-      </button>
+      <div class="side-btn submenu-parent" id="studentsMenuBtn">
+        Opiskelijat
+        <span class="submenu-arrow">▶</span>
+        <div class="submenu" id="studentsSubmenu">
+          <button class="submenu-btn" onclick="openOppilasModal(); closeSideMenu(); event.stopPropagation();">Lisää</button>
+          <button class="submenu-btn" onclick="openStudentListModal(); event.stopPropagation();">Lista</button>
+        </div>
+      </div>
+    <!-- Modal: Student List -->
+    <div id="StudentListModalOverlay" class="modal-overlay" style="display: none">
+      <div class="modal-window" style="min-width: 420px; max-width: 90vw;">
+        <button class="close-btn" onclick="closeStudentListModal()" title="Close">×</button>
+        <h2>Opiskelijat</h2>
+        <div class="modal-table-scroll">
+          <table border="1" style="width:100%;margin-top:10px;">
+            <thead>
+              <tr>
+                <th>Nimi</th>
+                <th>Ryhmä</th>
+              </tr>
+            </thead>
+            <tbody id="studentListTableBody">
+              <!-- Täytetään JS:llä -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+      <div class="side-btn submenu-parent" id="companiesMenuBtn">
+        Yritykset
+        <span class="submenu-arrow">▶</span>
+        <div class="submenu" id="companiesSubmenu">
+          <button class="submenu-btn" onclick="openYritysModal(); closeSideMenu(); event.stopPropagation();">Lisää</button>
+          <button class="submenu-btn" onclick="openCompanyListModal(); closeSideMenu(); event.stopPropagation();">Lista</button>
+        </div>
+      </div>
       <button class="side-btn" onclick="openPaikkaModal(); closeSideMenu();">
         Lisää harjoittelupaikka
       </button>
-      <button class="side-btn" onclick="openKirjauduModal(); closeSideMenu();">
-        Kirjaudu
+      <button
+        class="side-btn"
+        onclick="openLoginModal(); closeSideMenu();"
+        id="loginBtn"
+      >
+        Kirjaudu sisään
       </button>
+      <button
+        class="side-btn"
+        onclick="openLogoutModal(); closeSideMenu();"
+        id="logoutBtn"
+        style="display: none"
+      >
+        Kirjaudu ulos
+      </button>
+    </div>
+    <!-- Modal: Company List -->
+    <div id="CompanyListModalOverlay" class="modal-overlay" style="display: none">
+      <div class="modal-window" style="min-width: 420px; max-width: 90vw;">
+        <button class="close-btn" onclick="closeCompanyListModal()" title="Close">×</button>
+        <h2>Yritykset</h2>
+        <div class="modal-table-scroll">
+          <table border="1" style="width:100%;margin-top:10px;">
+            <thead>
+              <tr>
+                <th>Yritys nimi</th>
+                <th>Paikkojen määrä</th>
+                <th>Y-tunnus</th>
+              </tr>
+            </thead>
+            <tbody id="companyListTableBody">
+              <!-- Täytetään JS:llä -->
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- Таблица данных с местами практики Заголовок-->
@@ -295,6 +369,82 @@
     </div>
 
     <footer>
+      <!-- Modal: Login -->
+      <div id="LoginModalOverlay" class="modal-overlay" style="display: none">
+        <div class="modal-window">
+          <button class="close-btn" onclick="closeLoginModal()" title="Close">
+            ×
+          </button>
+          <h2>Kirjaudu sisään</h2>
+          <form id="login-form" method="post" action="#">
+            <div class="form-group">
+              <label for="loginEmail">Sähköposti:</label>
+              <input type="text" id="loginEmail" name="loginEmail" required />
+            </div>
+            <div class="form-group">
+              <label for="loginPassword">Salasana:</label>
+              <input
+                type="password"
+                id="loginPassword"
+                name="loginPassword"
+                required
+              />
+            </div>
+            <div class="buttons">
+              <button type="submit" class="btn btn-primary">Kirjaudu</button>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="closeLoginModal()"
+              >
+                Peruuta
+              </button>
+              <button
+                type="button"
+                class="btn btn-link"
+                style="
+                  background: none;
+                  border: none;
+                  color: #357ab8;
+                  text-decoration: underline;
+                  cursor: pointer;
+                  padding-left: 0;
+                "
+                onclick="closeLoginModal(); openKirjauduModal();"
+              >
+                Rekisteröidy
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Modal: Logout -->
+      <div id="LogoutModalOverlay" class="modal-overlay" style="display: none">
+        <div class="modal-window">
+          <button class="close-btn" onclick="closeLogoutModal()" title="Close">
+            ×
+          </button>
+          <h2>Kirjaudu ulos</h2>
+          <p>Haluatko varmasti kirjautua ulos?</p>
+          <div class="buttons">
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="logoutUser()"
+            >
+              Kyllä
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeLogoutModal()"
+            >
+              Peruuta
+            </button>
+          </div>
+        </div>
+      </div>
       <div class="divider"></div>
       <ul>
         <li>

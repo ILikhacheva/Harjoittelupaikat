@@ -1,3 +1,144 @@
+// --- Student List Modal Logic ---
+function openStudentListModal() {
+  document.getElementById("StudentListModalOverlay").style.display = "flex";
+  loadStudentList();
+}
+function closeStudentListModal() {
+  document.getElementById("StudentListModalOverlay").style.display = "none";
+}
+
+async function loadStudentList() {
+  const tbody = document.getElementById("studentListTableBody");
+  tbody.innerHTML = "<tr><td colspan='2'>Ladataan...</td></tr>";
+  try {
+    const res = await fetch("http://localhost:3000/students-full");
+    if (!res.ok) throw new Error("Virhe haettaessa opiskelijoita");
+    const students = await res.json();
+    if (!students.length) {
+      tbody.innerHTML = "<tr><td colspan='2'>Ei opiskelijoita</td></tr>";
+      return;
+    }
+    tbody.innerHTML = "";
+    students.forEach((s) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${s.st_name}</td><td>${s.st_group}</td>`;
+      tbody.appendChild(tr);
+    });
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan='3'>Virhe: ${e.message}</td></tr>`;
+  }
+}
+// --- Company List Modal Logic ---
+function openCompanyListModal() {
+  document.getElementById("CompanyListModalOverlay").style.display = "flex";
+  loadCompanyList();
+}
+function closeCompanyListModal() {
+  document.getElementById("CompanyListModalOverlay").style.display = "none";
+}
+
+async function loadCompanyList() {
+  const tbody = document.getElementById("companyListTableBody");
+  tbody.innerHTML = "<tr><td colspan='3'>Ladataan...</td></tr>";
+  try {
+    const res = await fetch("http://localhost:3000/companies-full");
+    if (!res.ok) throw new Error("Virhe haettaessa yrityksiä");
+    const companies = await res.json();
+    if (!companies.length) {
+      tbody.innerHTML = "<tr><td colspan='3'>Ei yrityksiä</td></tr>";
+      return;
+    }
+    tbody.innerHTML = "";
+    companies.forEach((c) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${c.company_name}</td><td>${c.count_place}</td><td>${c.tunnus}</td>`;
+      tbody.appendChild(tr);
+    });
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan='3'>Virhe: ${e.message}</td></tr>`;
+  }
+}
+// --- Login/Logout modal logic ---
+function openLoginModal() {
+  document.getElementById("LoginModalOverlay").style.display = "flex";
+}
+function closeLoginModal() {
+  document.getElementById("LoginModalOverlay").style.display = "none";
+}
+function openLogoutModal() {
+  document.getElementById("LogoutModalOverlay").style.display = "flex";
+}
+function closeLogoutModal() {
+  document.getElementById("LogoutModalOverlay").style.display = "none";
+}
+
+// Login form submit
+const loginForm = document.getElementById("login-form");
+if (loginForm) {
+  loginForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
+    // TODO: заменить URL на ваш реальный эндпоинт
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    if (res.ok) {
+      const user = await res.json();
+      closeLoginModal();
+      // Сохраняем статус авторизации и имя
+      localStorage.setItem("isLoggedIn", "1");
+      if (user && user.user_name) {
+        localStorage.setItem("userName", user.user_name);
+      }
+      updateAuthButtons();
+      updateGreeting();
+    } else {
+      alert("Virhe kirjautumisessa!");
+    }
+  });
+}
+
+// Logout logic
+function logoutUser() {
+  closeLogoutModal();
+  localStorage.removeItem("isLoggedIn");
+  localStorage.removeItem("userName");
+  updateAuthButtons();
+  updateGreeting();
+}
+// Приветствие пользователя
+function updateGreeting() {
+  const greeting = document.getElementById("userGreeting");
+  const name = localStorage.getItem("userName");
+  if (localStorage.getItem("isLoggedIn") && name) {
+    greeting.textContent = `Hello, ${name}`;
+    greeting.style.display = "block";
+  } else {
+    greeting.textContent = "";
+    greeting.style.display = "none";
+  }
+}
+
+window.addEventListener("DOMContentLoaded", updateGreeting);
+
+// Управление видимостью кнопок входа/выхода
+function updateAuthButtons() {
+  const loginBtn = document.getElementById("loginBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (localStorage.getItem("isLoggedIn")) {
+    if (loginBtn) loginBtn.style.display = "none";
+    if (logoutBtn) logoutBtn.style.display = "block";
+  } else {
+    if (loginBtn) loginBtn.style.display = "block";
+    if (logoutBtn) logoutBtn.style.display = "none";
+  }
+}
+
+// Инициализация при загрузке страницы
+window.addEventListener("DOMContentLoaded", updateAuthButtons);
 // Функция для выбора CSS-класса по статусу
 function getStatusClass(status) {
   if (status === "On") return "status-on";
@@ -148,9 +289,15 @@ if (usersForm) {
         alert("Rekisteröinti onnistui!");
         closeUsersModal();
         usersForm.reset();
+      } else if (res.status === 409) {
+        alert(
+          "A user with this email already exists. Please use another email."
+        );
+        // Оставляем окно регистрации открытым, можно добавить фокус на email
+        userEmail.focus();
       } else {
         const text = await res.text();
-        alert("Virhe rekisteröinnissä: " + text);
+        alert("Registration error: " + text);
       }
     } catch (err) {
       alert("Verkkovirhe: " + err.message);
