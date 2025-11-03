@@ -85,13 +85,13 @@ app.post("/add-student", async (req, res) => {
 });
 // Добавление новой компании
 app.post("/add-company", async (req, res) => {
-  const { nimi, count_place, y_tunnus } = req.body;
-  console.log("Adding company:", nimi, count_place, y_tunnus);
+  const { nimi, count_place, y_tunnus, address } = req.body;
+  console.log("Adding company:", nimi, count_place, y_tunnus, address);
 
   try {
     await pool.query(
-      "INSERT INTO companies (company_name, count_place, tunnus) VALUES ($1, $2, $3)",
-      [nimi, count_place, y_tunnus]
+      "INSERT INTO companies (company_name, count_place, tunnus, address) VALUES ($1, $2, $3, $4)",
+      [nimi, count_place, y_tunnus, address]
     );
     res.sendStatus(200);
   } catch (err) {
@@ -123,6 +123,28 @@ app.get("/companies", async (req, res) => {
   } catch (err) {
     console.error("DB ERROR /companies:", err);
     res.status(500).send("DB error");
+  }
+});
+
+// Обновление компании
+app.put("/companies/:id", async (req, res) => {
+  const { id } = req.params;
+  const { company_name, count_place, tunnus, address } = req.body;
+  try {
+    console.log("PUT /companies payload:", req.body);
+    const result = await pool.query(
+      "UPDATE companies SET company_name = $2, count_place = $3, tunnus = $4, address = $5 WHERE company_id = $1",
+      [id, company_name, count_place, tunnus, address]
+    );
+    console.log("PUT /companies result:", result);
+    if (result.rowCount === 0) {
+      res.status(404).send("Компания не найдена");
+    } else {
+      res.send("OK, обновлено строк: " + result.rowCount);
+    }
+  } catch (err) {
+    console.error("DB ERROR /companies PUT:", err);
+    res.status(500).send("DB error: " + err.message);
   }
 });
 
@@ -244,11 +266,11 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-// Получить полный список компаний для списка (company_name, count_place, tunnus)
+// Получить полный список компаний для списка (company_name, count_place, tunnus, address)
 app.get("/companies-full", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT company_id, company_name, count_place, tunnus FROM companies ORDER BY company_name"
+      "SELECT company_id, company_name, count_place, tunnus, address FROM companies ORDER BY company_name"
     );
     res.json(result.rows);
   } catch (err) {

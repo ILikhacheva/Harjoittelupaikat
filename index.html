@@ -29,8 +29,15 @@
     ></div>
     </div>
     <div class="divider"></div>
+    
+    <!-- Welcome GIF - показывается когда никто не вошел -->
+    <div id="welcomeGif" style="text-align: center; margin: 50px auto; display: block;">
+      <img src="odotta.gif" alt="Odottaa..." style="max-width: 400px; height: auto;">
+      <p style="font-size: 48px; font-weight: #32404f; margin-top: 48px;">Kirjaudu sisään nähdäksesi harjoittelupaikat</p>
+    </div>
+    
     <!-- Side menu -->
-    <div
+    <div  
       id="sideMenu"
       class="side-menu"
       style="display: none"
@@ -105,6 +112,8 @@
                 <th>Yritys nimi</th>
                 <th>Paikkojen määrä</th>
                 <th>Y-tunnus</th>
+                <th>Osoite</th>
+                <th id="companyActionsHeader" style="display:none;">Toiminnot</th>
               </tr>
             </thead>
             <tbody id="companyListTableBody">
@@ -280,6 +289,15 @@
               required
             />
           </div>
+          <div class="form-group">
+            <label for="YrityksenOsoite">Osoite:</label>
+            <input
+              type="text"
+              id="YrityksenOsoite"
+              name="YrityksenOsoite"
+              required
+            />
+          </div>
           <div class="buttons">
             <button type="submit" class="btn btn-primary">Tallenna</button>
             <button
@@ -370,97 +388,95 @@
       </div>
     </div>
 
-    <footer>
-      <!-- Modal: Login -->
-      <div id="LoginModalOverlay" class="modal-overlay" style="display: none">
-        <div class="modal-window">
-          <button class="close-btn" onclick="closeLoginModal()" title="Close">
-            ×
-          </button>
-          <h2>Kirjaudu sisään</h2>
-          <form id="login-form" method="post" action="#">
-            <div class="form-group">
-              <label for="loginEmail">Sähköposti:</label>
-              <input type="text" id="loginEmail" name="loginEmail" required />
-            </div>
-            <div class="form-group">
-              <label for="loginPassword">Salasana:</label>
-              <input
-                type="password"
-                id="loginPassword"
-                name="loginPassword"
-                required
-              />
-            </div>
-            <div class="buttons">
-              <button type="submit" class="btn btn-primary">Kirjaudu</button>
-              <button
-                type="button"
-                class="btn btn-secondary"
-                onclick="closeLoginModal()"
-              >
-                Peruuta
-              </button>
-              <button
-                type="button"
-                class="btn btn-link"
-                style="
-                  background: none;
-                  border: none;
-                  color: #357ab8;
-                  text-decoration: underline;
-                  cursor: pointer;
-                  padding-left: 0;
-                "
-                onclick="closeLoginModal(); openKirjauduModal();"
-              >
-                Rekisteröidy
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- Modal: Logout -->
-      <div id="LogoutModalOverlay" class="modal-overlay" style="display: none">
-        <div class="modal-window">
-          <button class="close-btn" onclick="closeLogoutModal()" title="Close">
-            ×
-          </button>
-          <h2>Kirjaudu ulos</h2>
-          <p>Haluatko varmasti kirjautua ulos?</p>
+    <!-- Modal: Login -->
+    <div id="LoginModalOverlay" class="modal-overlay" style="display: none">
+      <div class="modal-window">
+        <button class="close-btn" onclick="closeLoginModal()" title="Close">
+          ×
+        </button>
+        <h2>Kirjaudu sisään</h2>
+        <form id="login-form" method="post" action="#">
+          <div class="form-group">
+            <label for="loginEmail">Sähköposti:</label>
+            <input type="text" id="loginEmail" name="loginEmail" required />
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Salasana:</label>
+            <input
+              type="password"
+              id="loginPassword"
+              name="loginPassword"
+              required
+            />
+          </div>
           <div class="buttons">
-            <button
-              type="button"
-              class="btn btn-primary"
-              onclick="logoutUser()"
-            >
-              Kyllä
-            </button>
+            <button type="submit" class="btn btn-primary">Kirjaudu</button>
             <button
               type="button"
               class="btn btn-secondary"
-              onclick="closeLogoutModal()"
+              onclick="closeLoginModal()"
             >
               Peruuta
             </button>
+            <button
+              type="button"
+              class="btn btn-link"
+              style="
+                background: none;
+                border: none;
+                color: #357ab8;
+                text-decoration: underline;
+                cursor: pointer;
+                padding-left: 0;
+              "
+              onclick="closeLoginModal(); openKirjauduModal();"
+            >
+              Rekisteröidy
+            </button>
           </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Logout -->
+    <div id="LogoutModalOverlay" class="modal-overlay" style="display: none">
+      <div class="modal-window">
+        <button class="close-btn" onclick="closeLogoutModal()" title="Close">
+          ×
+        </button>
+        <h2>Kirjaudu ulos</h2>
+        <p>Haluatko varmasti kirjautua ulos?</p>
+        <div class="buttons">
+          <button
+            type="button"
+            class="btn btn-primary"
+            onclick="logoutUser()"
+          >
+            Kyllä
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            onclick="closeLogoutModal()"
+          >
+            Peruuta
+          </button>
         </div>
       </div>
-      <div class="divider"></div>
-      <ul>
-        <li>
-          <a href="https://www.kpedu.fi/" title="Meistä" target="_blank"
-            >https://www.kpedu.fi/</a
-          >
-        </li>
-        <li>
-          <a href="mailto:anders.wikberg@kpedu.fi" title="Lähetä sähköpostia">
-            anders.wikberg@kpedu.fi</a
-          >
-        </li>
-      </ul>
-      <p>© 2025 Harjoittelupaikat</p>
+    </div>
+    
+    <footer>
+      <div class="divider-footer"></div>
+      <div>
+        <a href="https://www.kpedu.fi/" title="Meistä" target="_blank"
+          >https://www.kpedu.fi/</a
+        >
+        <p> </p>
+        <a href="mailto:anders.wikberg@kpedu.fi" title="Lähetä sähköpostia">
+          anders.wikberg@kpedu.fi</a
+        >
+        <p>© 2025 Harjoittelupaikat</p>
+      </div>
     </footer>
     <script src="app.js"></script>
   </body>

@@ -207,6 +207,12 @@ body {
 footer {
   margin-top: auto;
 }
+
+footer > div {
+  text-align: left;
+  padding-left: 24px;
+  margin-top: 24px;
+}
 /* Цветные статусы для таблицы Harjoittelupaikat */
 .status-on {
   color: #fff;
@@ -416,12 +422,6 @@ footer {
   th {
     display: revert;
   }
-  footer ul {
-    padding-left: 0;
-  }
-  footer li {
-    font-size: 14px;
-  }
 
   /* Header: stack burger under title on small screens */
   .header {
@@ -470,10 +470,18 @@ h1 {
 }
 .divider {
   width: 100vw;
-  height: 2mm;
+  height: 10px;
   background-color: #333;
   margin: 0;
   border: 0;
   position: relative;
-  z-index: 2;
+}
+
+.divider-footer {
+  width: 100vw;
+  height: 10px;
+  background-color: #333;
+  margin: 0;
+  border: 0;
+  position: relative;
 }

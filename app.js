@@ -49,6 +49,12 @@ async function loadStudentList() {
 // --- Company List Modal Logic ---
 function openCompanyListModal() {
   document.getElementById("CompanyListModalOverlay").style.display = "flex";
+  // Show/hide actions column for teachers
+  const actionsHeader = document.getElementById("companyActionsHeader");
+  const isTeacher = localStorage.getItem("userRole") === "2";
+  if (actionsHeader) {
+    actionsHeader.style.display = isTeacher ? "table-cell" : "none";
+  }
   loadCompanyList();
 }
 function closeCompanyListModal() {
@@ -57,25 +63,116 @@ function closeCompanyListModal() {
 
 async function loadCompanyList() {
   const tbody = document.getElementById("companyListTableBody");
-  tbody.innerHTML = "<tr><td colspan='3'>Ladataan...</td></tr>";
+  const isTeacher = localStorage.getItem("userRole") === "2";
+  tbody.innerHTML = `<tr><td colspan='${
+    isTeacher ? 5 : 4
+  }'>Ladataan...</td></tr>`;
   try {
     const res = await fetch("http://localhost:3000/companies-full");
     if (!res.ok) throw new Error("Virhe haettaessa yrityksiä");
     const companies = await res.json();
     if (!companies.length) {
-      tbody.innerHTML = "<tr><td colspan='3'>Ei yrityksiä</td></tr>";
+      tbody.innerHTML = `<tr><td colspan='${
+        isTeacher ? 5 : 4
+      }'>Ei yrityksiä</td></tr>`;
       return;
     }
     tbody.innerHTML = "";
-    companies.forEach((c) => {
+    companies.forEach((c, idx) => {
       const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${c.company_name}</td><td>${c.count_place}</td><td>${c.tunnus}</td>`;
+      tr.setAttribute("data-company-id", c.company_id);
+      const actionButtons = isTeacher
+        ? `<td><button class='edit-company-btn' data-idx='${idx}'>✏️</button></td>`
+        : "";
+      tr.innerHTML = `<td>${c.company_name}</td><td>${c.count_place}</td><td>${
+        c.tunnus
+      }</td><td>${c.address || ""}</td>${actionButtons}`;
       tbody.appendChild(tr);
     });
+
+    // Add event delegation for edit buttons
+    if (isTeacher) {
+      tbody.onclick = function (e) {
+        const btn = e.target.closest("button");
+        if (!btn || !btn.classList.contains("edit-company-btn")) return;
+        const idx = btn.getAttribute("data-idx");
+        const tr = btn.closest("tr");
+        const company = companies[idx];
+        editCompanyRow(tr, company, companies, idx);
+      };
+    }
   } catch (e) {
-    tbody.innerHTML = `<tr><td colspan='3'>Virhe: ${e.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan='${isTeacher ? 5 : 4}'>Virhe: ${
+      e.message
+    }</td></tr>`;
   }
 }
+
+// Function to edit company row
+function editCompanyRow(tr, company, companies, idx) {
+  const originalHTML = tr.innerHTML;
+  tr.innerHTML = `
+    <td><input type='text' class='edit-company-name' value="${
+      company.company_name
+    }" style="width:150px;"></td>
+    <td><input type='number' class='edit-count-place' value="${
+      company.count_place
+    }" style="width:80px;"></td>
+    <td><input type='text' class='edit-tunnus' value="${
+      company.tunnus
+    }" style="width:100px;"></td>
+    <td><input type='text' class='edit-address' value="${
+      company.address || ""
+    }" style="width:120px;"></td>
+    <td>
+      <button class='save-company-btn' data-idx='${idx}'>💾</button>
+      <button class='cancel-company-btn' data-idx='${idx}'>✖️</button>
+    </td>
+  `;
+  tr._originalHTML = originalHTML;
+
+  // Add event listeners for save/cancel
+  const saveBtn = tr.querySelector(".save-company-btn");
+  const cancelBtn = tr.querySelector(".cancel-company-btn");
+
+  saveBtn.onclick = async function (e) {
+    e.preventDefault();
+    const companyName = tr.querySelector(".edit-company-name").value;
+    const countPlace = tr.querySelector(".edit-count-place").value;
+    const tunnus = tr.querySelector(".edit-tunnus").value;
+    const address = tr.querySelector(".edit-address").value;
+
+    try {
+      const res = await fetch(
+        `http://localhost:3000/companies/${company.company_id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            company_name: companyName,
+            count_place: parseInt(countPlace),
+            tunnus: tunnus,
+            address: address,
+          }),
+        }
+      );
+
+      if (res.ok) {
+        loadCompanyList(); // Reload the list
+      } else {
+        const text = await res.text();
+        alert("Virhe tallennuksessa: " + text);
+      }
+    } catch (err) {
+      alert("Virhe tallennuksessa: " + err.message);
+    }
+  };
+
+  cancelBtn.onclick = function () {
+    tr.innerHTML = originalHTML;
+  };
+}
+
 // --- Login/Logout modal logic ---
 function openLoginModal() {
   document.getElementById("LoginModalOverlay").style.display = "flex";
@@ -164,6 +261,7 @@ function updateAuthButtons() {
   const addCompanyBtn = document.getElementById("addCompanyBtn");
   const addPlaceBtn = document.getElementById("addPlaceBtn");
   const dataTable = document.getElementById("dataTable");
+  const welcomeGif = document.getElementById("welcomeGif");
   const isLoggedIn = localStorage.getItem("isLoggedIn");
   const userRole = localStorage.getItem("userRole");
   if (isLoggedIn) {
@@ -188,7 +286,7 @@ function updateAuthButtons() {
         addPlaceBtn.setAttribute("aria-disabled", "false");
       }
     } else {
-      // Студент — просмотр списков + добавление компании
+      // Студент — просмотр списков + добавление компании + добавление места практики для себя
       if (addStudentBtn) {
         addStudentBtn.disabled = true;
         addStudentBtn.setAttribute("aria-disabled", "true");
@@ -202,12 +300,13 @@ function updateAuthButtons() {
         addCompanyBtn.setAttribute("aria-disabled", "false");
       }
       if (addPlaceBtn) {
-        addPlaceBtn.disabled = true;
-        addPlaceBtn.setAttribute("aria-disabled", "true");
+        addPlaceBtn.disabled = false;
+        addPlaceBtn.setAttribute("aria-disabled", "false");
       }
     }
-    // Показываем таблицу для всех залогиненных
+    // Показываем таблицу и скрываем GIF для всех залогиненных
     if (dataTable) dataTable.style.display = "block";
+    if (welcomeGif) welcomeGif.style.display = "none";
   } else {
     if (loginBtn) loginBtn.style.display = "block";
     if (logoutBtn) logoutBtn.style.display = "none";
@@ -227,7 +326,9 @@ function updateAuthButtons() {
       addPlaceBtn.disabled = true;
       addPlaceBtn.setAttribute("aria-disabled", "true");
     }
+    // Скрываем таблицу и показываем GIF для незалогиненных
     if (dataTable) dataTable.style.display = "none";
+    if (welcomeGif) welcomeGif.style.display = "block";
   }
 }
 
@@ -814,10 +915,11 @@ document
     const nimi = document.getElementById("YrityksenNimi").value;
     const count_place = document.getElementById("PaikkojenMaara").value;
     const y_tunnus = document.getElementById("YrityksenTunnus").value;
+    const address = document.getElementById("YrityksenOsoite").value;
     const res = await fetch("http://localhost:3000/add-company", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nimi, count_place, y_tunnus }),
+      body: JSON.stringify({ nimi, count_place, y_tunnus, address }),
     });
     if (res.ok) {
       closeYritysModal();
