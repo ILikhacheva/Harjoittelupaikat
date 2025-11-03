@@ -1,3 +1,9 @@
+// Функция для выбора CSS-класса по статусу
+function getStatusClass(status) {
+  if (status === "On") return "status-on";
+  if (status === "Odottaa") return "status-odottaa";
+  return "status-ei";
+}
 // Открытие модального окна регистрации (Kirjaudu)
 function openKirjauduModal() {
   document.getElementById("UsersModalOverlay").style.display = "block";
@@ -247,9 +253,10 @@ fetch("http://localhost:3000/workplace")
         <td>${row.begin_date}</td>
         <td>${row.end_date}</td>
         <td>${row.lunch_money}</td>
-        <td>${row.city}</td>       
-        <td>${row.status}</td>
-
+        <td>${row.city}</td>
+        <td><span class="${getStatusClass(row.status)}">${
+        row.status
+      }</span></td>
       `;
       tbody.appendChild(tr);
     });

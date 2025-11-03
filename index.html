@@ -10,7 +10,7 @@
   <body>
     <!-- Объединяем бургер меню и заголовок-->
     <div class="header">
-      <h1>Tervetuloa Harjoittelupaikat sivustolle!</h1>
+      <h1>Tervetuloa harjoittelupaikat sivustolle!</h1>
       <div id="burgerMenu" onclick="openSideMenu()">
         <div class="bar"></div>
         <div class="bar"></div>
@@ -150,9 +150,9 @@
             <label for="Status">Status:</label>
             <select id="Status" name="Status" required>
               <option value="">Valitse...</option>
-              <option value="Есть">Есть</option>
-              <option value="В поиске">В поиске</option>
-              <option value="Нет">Нет</option>
+              <option value="Есть">On</option>
+              <option value="В поиске">Odottaa</option>
+              <option value="Нет">Ei</option>
             </select>
           </div>
           <div class="buttons">
@@ -295,6 +295,7 @@
     </div>
 
     <footer>
+      <div class="divider"></div>
       <ul>
         <li>
           <a href="https://www.kpedu.fi/" title="Meistä" target="_blank"

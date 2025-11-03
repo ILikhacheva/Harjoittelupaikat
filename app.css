@@ -1,3 +1,125 @@
+#dataTable {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+table {
+  margin-left: auto;
+  margin-right: auto;
+}
+/* Прозрачный фоновый рисунок для всего сайта */
+body {
+  position: relative;
+  z-index: 0;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: url("bg.jpg") center center/cover no-repeat;
+  opacity: 0.6;
+  pointer-events: none;
+}
+/* Закрепление первого столбца таблицы при скролле */
+table th:first-child,
+table td:first-child {
+  position: sticky;
+  left: 0;
+  background: #fff;
+  z-index: 2;
+}
+table th:first-child {
+  z-index: 3;
+}
+/* Глобальные стили для таблицы */
+table td {
+  background-color: #fff;
+  color: #1e1a1a; /* цвет текста в ячейках */
+}
+
+table th {
+  background-color: #fff;
+  color: #1e1a1a; /* цвет текста в ячейках */
+}
+
+/* Глобальные стили для обеспечения липкого футера */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+footer {
+  margin-top: auto;
+}
+/* Цветные статусы для таблицы Harjoittelupaikat */
+.status-on {
+  color: #fff;
+  background: #4caf50;
+  border-radius: 6px;
+  padding: 2px 10px;
+  display: inline-block;
+}
+.status-odottaa {
+  color: #333;
+  background: #ffe066;
+  border-radius: 6px;
+  padding: 2px 10px;
+  display: inline-block;
+}
+.status-ei {
+  color: #fff;
+  background: #e74c3c;
+  border-radius: 6px;
+  padding: 2px 10px;
+  display: inline-block;
+}
+/* Выравнивание и стилизация modal forms */
+.modal-window form {
+  width: 100%;
+  max-width: 350px;
+  margin: 0 auto;
+  background-color: #cee2f4;
+}
+.form-group {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 18px;
+}
+.form-group label {
+  min-width: 110px;
+  margin-right: 20px;
+  margin-left: 8px;
+  text-align: right;
+  color: #333;
+}
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="date"],
+.form-group input[type="password"],
+.form-group select {
+  width: 180px;
+  padding: 7px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+.buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
 /* Modal overlay and window styles */
 .modal-overlay {
   position: fixed;
@@ -22,6 +144,7 @@
   overflow-y: auto;
   position: relative;
   z-index: 2001;
+  background-color: #cee2f4;
 }
 .modal-window h2 {
   text-align: center;
@@ -38,20 +161,9 @@
   cursor: pointer;
   color: #888;
 }
+
 /* Burger menu styles */
-#burgerMenu {
-  position: fixed;
-  top: 18px;
-  right: 18px;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  z-index: 1001;
-}
+/* ...existing code... */
 
 #burgerMenu .bar {
   width: 28px;
@@ -120,13 +232,7 @@
   padding-bottom: 8px;
 }
 
-#burgerMenu {
-  position: absolute;
-  left: 18px;
-  top: 50%;
-  transform: translateY(-50%);
-  margin: 0;
-}
+/* ...existing code... */
 
 .header h1 {
   flex: 1;
@@ -138,6 +244,7 @@
     font-size: 16px;
     padding: 10px;
   }
+
   .container {
     width: 100%;
     margin: 0;
@@ -200,8 +307,11 @@ h1 {
   margin: 0;
 }
 
-/* Убираем .header, burgerMenu теперь абсолютный */
 #burgerMenu {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
   width: 36px;
   height: 36px;
   display: flex;
