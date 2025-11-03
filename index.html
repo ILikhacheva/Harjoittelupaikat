@@ -1,5 +1,31 @@
 <!DOCTYPE html>
 <html lang="fi">
+<!--
+=====================================================
+СИСТЕМА УПРАВЛЕНИЯ МЕСТАМИ ПРАКТИКИ - ГЛАВНАЯ СТРАНИЦА
+HARJOITTELUPAIKKOJEN HALLINTAJÄRJESTELMÄ - PÄÄSIVU
+=====================================================
+
+Эта страница содержит интерфейс для управления:
+Tämä sivu sisältää käyttöliittymän hallintaan:
+
+- Студентов и их данных (добавление, просмотр, редактирование)
+  Opiskelijat ja heidän tietonsa (lisäys, katselu, muokkaus)
+
+- Компаний и мест практики (управление для учителей)
+  Yritykset ja harjoittelupaikat (hallinta opettajille)
+
+- Системы входа и ролевой авторизации
+  Kirjautumisjärjestelmä ja roolipohjainen valtuutus
+
+Роли пользователей / Käyttäjäroolit:
+- Студент (3): может видеть только свои данные
+  Opiskelija (3): voi nähdä vain omat tietonsa
+- Учитель (2): полный доступ к управлению
+  Opettaja (2): täysi hallintaoikeus
+
+=====================================================
+-->
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,7 +34,12 @@
     <link rel="stylesheet" href="app.css" />
   </head>
   <body>
-    <!-- Объединяем бургер меню и заголовок-->
+    <!-- =====================================================
+         ЗАГОЛОВОК И НАВИГАЦИЯ
+         OTSIKKO JA NAVIGOINTI
+         ===================================================== -->
+    
+    <!-- Объединяем бургер меню и заголовок / Yhdistetään burgeri-valikko ja otsikko -->
     <div class="header">
       <h1>Tervetuloa harjoittelupaikat sivustolle!</h1>
       <div id="burgerMenu" onclick="openSideMenu()">
@@ -30,13 +61,21 @@
     </div>
     <div class="divider"></div>
     
-    <!-- Welcome GIF - показывается когда никто не вошел -->
+    <!-- =====================================================
+         ЭКРАН ПРИВЕТСТВИЯ ДЛЯ НЕАВТОРИЗОВАННЫХ ПОЛЬЗОВАТЕЛЕЙ
+         TERVETULORUUTU VALTUUTTAMATTOMILLE KÄYTTÄJILLE
+         ===================================================== -->
+    
+    <!-- Показывается когда никто не вошел / Näytetään kun kukaan ei ole kirjautunut -->
     <div id="welcomeGif" style="text-align: center; margin: 50px auto; display: block;">
       <img src="odotta.gif" alt="Odottaa..." style="max-width: 400px; height: auto;">
       <p style="font-size: 48px; font-weight: #32404f; margin-top: 48px;">Kirjaudu sisään nähdäksesi harjoittelupaikat</p>
     </div>
     
-    <!-- Side menu -->
+    <!-- =====================================================
+         БОКОВОЕ МЕНЮ НАВИГАЦИИ
+         SIVUNAVIGOINTIVALIKKO
+         ===================================================== -->
     <div  
       id="sideMenu"
       class="side-menu"

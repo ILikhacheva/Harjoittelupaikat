@@ -1,28 +1,69 @@
-//подключаемся к базе данных PostgreSQL и создаем сервер Express
+// =====================================================
+// СЕРВЕРНАЯ ЧАСТЬ СИСТЕМЫ УПРАВЛЕНИЯ МЕСТАМИ ПРАКТИКИ
+// HARJOITTELUPAIKKOJEN HALLINTAJÄRJESTELMÄN PALVELINPUOLI
+// =====================================================
+//
+// Этот файл содержит Express.js сервер с API endpoints для:
+// Tämä tiedosto sisältää Express.js palvelimen API-päätepisteineen:
+//
+// - Аутентификация пользователей (логин/регистрация)
+//   Käyttäjien autentikointi (kirjautuminen/rekisteröinti)
+//
+// - CRUD операции для студентов, компаний и мест практики
+//   CRUD-toiminnot opiskelijoille, yrityksille ja harjoittelupaikoille
+//
+// - Управление правами доступа по ролям
+//   Roolipohjainen käyttöoikeuksien hallinta
+//
+// - Подключение к PostgreSQL базе данных
+//   PostgreSQL tietokantayhteys
+//
+// =====================================================
 
 // Загружаем переменные окружения из .env файла
+// Ladataan ympäristömuuttujat .env tiedostosta
 require("dotenv").config();
 
+// Импортируем необходимые модули
+// Tuodaan tarvittavat moduulit
 const express = require("express");
-const bcrypt = require("bcrypt");
-const cors = require("cors");
-const { Pool } = require("pg");
+const bcrypt = require("bcrypt"); // Для хеширования паролей / Salasanojen tiivistykseen
+const cors = require("cors"); // Для кросс-доменных запросов / Cross-origin pyyntöjä varten
+const { Pool } = require("pg"); // PostgreSQL клиент / PostgreSQL asiakasohjelma
 const app = express();
 
+// =====================================================
+// НАСТРОЙКА MIDDLEWARE
+// MIDDLEWARE KONFIGURAATIO
+// =====================================================
+
+// Настраиваем CORS для разрешения кросс-доменных запросов
+// Konfiguroidaan CORS sallimaan cross-origin pyynnöt
 app.use(
   cors({
-    origin: "*",
+    origin: "*", // Разрешаем запросы с любого домена / Sallitaan pyynnöt mistä tahansa domainista
   })
 );
 
+// Подключаем обслуживание статических файлов из текущей директории
+// Kytketään staattisten tiedostojen tarjoilu nykyisestä hakemistosta
 app.use(express.static(__dirname));
+
+// Подключаем middleware для парсинга JSON в запросах
+// Kytketään middleware JSON:n jäsentämiseen pyynnöissä
 app.use(express.json());
 
-// Настройки подключения к базе данных PostgreSQL
+// =====================================================
+// НАСТРОЙКА ПОДКЛЮЧЕНИЯ К БАЗЕ ДАННЫХ
+// TIETOKANTAYHTEYDEN KONFIGURAATIO
+// =====================================================
+
+// Создаем пул подключений к PostgreSQL базе данных
+// Luodaan PostgreSQL tietokantayhteyksien pool
 const pool = new Pool({
-  host: process.env.DB_HOST || "localhost",
-  port: process.env.DB_PORT || 5432,
-  database: process.env.DB_NAME || "harjoittelu_sivu",
+  host: process.env.DB_HOST || "localhost", // Хост БД / Tietokannan isäntä
+  port: process.env.DB_PORT || 5432, // Порт БД / Tietokannan portti
+  database: process.env.DB_NAME || "harjoittelu_sivu", // Имя БД / Tietokannan nimi
   user: process.env.DB_USER || "harjoittelu_sivu",
   password: process.env.DB_PASSWORD || "12345",
 });
@@ -36,7 +77,13 @@ pool.on("error", (err) => {
   console.error("❌ Connection error to PostgreSQL:", err);
 });
 
-// Получить список мест практики
+// =====================================================
+// API ENDPOINTS ДЛЯ РАБОТЫ С ДАННЫМИ
+// API-PÄÄTEPISTEET TIETOJEN KÄSITTELYYN
+// =====================================================
+
+// Получить список мест практики с фильтрацией по ролям
+// Hae harjoittelupaikkojen luettelo roolisuodatuksella
 app.get("/workplace", async (req, res) => {
   try {
     // Check for student restriction
@@ -70,8 +117,6 @@ app.listen(3000, () => {
 // Добавление нового студента
 app.post("/add-student", async (req, res) => {
   const { nimi, ryhma } = req.body;
-  console.log("Adding student:", nimi, ryhma);
-
   try {
     await pool.query(
       "INSERT INTO students (st_name, st_group) VALUES ($1, $2)",
@@ -86,8 +131,6 @@ app.post("/add-student", async (req, res) => {
 // Добавление новой компании
 app.post("/add-company", async (req, res) => {
   const { nimi, count_place, y_tunnus, address } = req.body;
-  console.log("Adding company:", nimi, count_place, y_tunnus, address);
-
   try {
     await pool.query(
       "INSERT INTO companies (company_name, count_place, tunnus, address) VALUES ($1, $2, $3, $4)",
@@ -131,12 +174,10 @@ app.put("/companies/:id", async (req, res) => {
   const { id } = req.params;
   const { company_name, count_place, tunnus, address } = req.body;
   try {
-    console.log("PUT /companies payload:", req.body);
     const result = await pool.query(
       "UPDATE companies SET company_name = $2, count_place = $3, tunnus = $4, address = $5 WHERE company_id = $1",
       [id, company_name, count_place, tunnus, address]
     );
-    console.log("PUT /companies result:", result);
     if (result.rowCount === 0) {
       res.status(404).send("Компания не найдена");
     } else {
@@ -246,7 +287,6 @@ app.post("/api/login", async (req, res) => {
       return res.status(401).json({ error: "Käyttäjää ei löydy" });
     }
     const user = result.rows[0];
-    console.log("User from DB:", user);
     const match = await bcrypt.compare(password, user.user_password);
     if (!match) {
       return res.status(401).json({ error: "Väärä salasana" });
@@ -258,7 +298,6 @@ app.post("/api/login", async (req, res) => {
       user_role: user.user_role,
       student_id: user.student_id || null,
     };
-    console.log("Login response:", response);
     res.json(response);
   } catch (err) {
     console.error("DB ERROR /api/login:", err);
@@ -344,7 +383,6 @@ app.put("/workplace", async (req, res) => {
   const userRole = req.headers["x-user-role"];
   const studentIdHeader = req.headers["x-student-id"];
   try {
-    console.log("PUT /workplace payload:", req.body);
     let query = `UPDATE workplace SET company_id=$2, boss_name=$3, boss_phone=$4, boss_email=$5, begin_date=$6, end_date=$7, lunch_money=$8, city=$9, status=$10 WHERE row_id=$1`;
     let params = [
       row_id,
@@ -364,7 +402,6 @@ app.put("/workplace", async (req, res) => {
       params.push(studentIdHeader);
     }
     const result = await pool.query(query, params);
-    console.log("PUT /workplace result:", result);
     if (result.rowCount === 0) {
       res.status(404).send("Не найдена строка для обновления (row_id)");
     } else {

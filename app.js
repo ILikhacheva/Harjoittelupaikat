@@ -1,86 +1,239 @@
-// Show/hide actions column header for teachers and students
+// =====================================================
+// СИСТЕМА УПРАВЛЕНИЯ МЕСТАМИ ПРАКТИКИ
+// HARJOITTELUPAIKKOJEN HALLINTAJÄRJESTELMÄ
+// =====================================================
+//
+// Этот файл содержит весь клиентский JavaScript код для системы
+// управления местами практики. Включает функции для:
+//
+// Tämä tiedosto sisältää kaiken asiakaspuolen JavaScript-koodin
+// harjoittelupaikkojen hallintajärjestelmälle. Sisältää toiminnot:
+//
+// - Управление модальными окнами (студенты, компании, места практики)
+//   Modal-ikkunoiden hallinta (opiskelijat, yritykset, harjoittelupaikat)
+//
+// - Встроенное редактирование в таблицах (для учителей)
+//   Sisäänrakennettu taulukkomuokkaus (opettajille)
+//
+// - Аутентификация и авторизация пользователей
+//   Käyttäjien autentikointi ja auktorisointi
+//
+// - Управление правами доступа по ролям (студент/учитель)
+//   Roolipohjainen käyttöoikeuksien hallinta (opiskelija/opettaja)
+//
+// - Ограничения дат (только будущие даты)
+//   Päivämäärärajoitukset (vain tulevat päivämäärät)
+//
+// =====================================================
+
+// =====================================================
+// ФУНКЦИИ УПРАВЛЕНИЯ ВИДИМОСТЬЮ КОЛОНОК И ЭЛЕМЕНТОВ
+// TOIMINTOJEN NÄKYVYYDEN HALLINTA FUNKTIOT
+// =====================================================
+
+// Показать/скрыть заголовок колонки действий для учителей и студентов
+// Näytä/piilota toimintojen sarakkeen otsikko opettajille ja opiskelijoille
 function updateActionsHeader() {
+  // Получаем элемент заголовка колонки действий в основной таблице
+  // Haetaan toimintojen sarakkeen otsikko elementti päätaulukosta
   const actionsHeader = document.getElementById("actionsHeader");
+
+  // Если элемент не найден, выходим из функции
+  // Jos elementtiä ei löydy, poistutaan funktiosta
   if (!actionsHeader) return;
+
+  // Проверяем роль пользователя из localStorage (2 = учитель, 3 = студент)
+  // Tarkistetaan käyttäjän rooli localStoragesta (2 = opettaja, 3 = opiskelija)
   const isTeacher = localStorage.getItem("userRole") === "2";
   const isStudent = localStorage.getItem("userRole") === "3";
-  // Показываем столбец действий для учителей и студентов
+
+  // Показываем столбец действий только для учителей и студентов
+  // Näytetään toimintosarake vain opettajille ja opiskelijoille
   actionsHeader.style.display = isTeacher || isStudent ? "table-cell" : "none";
 }
 
-// Call after login/logout and on load
-window.addEventListener("DOMContentLoaded", updateActionsHeader);
-window.addEventListener("storage", updateActionsHeader);
-// Also call in updateAuthButtons
-function updateAuthButtons() {
-  // ...existing code...
+// =====================================================
+// ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ
+// SOVELLUKSEN ALUSTUS SIVUN LATAUTUESSA
+// =====================================================
+
+// Вызываем функции после загрузки страницы и после входа/выхода
+// Kutsutaan funktioita sivun latauduttua ja kirjautumisen/uloskirjautumisen jälkeen
+window.addEventListener("DOMContentLoaded", function () {
+  // Обновляем видимость заголовков колонок действий
+  // Päivitetään toimintosarakkeiden otsikoiden näkyvyys
   updateActionsHeader();
-}
-// --- Student List Modal Logic ---
+
+  // Инициализируем ограничения дат при загрузке страницы
+  // Alustetaan päivämäärärajoitukset sivun latautuessa
+  setMinDatesForWorkplace();
+});
+
+// Слушаем изменения в localStorage (например, при входе/выходе)
+// Kuunnellaan localStorage muutoksia (esim. kirjautumisessa/uloskirjautumisessa)
+window.addEventListener("storage", updateActionsHeader);
+
+// =====================================================
+// ФУНКЦИИ МОДАЛЬНОГО ОКНА СПИСКА СТУДЕНТОВ
+// OPISKELIJALUETTELON MODAL-IKKUNAN FUNKTIOT
+// =====================================================
+
+// Открыть модальное окно со списком студентов
+// Avaa opiskelijaluettelon modal-ikkuna
 function openStudentListModal() {
+  // Делаем модальное окно видимым (display: flex для центрирования)
+  // Tehdään modal-ikkuna näkyväksi (display: flex keskitystä varten)
   document.getElementById("StudentListModalOverlay").style.display = "flex";
+
+  // Загружаем список студентов с сервера
+  // Ladataan opiskelijalista palvelimelta
   loadStudentList();
 }
+
+// Закрыть модальное окно со списком студентов
+// Sulje opiskelijaluettelon modal-ikkuna
 function closeStudentListModal() {
+  // Скрываем модальное окно
+  // Piilotetaan modal-ikkuna
   document.getElementById("StudentListModalOverlay").style.display = "none";
 }
 
+// Загрузить и отобразить список студентов в таблице
+// Lataa ja näytä opiskelijalista taulukossa
 async function loadStudentList() {
+  // Получаем тело таблицы студентов для заполнения данными
+  // Haetaan opiskelijataulukon runko tietojen täyttämiseksi
   const tbody = document.getElementById("studentListTableBody");
+
+  // Проверяем, является ли текущий пользователь учителем
+  // Tarkistetaan onko nykyinen käyttäjä opettaja
   const isTeacher = localStorage.getItem("userRole") === "2";
+
+  // Получаем заголовок колонки действий в таблице студентов
+  // Haetaan toimintosarakkeen otsikko opiskelijataulukosta
   const actionsHeader = document.getElementById("studentActionsHeader");
 
-  // Show/hide actions column for teachers
+  // Показываем/скрываем колонку действий для учителей
+  // Näytetään/piilotetaan toimintosarake opettajille
   if (actionsHeader) {
     actionsHeader.style.display = isTeacher ? "table-cell" : "none";
   }
 
+  // Определяем количество колонок для сообщений (с действиями или без)
+  // Määritetään sarakkeiden määrä viestejä varten (toimintojen kanssa tai ilman)
   const colspan = isTeacher ? "3" : "2";
+
+  // Показываем сообщение о загрузке
+  // Näytetään latausviesti
   tbody.innerHTML = `<tr><td colspan='${colspan}'>Ladataan...</td></tr>`;
 
   try {
+    // Отправляем запрос на сервер для получения списка студентов
+    // Lähetetään pyyntö palvelimelle opiskelijalistan hakemiseksi
     const res = await fetch("http://localhost:3000/students-full");
+
+    // Проверяем успешность запроса
+    // Tarkistetaan pyynnön onnistuminen
     if (!res.ok) throw new Error("Virhe haettaessa opiskelijoita");
+
+    // Парсим JSON-ответ от сервера
+    // Jäsennetään JSON-vastaus palvelimelta
     const students = await res.json();
+
+    // Если студентов нет, показываем соответствующее сообщение
+    // Jos opiskelijoita ei ole, näytetään vastaava viesti
     if (!students.length) {
       tbody.innerHTML = `<tr><td colspan='${colspan}'>Ei opiskelijoita</td></tr>`;
       return;
     }
+
+    // Очищаем таблицу перед добавлением данных
+    // Tyhjennetään taulukko ennen tietojen lisäämistä
     tbody.innerHTML = "";
+
+    // Перебираем всех студентов и создаем для каждого строку таблицы
+    // Käydään läpi kaikki opiskelijat ja luodaan kullekin taulukon rivi
     students.forEach((s, idx) => {
+      // Создаем новую строку таблицы
+      // Luodaan uusi taulukon rivi
       const tr = document.createElement("tr");
+
+      // Добавляем ID студента как атрибут для идентификации
+      // Lisätään opiskelijan ID attribuutiksi tunnistusta varten
       tr.setAttribute("data-student-id", s.st_id);
+
+      // Создаем кнопки действий только для учителей (кнопка редактирования с иконкой карандаша)
+      // Luodaan toimintopainikkeet vain opettajille (muokkaus painike lyijykynä ikonilla)
       const actionButtons = isTeacher
         ? `<td><button class='edit-student-btn' data-idx='${idx}'>✏️</button></td>`
         : "";
+      // Заполняем строку данными: имя студента, группа и кнопки действий
+      // Täytetään rivi tiedoilla: opiskelijan nimi, ryhmä ja toimintopainikkeet
       tr.innerHTML = `<td>${s.st_name}</td><td>${s.st_group}</td>${actionButtons}`;
+
+      // Добавляем строку в тело таблицы
+      // Lisätään rivi taulukon runkoon
       tbody.appendChild(tr);
     });
 
-    // Add event delegation for edit buttons
+    // Добавляем обработчик событий для кнопок редактирования (делегирование событий)
+    // Lisätään tapahtumankäsittelijä muokkauspainikkeille (event delegation)
     if (isTeacher) {
       tbody.onclick = function (e) {
+        // Ищем нажатую кнопку
+        // Etsitään painettua painiketta
         const btn = e.target.closest("button");
+
+        // Проверяем, что это именно кнопка редактирования студента
+        // Tarkistetaan että kyseessä on opiskelijan muokkauspainike
         if (!btn || !btn.classList.contains("edit-student-btn")) return;
+
+        // Получаем индекс студента из атрибута кнопки
+        // Haetaan opiskelijan indeksi painikkeen attribuutista
         const idx = btn.getAttribute("data-idx");
+
+        // Получаем строку таблицы, содержащую кнопку
+        // Haetaan taulukon rivi, joka sisältää painikkeen
         const tr = btn.closest("tr");
+
+        // Получаем данные студента по индексу
+        // Haetaan opiskelijan tiedot indeksin perusteella
         const student = students[idx];
+
+        // Вызываем функцию редактирования строки студента
+        // Kutsutaan opiskelijan rivin muokkaustoimintoa
         editStudentRow(tr, student, students, idx);
       };
     }
   } catch (e) {
+    // Обработка ошибок - показываем сообщение об ошибке в таблице
+    // Virheiden käsittely - näytetään virheviesti taulukossa
     tbody.innerHTML = `<tr><td colspan='${colspan}'>Virhe: ${e.message}</td></tr>`;
   }
 }
-// --- Company List Modal Logic ---
+
+// =====================================================
+// ФУНКЦИИ МОДАЛЬНОГО ОКНА СПИСКА КОМПАНИЙ
+// YRITYSLUETTELON MODAL-IKKUNAN FUNKTIOT
+// =====================================================
+
+// Открыть модальное окно со списком компаний
+// Avaa yritysluettelon modal-ikkuna
 function openCompanyListModal() {
+  // Делаем модальное окно видимым
+  // Tehdään modal-ikkuna näkyväksi
   document.getElementById("CompanyListModalOverlay").style.display = "flex";
-  // Show/hide actions column for teachers
+
+  // Показываем/скрываем колонку действий для учителей
+  // Näytetään/piilotetaan toimintosarake opettajille
   const actionsHeader = document.getElementById("companyActionsHeader");
   const isTeacher = localStorage.getItem("userRole") === "2";
   if (actionsHeader) {
     actionsHeader.style.display = isTeacher ? "table-cell" : "none";
   }
+
+  // Загружаем список компаний с сервера
+  // Ladataan yritysluettelo palvelimelta
   loadCompanyList();
 }
 function closeCompanyListModal() {
@@ -199,9 +352,20 @@ function editCompanyRow(tr, company, companies, idx) {
   };
 }
 
-// Function to edit student row
+// =====================================================
+// ФУНКЦИИ ВСТРОЕННОГО РЕДАКТИРОВАНИЯ СТРОК ТАБЛИЦЫ
+// TAULUKKORIVIEN SISÄÄNRAKENNETUT MUOKKAUSTOIMINNOT
+// =====================================================
+
+// Функция редактирования строки студента прямо в таблице
+// Opiskelijan rivin muokkaustoiminto suoraan taulukossa
 function editStudentRow(tr, student, students, idx) {
+  // Сохраняем оригинальный HTML строки для возможности отмены
+  // Tallennetaan rivin alkuperäinen HTML peruuttamisen mahdollistamiseksi
   const originalHTML = tr.innerHTML;
+
+  // Заменяем содержимое строки на поля ввода для редактирования
+  // Korvataan rivin sisältö syöttökentillä muokkausta varten
   tr.innerHTML = `
     <td><input type='text' class='edit-student-name' value="${student.st_name}" style="width:150px;"></td>
     <td><input type='text' class='edit-student-group' value="${student.st_group}" style="width:120px;"></td>
@@ -210,6 +374,9 @@ function editStudentRow(tr, student, students, idx) {
       <button class='cancel-student-btn' data-idx='${idx}'>✖️</button>
     </td>
   `;
+
+  // Сохраняем оригинальный HTML в свойстве строки
+  // Tallennetaan alkuperäinen HTML rivin ominaisuuteen
   tr._originalHTML = originalHTML;
 
   // Add event listeners for save/cancel
@@ -281,7 +448,6 @@ if (loginForm) {
     });
     if (res.ok) {
       const user = await res.json();
-      console.log("Login response user:", user);
       closeLoginModal();
       // Сохраняем статус авторизации, имя и роль
       localStorage.setItem("isLoggedIn", "1");
@@ -559,9 +725,7 @@ if (usersForm) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      console.log(res);
       if (res.ok) {
-        alert("Rekisteröinti onnistui!");
         closeUsersModal();
         usersForm.reset();
       } else if (res.status === 409) {
@@ -669,6 +833,48 @@ function closeYritysModal() {
 }
 function openPaikkaModal() {
   document.getElementById("PaikkaModalOverlay").style.display = "flex";
+  populateStudentsSelect();
+  setMinDatesForWorkplace();
+}
+
+// =====================================================
+// ФУНКЦИИ УПРАВЛЕНИЯ ДАТАМИ И ОГРАНИЧЕНИЯМИ
+// PÄIVÄMÄÄRIEN JA RAJOITUSTEN HALLINTA
+// =====================================================
+
+// Устанавливает минимальные даты для формы рабочего места (только сегодня и будущие даты)
+// Asettaa vähimmäispäivämäärät työpaikkaformulaarille (vain tänään ja tulevat päivämäärät)
+function setMinDatesForWorkplace() {
+  // Получаем сегодняшнюю дату в формате YYYY-MM-DD
+  // Haetaan tämän päivän päivämäärä muodossa YYYY-MM-DD
+  const today = new Date().toISOString().split("T")[0];
+
+  // Получаем поля ввода дат начала и окончания
+  // Haetaan alku- ja loppupäivämäärien syöttökentät
+  const alkuInput = document.getElementById("Alku");
+  const loppuInput = document.getElementById("Loppu");
+
+  // Устанавливаем минимальную дату для поля начала (сегодня)
+  // Asetetaan vähimmäispäivämäärä alkupäivälle (tänään)
+  if (alkuInput) {
+    alkuInput.min = today;
+  }
+
+  // Устанавливаем минимальную дату для поля окончания (сегодня)
+  // Asetetaan vähimmäispäivämäärä loppupäivälle (tänään)
+  if (loppuInput) {
+    loppuInput.min = today;
+  }
+
+  // Добавляем слушатель события для обеспечения того, чтобы дата окончания не была раньше даты начала
+  // Lisätään tapahtumankuuntelija varmistamaan, että loppupäivä ei ole ennen alkupäivää
+  if (alkuInput && loppuInput) {
+    alkuInput.addEventListener("change", function () {
+      // При изменении даты начала, устанавливаем минимальную дату окончания
+      // Alkupäivän muuttuessa asetetaan loppupäivän vähimmäispäivämäärä
+      loppuInput.min = this.value || today;
+    });
+  }
 }
 function closePaikkaModal() {
   document.getElementById("PaikkaModalOverlay").style.display = "none";
@@ -859,6 +1065,25 @@ function loadWorkplaceTable() {
             </td>
           `;
           tr._originalHTML = originalHTML;
+
+          // Set minimum dates for editing (today and future only)
+          const today = new Date().toISOString().split("T")[0];
+          const beginDateInput = tr.querySelector(".edit-begin-date");
+          const endDateInput = tr.querySelector(".edit-end-date");
+
+          if (beginDateInput) {
+            beginDateInput.min = today;
+          }
+          if (endDateInput) {
+            endDateInput.min = today;
+          }
+
+          // Ensure end date is not before start date
+          if (beginDateInput && endDateInput) {
+            beginDateInput.addEventListener("change", function () {
+              endDateInput.min = this.value || today;
+            });
+          }
         } else if (btn.classList.contains("cancel-btn")) {
           // Restore original row
           const tr = btn.closest("tr");
@@ -869,8 +1094,6 @@ function loadWorkplaceTable() {
             loadWorkplaceTable();
           }
         } else if (btn.classList.contains("save-btn")) {
-          // Диагностика: срабатывает ли обработчик
-          console.log("save-btn clicked");
           // Если кнопка внутри формы, предотвратить submit
           if (e && typeof e.preventDefault === "function") e.preventDefault();
           const tr = btn.closest("tr");
@@ -908,10 +1131,6 @@ function loadWorkplaceTable() {
             city: cityInput ? cityInput.value : rowData.city,
             status: statusInput ? statusInput.value : rowData.status,
           };
-          // Диагностика: выводим все данные
-          alert(
-            "Отправляемые данные (PUT):\n" + JSON.stringify(payload, null, 2)
-          );
           fetch("http://localhost:3000/workplace", {
             method: "PUT",
             headers: {
@@ -922,12 +1141,10 @@ function loadWorkplaceTable() {
             body: JSON.stringify(payload),
           })
             .then(async (res) => {
-              const text = await res.text();
-              // Диагностика: показываем ответ сервера
-              alert("Ответ сервера (PUT):\n" + text);
               if (res.ok) {
                 location.reload();
               } else {
+                const text = await res.text();
                 throw new Error(text);
               }
             })
@@ -1022,7 +1239,6 @@ document
       document.getElementById("PaikanNimi").value,
       10
     );
-    console.log("Valitut ID:t:", student_id, company_id);
     if (
       isNaN(student_id) ||
       student_id === -1 ||
