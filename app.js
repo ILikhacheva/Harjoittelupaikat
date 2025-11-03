@@ -124,16 +124,56 @@ function updateGreeting() {
 
 window.addEventListener("DOMContentLoaded", updateGreeting);
 
-// Управление видимостью кнопок входа/выхода
+// Управление видимостью кнопок входа/выхода и доступом к меню/таблице
 function updateAuthButtons() {
   const loginBtn = document.getElementById("loginBtn");
   const logoutBtn = document.getElementById("logoutBtn");
-  if (localStorage.getItem("isLoggedIn")) {
+  const addStudentBtn = document.getElementById("addStudentBtn");
+  const listStudentBtn = document.getElementById("listStudentBtn");
+  const addCompanyBtn = document.getElementById("addCompanyBtn");
+  const addPlaceBtn = document.getElementById("addPlaceBtn");
+  const dataTable = document.getElementById("dataTable");
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
+  if (isLoggedIn) {
     if (loginBtn) loginBtn.style.display = "none";
     if (logoutBtn) logoutBtn.style.display = "block";
+    if (addStudentBtn) {
+      addStudentBtn.disabled = false;
+      addStudentBtn.setAttribute("aria-disabled", "false");
+    }
+    if (listStudentBtn) {
+      listStudentBtn.disabled = false;
+      listStudentBtn.setAttribute("aria-disabled", "false");
+    }
+    if (addCompanyBtn) {
+      addCompanyBtn.disabled = false;
+      addCompanyBtn.setAttribute("aria-disabled", "false");
+    }
+    if (addPlaceBtn) {
+      addPlaceBtn.disabled = false;
+      addPlaceBtn.setAttribute("aria-disabled", "false");
+    }
+    if (dataTable) dataTable.style.display = "block";
   } else {
     if (loginBtn) loginBtn.style.display = "block";
     if (logoutBtn) logoutBtn.style.display = "none";
+    if (addStudentBtn) {
+      addStudentBtn.disabled = true;
+      addStudentBtn.setAttribute("aria-disabled", "true");
+    }
+    if (listStudentBtn) {
+      listStudentBtn.disabled = true;
+      listStudentBtn.setAttribute("aria-disabled", "true");
+    }
+    if (addCompanyBtn) {
+      addCompanyBtn.disabled = true;
+      addCompanyBtn.setAttribute("aria-disabled", "true");
+    }
+    if (addPlaceBtn) {
+      addPlaceBtn.disabled = true;
+      addPlaceBtn.setAttribute("aria-disabled", "true");
+    }
+    if (dataTable) dataTable.style.display = "none";
   }
 }
 

@@ -37,14 +37,15 @@
       onmouseleave="closeSideMenu()"
     >
       <!-- Боковое меню кнопок -->
-      <div class="side-btn submenu-parent" id="studentsMenuBtn">
-        Opiskelijat
-        <span class="submenu-arrow">▶</span>
-        <div class="submenu" id="studentsSubmenu">
-          <button class="submenu-btn" onclick="openOppilasModal(); closeSideMenu(); event.stopPropagation();">Lisää</button>
-          <button class="submenu-btn" onclick="openStudentListModal(); event.stopPropagation();">Lista</button>
+      <!-- удалено дублирующее меню студентов -->
+        <div class="side-btn submenu-parent" id="studentsMenuBtn">
+          Opiskelijat
+          <span class="submenu-arrow">▶</span>
+          <div class="submenu" id="studentsSubmenu">
+            <button class="submenu-btn" id="addStudentBtn" aria-disabled="true" disabled onclick="openOppilasModal(); closeSideMenu(); event.stopPropagation();">Lisää</button>
+            <button class="submenu-btn" id="listStudentBtn" aria-disabled="true" disabled onclick="openStudentListModal(); event.stopPropagation();">Lista</button>
+          </div>
         </div>
-      </div>
     <!-- Modal: Student List -->
     <div id="StudentListModalOverlay" class="modal-overlay" style="display: none">
       <div class="modal-window" style="min-width: 420px; max-width: 90vw;">
@@ -65,17 +66,18 @@
         </div>
       </div>
     </div>
-      <div class="side-btn submenu-parent" id="companiesMenuBtn">
-        Yritykset
-        <span class="submenu-arrow">▶</span>
-        <div class="submenu" id="companiesSubmenu">
-          <button class="submenu-btn" onclick="openYritysModal(); closeSideMenu(); event.stopPropagation();">Lisää</button>
-          <button class="submenu-btn" onclick="openCompanyListModal(); closeSideMenu(); event.stopPropagation();">Lista</button>
+      <!-- удалено дублирующее меню компаний -->
+        <div class="side-btn submenu-parent" id="companiesMenuBtn">
+          Yritykset
+          <span class="submenu-arrow">▶</span>
+          <div class="submenu" id="companiesSubmenu">
+            <button class="submenu-btn" id="addCompanyBtn" aria-disabled="true" disabled onclick="openYritysModal(); closeSideMenu(); event.stopPropagation();">Lisää</button>
+            <button class="submenu-btn" onclick="openCompanyListModal(); closeSideMenu(); event.stopPropagation();">Lista</button>
+          </div>
         </div>
-      </div>
-      <button class="side-btn" onclick="openPaikkaModal(); closeSideMenu();">
-        Lisää harjoittelupaikka
-      </button>
+        <button class="side-btn" id="addPlaceBtn" aria-disabled="true" disabled onclick="openPaikkaModal(); closeSideMenu();">
+          Lisää harjoittelupaikka
+        </button>
       <button
         class="side-btn"
         onclick="openLoginModal(); closeSideMenu();"
@@ -115,7 +117,7 @@
     </div>
 
     <!-- Таблица данных с местами практики Заголовок-->
-    <div id="dataTable">
+    <div id="dataTable" style="display:none;">
       <h2>Harjoittelupaikat</h2>
       <table border="1">
         <thead>
