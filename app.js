@@ -27,6 +27,15 @@
 // =====================================================
 
 // =====================================================
+// ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+// GLOBAALIT MUUTTUJAT
+// =====================================================
+
+// Массив для хранения данных студентов для сортировки
+// Taulukko opiskelijatietojen säilyttämiseen lajittelua varten
+let studentsData = [];
+
+// =====================================================
 // ФУНКЦИИ УПРАВЛЕНИЯ ВИДИМОСТЬЮ КОЛОНОК И ЭЛЕМЕНТОВ
 // TOIMINTOJEN NÄKYVYYDEN HALLINTA FUNKTIOT
 // =====================================================
@@ -100,7 +109,7 @@ function closeStudentListModal() {
 
 // Загрузить и отобразить список студентов в таблице
 // Lataa ja näytä opiskelijalista taulukossa
-async function loadStudentList() {
+async function loadStudentList(sortBy = "st_name", sortOrder = "asc") {
   // Получаем тело таблицы студентов для заполнения данными
   // Haetaan opiskelijataulukon runko tietojen täyttämiseksi
   const tbody = document.getElementById("studentListTableBody");
@@ -128,9 +137,12 @@ async function loadStudentList() {
   tbody.innerHTML = `<tr><td colspan='${colspan}'>Ladataan...</td></tr>`;
 
   try {
-    // Отправляем запрос на сервер для получения списка студентов
-    // Lähetetään pyyntö palvelimelle opiskelijalistan hakemiseksi
-    const res = await fetch("http://localhost:3000/students-full");
+    // Отправляем запрос на сервер для получения списка студентов с параметрами сортировки
+    // Lähetetään pyyntö palvelimelle opiskelijalistan hakemiseksi lajitteluparametreillä
+    const url = `http://localhost:3000/students-full?sortBy=${encodeURIComponent(
+      sortBy
+    )}&sortOrder=${encodeURIComponent(sortOrder)}`;
+    const res = await fetch(url);
 
     // Проверяем успешность запроса
     // Tarkistetaan pyynnön onnistuminen
@@ -140,6 +152,10 @@ async function loadStudentList() {
     // Jäsennetään JSON-vastaus palvelimelta
     const students = await res.json();
 
+    // Сохраняем данные глобально для сортировки
+    // Tallennetaan tiedot globaalisti lajittelua varten
+    studentsData = students;
+
     // Если студентов нет, показываем соответствующее сообщение
     // Jos opiskelijoita ei ole, näytetään vastaava viesti
     if (!students.length) {
@@ -147,66 +163,9 @@ async function loadStudentList() {
       return;
     }
 
-    // Очищаем таблицу перед добавлением данных
-    // Tyhjennetään taulukko ennen tietojen lisäämistä
-    tbody.innerHTML = "";
-
-    // Перебираем всех студентов и создаем для каждого строку таблицы
-    // Käydään läpi kaikki opiskelijat ja luodaan kullekin taulukon rivi
-    students.forEach((s, idx) => {
-      // Создаем новую строку таблицы
-      // Luodaan uusi taulukon rivi
-      const tr = document.createElement("tr");
-
-      // Добавляем ID студента как атрибут для идентификации
-      // Lisätään opiskelijan ID attribuutiksi tunnistusta varten
-      tr.setAttribute("data-student-id", s.st_id);
-
-      // Создаем кнопки действий только для учителей (кнопка редактирования с иконкой карандаша)
-      // Luodaan toimintopainikkeet vain opettajille (muokkaus painike lyijykynä ikonilla)
-      const actionButtons = isTeacher
-        ? `<td><button class='edit-student-btn' data-idx='${idx}'>✏️</button></td>`
-        : "";
-      // Заполняем строку данными: имя студента, фамилия, группа и кнопки действий
-      // Täytetään rivi tiedoilla: opiskelijan nimi, sukunimi, ryhmä ja toimintopainikkeet
-      tr.innerHTML = `<td>${s.st_name}</td><td>${s.st_s_name || ""}</td><td>${
-        s.st_group
-      }</td>${actionButtons}`;
-
-      // Добавляем строку в тело таблицы
-      // Lisätään rivi taulukon runkoon
-      tbody.appendChild(tr);
-    });
-
-    // Добавляем обработчик событий для кнопок редактирования (делегирование событий)
-    // Lisätään tapahtumankäsittelijä muokkauspainikkeille (event delegation)
-    if (isTeacher) {
-      tbody.onclick = function (e) {
-        // Ищем нажатую кнопку
-        // Etsitään painettua painiketta
-        const btn = e.target.closest("button");
-
-        // Проверяем, что это именно кнопка редактирования студента
-        // Tarkistetaan että kyseessä on opiskelijan muokkauspainike
-        if (!btn || !btn.classList.contains("edit-student-btn")) return;
-
-        // Получаем индекс студента из атрибута кнопки
-        // Haetaan opiskelijan indeksi painikkeen attribuutista
-        const idx = btn.getAttribute("data-idx");
-
-        // Получаем строку таблицы, содержащую кнопку
-        // Haetaan taulukon rivi, joka sisältää painikkeen
-        const tr = btn.closest("tr");
-
-        // Получаем данные студента по индексу
-        // Haetaan opiskelijan tiedot indeksin perusteella
-        const student = students[idx];
-
-        // Вызываем функцию редактирования строки студента
-        // Kutsutaan opiskelijan rivin muokkaustoimintoa
-        editStudentRow(tr, student, students, idx);
-      };
-    }
+    // Отображаем студентов в таблице
+    // Näytetään opiskelijat taulukossa
+    renderStudentList(students);
 
     // Заполняем список групп для фильтра и инициализируем поиск
     // Täytetään ryhmälista suodatinta varten ja alustetaan haku
@@ -1256,8 +1215,14 @@ function populateAddressFilter(companies) {
 
 // Загрузить и отобразить данные мест практики
 // Lataa ja näytä harjoittelupaikkojen tiedot
-function loadWorkplaceTable() {
-  fetch("http://localhost:3000/workplace")
+function loadWorkplaceTable(sortBy = null, sortOrder = null) {
+  // Строим URL с параметрами сортировки / Rakennetaan URL lajitteluparametrein
+  let url = "http://localhost:3000/workplace";
+  if (sortBy && sortOrder) {
+    url += `?sortBy=${sortBy}&sortOrder=${sortOrder}`;
+  }
+
+  fetch(url)
     .then((response) => response.json())
     .then((data) => {
       const tbody = document.getElementById("tableBody");
@@ -1344,7 +1309,9 @@ function loadWorkplaceTable() {
             <td style="display:none;">${row.row_id}</td>
             <td style="display:none;">${row.student_id}</td>
             <td style="display:none;">${row.company_id}</td>
-            <td data-student-id="${row.student_id || ""}">${row.st_name}</td>
+            <td data-student-id="${row.student_id || ""}">${row.st_name}${
+            row.st_s_name ? " " + row.st_s_name : ""
+          }</td>
             <td data-company-id="${row.company_id || ""}">${
             companyName || ""
           }</td>
@@ -1677,13 +1644,10 @@ document
 // Muuttuja lajittelusuunnan seurantaan
 let currentSortDirection = null; // null, 'asc', 'desc'
 
-// Функция сортировки таблицы
-// Taulukon lajittelutoiminto
+// Функция сортировки основной таблицы мест практики (серверная сортировка)
+// Pääharjoittelupaikkataulukon lajittelufunktio (palvelinpuolen lajittelu)
 function sortTable(column, direction) {
   if (column !== "student") return; // Сортируем только по студентам / Lajitellaan vain opiskelijoiden mukaan
-
-  const tableBody = document.getElementById("tableBody");
-  const rows = Array.from(tableBody.getElementsByTagName("tr"));
 
   // Обновляем визуальные индикаторы
   // Päivitetään visuaaliset indikaattorit
@@ -1693,32 +1657,9 @@ function sortTable(column, direction) {
   // Tallennetaan nykyinen suunta
   currentSortDirection = direction;
 
-  // Сортируем строки
-  // Lajitellaan rivit
-  const sortedRows = rows.sort((a, b) => {
-    // Получаем имена студентов (первая видимая колонка, индекс 3 если считать скрытые)
-    // Haetaan opiskelijoiden nimet (ensimmäinen näkyvä sarake, indeksi 3 jos lasketaan piilotetut)
-    const aStudentName = a.cells[3] ? a.cells[3].textContent.toLowerCase() : "";
-    const bStudentName = b.cells[3] ? b.cells[3].textContent.toLowerCase() : "";
-
-    // Сравниваем имена
-    // Verrataan nimet
-    const comparison = aStudentName.localeCompare(bStudentName, "fi");
-
-    return direction === "asc" ? comparison : -comparison;
-  });
-
-  // Очищаем таблицу и добавляем отсортированные строки
-  // Tyhjennetään taulukko ja lisätään lajitellut rivit
-  tableBody.innerHTML = "";
-  sortedRows.forEach((row) => tableBody.appendChild(row));
-
-  // Применяем поиск заново, если он активен
-  // Sovelletaan haku uudelleen, jos se on aktiivinen
-  const searchInput = document.getElementById("searchInput");
-  if (searchInput && searchInput.value) {
-    filterWorkplaceTable(searchInput.value);
-  }
+  // Загружаем данные с сервера с нужной сортировкой
+  // Ladataan tiedot palvelimelta halutulla lajittelulla
+  loadWorkplaceTable(column, direction);
 }
 
 // Обновление визуальных индикаторов сортировки
@@ -1739,5 +1680,142 @@ function updateSortIndicators(direction) {
     if (arrow) {
       arrow.classList.add("active");
     }
+  }
+}
+
+// =====================================================
+// ФУНКЦИИ СОРТИРОВКИ ТАБЛИЦЫ СТУДЕНТОВ
+// OPISKELIJATAULUKON LAJITTELUFUNKTIOT
+// =====================================================
+
+// Функция для отображения списка студентов в таблице
+// Funktio opiskelijalistan näyttämiseen taulukossa
+function renderStudentList(students) {
+  // Получаем тело таблицы студентов
+  // Haetaan opiskelijataulukon runko
+  const tbody = document.getElementById("studentListTableBody");
+
+  // Проверяем, является ли пользователь учителем
+  // Tarkistetaan onko käyttäjä opettaja
+  const isTeacher = localStorage.getItem("userRole") === "2";
+
+  // Очищаем таблицу перед добавлением данных
+  // Tyhjennetään taulukko ennen tietojen lisäämistä
+  tbody.innerHTML = "";
+
+  // Перебираем всех студентов и создаем для каждого строку таблицы
+  // Käydään läpi kaikki opiskelijat ja luodaan kullekin taulukon rivi
+  students.forEach((s, idx) => {
+    // Создаем новую строку таблицы
+    // Luodaan uusi taulukon rivi
+    const tr = document.createElement("tr");
+
+    // Добавляем ID студента как атрибут для идентификации
+    // Lisätään opiskelijan ID attribuutiksi tunnistusta varten
+    tr.setAttribute("data-student-id", s.st_id);
+
+    // Создаем кнопки действий только для учителей (кнопка редактирования с иконкой карандаша)
+    // Luodaan toimintopainikkeet vain opettajille (muokkaus painike lyijykynä ikonilla)
+    const actionButtons = isTeacher
+      ? `<td><button class='edit-student-btn' data-idx='${idx}'>✏️</button></td>`
+      : "";
+
+    // Заполняем строку данными: имя студента, фамилия, группа и кнопки действий
+    // Täytetään rivi tiedoilla: opiskelijan nimi, sukunimi, ryhmä ja toimintopainikkeet
+    tr.innerHTML = `<td>${s.st_name}</td><td>${s.st_s_name || ""}</td><td>${
+      s.st_group
+    }</td>${actionButtons}`;
+
+    // Добавляем строку в тело таблицы
+    // Lisätään rivi taulukon runkoon
+    tbody.appendChild(tr);
+  });
+
+  // Добавляем обработчик событий для кнопок редактирования (если пользователь учитель)
+  // Lisätään tapahtumankäsittelijä muokkauspainikkeille (jos käyttäjä on opettaja)
+  if (isTeacher) {
+    tbody.onclick = function (e) {
+      // Ищем нажатую кнопку
+      // Etsitään painettua painiketta
+      const btn = e.target.closest("button");
+
+      // Проверяем, что это именно кнопка редактирования студента
+      // Tarkistetaan että kyseessä on opiskelijan muokkauspainike
+      if (!btn || !btn.classList.contains("edit-student-btn")) return;
+
+      // Получаем индекс студента из атрибута кнопки
+      // Haetaan opiskelijan indeksi painikkeen attribuutista
+      const idx = btn.getAttribute("data-idx");
+
+      // Получаем строку таблицы, содержащую кнопку
+      // Haetaan taulukon rivi, joka sisältää painikkeen
+      const tr = btn.closest("tr");
+
+      // Получаем данные студента по индексу
+      // Haetaan opiskelijan tiedot indeksin perusteella
+      const student = students[idx];
+
+      // Вызываем функцию редактирования строки студента
+      // Kutsutaan opiskelijan rivin muokkaustoimintoa
+      editStudentRow(tr, student, students, idx);
+    };
+  }
+}
+
+// Функция сортировки таблицы студентов
+// Opiskelijataulukon lajittelufunktio
+// Функция сортировки таблицы студентов через серверный запрос
+// Opiskelijataulukon lajittelufunktio palvelinpyynnön kautta
+function sortStudentTable(column, direction) {
+  // Преобразуем название колонки в соответствующее поле БД
+  // Muunnetaan sarakkeen nimi vastaavaksi tietokantakentäksi
+  let sortBy;
+  switch (column) {
+    case "student":
+      sortBy = "st_name";
+      break;
+    case "surname":
+      sortBy = "st_s_name";
+      break;
+    default:
+      sortBy = "st_name";
+  }
+
+  // Перезагружаем список студентов с новой сортировкой
+  // Ladataan opiskelijalista uudelleen uudella lajittelulla
+  loadStudentList(sortBy, direction);
+
+  // Обновляем визуальные индикаторы сортировки
+  // Päivitetään lajittelun visuaaliset indikaattorit
+  updateStudentSortArrows(column, direction);
+}
+
+// Функция обновления стрелок сортировки для таблицы студентов
+// Opiskelijataulukon lajittelunuolien päivitysfunktio
+function updateStudentSortArrows(activeColumn, direction) {
+  // Убираем активный класс у всех стрелок в таблице студентов
+  // Poistetaan aktiivinen luokka kaikilta nuolilta opiskelijataulukossa
+  const studentTable = document
+    .querySelector("#studentListTableBody")
+    .closest("table");
+  const allArrows = studentTable.querySelectorAll(".sort-up, .sort-down");
+  allArrows.forEach((arrow) => arrow.classList.remove("active"));
+
+  // Находим заголовок активной колонки
+  // Etsitään aktiivisen sarakkeen otsikko
+  const activeHeader = studentTable.querySelector(
+    `thead th[data-column="${activeColumn}"]`
+  );
+  if (!activeHeader) return;
+
+  // Определяем класс стрелки в зависимости от направления
+  // Määritetään nuolen luokka suunnan mukaan
+  const arrowClass = direction === "asc" ? ".sort-up" : ".sort-down";
+
+  // Активируем соответствующую стрелку
+  // Aktivoidaan vastaava nuoli
+  const arrow = activeHeader.querySelector(arrowClass);
+  if (arrow) {
+    arrow.classList.add("active");
   }
 }

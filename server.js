@@ -89,7 +89,13 @@ app.get("/workplace", async (req, res) => {
     // Check for student restriction
     const userRole = req.headers["x-user-role"];
     const studentId = req.headers["x-student-id"];
-    let query = `SELECT w.row_id, w.student_id, w.company_id, s.st_name,
+
+    // Получаем параметры сортировки из query string
+    // Haetaan lajitteluparametrit query stringistä
+    const sortBy = req.query.sortBy; // 'student'
+    const sortOrder = req.query.sortOrder; // 'asc' или 'desc'
+
+    let query = `SELECT w.row_id, w.student_id, w.company_id, s.st_name, s.st_s_name,
       c.company_name, w.boss_name, w.boss_phone, w.boss_email,
       TO_CHAR(w.begin_date, 'YYYY-MM-DD') as begin_date,
       TO_CHAR(w.end_date, 'YYYY-MM-DD') as end_date,
@@ -97,11 +103,21 @@ app.get("/workplace", async (req, res) => {
       FROM public.workplace w
       JOIN public.students s ON w.student_id = s.student_id
       JOIN public.companies c ON w.company_id = c.company_id`;
+
     let params = [];
     if (userRole === "3" && studentId) {
       query += " WHERE w.student_id = $1";
       params = [studentId];
     }
+
+    // Добавляем сортировку / Lisätään lajittelu
+    if (sortBy === "student" && (sortOrder === "asc" || sortOrder === "desc")) {
+      query += ` ORDER BY s.st_name ${sortOrder.toUpperCase()}, s.st_s_name ${sortOrder.toUpperCase()}`;
+    } else {
+      // По умолчанию сортируем по имени студента / Oletuksena lajitellaan opiskelijan nimen mukaan
+      query += ` ORDER BY s.st_name ASC, s.st_s_name ASC`;
+    }
+
     const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (err) {
@@ -321,9 +337,29 @@ app.get("/companies-full", async (req, res) => {
 // Получить полный список студентов для списка (student_id, st_name, st_s_name, st_group)
 app.get("/students-full", async (req, res) => {
   try {
-    const result = await pool.query(
-      "SELECT student_id as st_id, st_name, st_s_name, st_group FROM students ORDER BY st_name, st_s_name"
-    );
+    // Получаем параметры сортировки из query string
+    // Haetaan lajitteluparametrit query stringistä
+    const sortBy = req.query.sortBy || "st_name"; // По умолчанию по имени / Oletuksena nimen mukaan
+    const sortOrder = req.query.sortOrder || "asc"; // По умолчанию по возрастанию / Oletuksena nousevasti
+
+    // Валидируем параметры сортировки для безопасности
+    // Validoidaan lajitteluparametrit turvallisuuden vuoksi
+    const allowedSortColumns = ["st_name", "st_s_name", "st_group"];
+    const allowedSortOrders = ["asc", "desc"];
+
+    const validSortBy = allowedSortColumns.includes(sortBy)
+      ? sortBy
+      : "st_name";
+    const validSortOrder = allowedSortOrders.includes(sortOrder.toLowerCase())
+      ? sortOrder.toLowerCase()
+      : "asc";
+
+    // Строим SQL запрос с динамической сортировкой
+    // Rakennetaan SQL-kysely dynaamisella lajittelulla
+    const orderClause = `ORDER BY ${validSortBy} ${validSortOrder.toUpperCase()}`;
+    const query = `SELECT student_id as st_id, st_name, st_s_name, st_group FROM students ${orderClause}`;
+
+    const result = await pool.query(query);
     res.json(result.rows);
   } catch (err) {
     console.error("DB ERROR /students-full:", err);

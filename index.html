@@ -124,8 +124,20 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
           <table border="1" style="width:100%;margin-top:10px;">
             <thead>
               <tr>
-                <th>Nimi</th>
-                <th>Sukunimi</th>
+                <th class="sortable" data-column="student">
+                  Nimi
+                  <span class="sort-arrows">
+                    <span class="sort-up" onclick="sortStudentTable('student', 'asc')">▲</span>
+                    <span class="sort-down" onclick="sortStudentTable('student', 'desc')">▼</span>
+                  </span>
+                </th>
+                <th class="sortable" data-column="surname">
+                  Sukunimi
+                  <span class="sort-arrows">
+                    <span class="sort-up" onclick="sortStudentTable('surname', 'asc')">▲</span>
+                    <span class="sort-down" onclick="sortStudentTable('surname', 'desc')">▼</span>
+                  </span>
+                </th>
                 <th>Ryhmä</th>
                 <th id="studentActionsHeader" style="display:none;">Toiminnot</th>
               </tr>
