@@ -699,6 +699,306 @@ function closeLogoutModal() {
   document.getElementById("LogoutModalOverlay").style.display = "none";
 }
 
+// =====================================================
+// ФУНКЦИИ МОДАЛЬНОГО ОКНА ОТЧЕТОВ
+// RAPORTTIEN MODAL-IKKUNAN FUNKTIOT
+// =====================================================
+
+// Открыть модальное окно отчетов
+// Avaa raporttien modal-ikkuna
+function openReportModal() {
+  document.getElementById("ReportModalOverlay").style.display = "flex";
+}
+
+// Закрыть модальное окно отчетов
+// Sulje raporttien modal-ikkuna
+function closeReportModal() {
+  document.getElementById("ReportModalOverlay").style.display = "none";
+  // Сбрасываем содержимое при закрытии
+  // Nollataan sisältö sulkemisen yhteydessä
+  const reportContent = document.getElementById("reportContent");
+  const exportBtn = document.getElementById("exportPdfBtn");
+  if (reportContent) {
+    reportContent.innerHTML =
+      "<p style=\"text-align: center; color: #666;\">Klikkaa 'Luo raportti' -painiketta luodaksesi raportin.</p>";
+  }
+  if (exportBtn) {
+    exportBtn.style.display = "none";
+  }
+}
+
+// Генерация отчета
+// Raportin luominen
+async function generateReport() {
+  const reportContent = document.getElementById("reportContent");
+  const exportBtn = document.getElementById("exportPdfBtn");
+
+  try {
+    // Показываем загрузку
+    // Näytetään latausviesti
+    reportContent.innerHTML =
+      '<p style="text-align: center; color: #357ab8;"><strong>Ladataan raporttia...</strong></p>';
+
+    // Запрашиваем данные с сервера
+    // Pyydetään tiedot palvelimelta
+    const response = await fetch("http://localhost:3000/report");
+    if (!response.ok) {
+      throw new Error("Virhe ladattaessa raporttia");
+    }
+
+    const data = await response.json();
+
+    if (data.length === 0) {
+      reportContent.innerHTML =
+        '<p style="text-align: center; color: #dc3545;"><strong>Ei tietoja raportille</strong></p>';
+      return;
+    }
+
+    // Генерируем HTML для отчета
+    // Luodaan HTML raporttia varten
+    let htmlContent = `
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h3 style="margin: 0; color: #333;">Harjoittelupaikkaraportti</h3>
+        <p style="margin: 5px 0; color: #666;">Luotu: ${new Date().toLocaleDateString(
+          "fi-FI"
+        )}</p>
+      </div>
+      
+      <table style="width: 100%; border-collapse: collapse; margin: 0 auto; font-size: 12px;">
+        <thead>
+          <tr style="background-color: #f8f9fa;">
+            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Yritys</th>
+            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Y-tunnus</th>
+            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Osoite</th>
+            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Opiskelija</th>
+            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Ryhmä</th>
+            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Ohjaaja</th>
+            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Puhelin</th>
+            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Sähköposti</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    data.forEach((row, index) => {
+      const studentFullName = `${row.st_name}${
+        row.st_s_name ? " " + row.st_s_name : ""
+      }`;
+      htmlContent += `
+        <tr style="background-color: ${
+          index % 2 === 0 ? "#ffffff" : "#f8f9fa"
+        };">
+          <td style="border: 1px solid #ddd; padding: 6px;">${
+            row.company_name || ""
+          }</td>
+          <td style="border: 1px solid #ddd; padding: 6px;">${
+            row.tunnus || ""
+          }</td>
+          <td style="border: 1px solid #ddd; padding: 6px;">${
+            row.address || ""
+          }</td>
+          <td style="border: 1px solid #ddd; padding: 6px;">${studentFullName}</td>
+          <td style="border: 1px solid #ddd; padding: 6px;">${
+            row.st_group || ""
+          }</td>
+          <td style="border: 1px solid #ddd; padding: 6px;">${
+            row.boss_name || ""
+          }</td>
+          <td style="border: 1px solid #ddd; padding: 6px;">${
+            row.boss_phone || ""
+          }</td>
+          <td style="border: 1px solid #ddd; padding: 6px;">${
+            row.boss_email || ""
+          }</td>
+        </tr>
+      `;
+    });
+
+    htmlContent += `
+        </tbody>
+      </table>
+      
+      <div style="margin-top: 20px; text-align: center; font-size: 11px; color: #666;">
+        <p>Yhteensä: ${data.length} harjoittelupaikkaa</p>
+      </div>
+    `;
+
+    reportContent.innerHTML = htmlContent;
+
+    // Показываем кнопку экспорта в PDF
+    // Näytetään PDF-vientipainike
+    if (exportBtn) {
+      exportBtn.style.display = "inline-block";
+    }
+  } catch (error) {
+    console.error("Virhe luotaessa raporttia:", error);
+    reportContent.innerHTML =
+      '<p style="text-align: center; color: #dc3545;"><strong>Virhe luotaessa raporttia: ' +
+      error.message +
+      "</strong></p>";
+  }
+}
+
+// Экспорт в PDF
+// PDF-vienti
+function exportToPdf() {
+  // Используем window.print для печати/сохранения в PDF
+  // Käytetään window.print tulostukseen/PDF:n tallentamiseen
+  const reportContent = document.getElementById("reportContent");
+
+  if (!reportContent || !reportContent.innerHTML.includes("table")) {
+    alert("Luo ensin raportti ennen tallentamista!");
+    return;
+  }
+
+  // Создаем временное окно для печати
+  // Luodaan väliaikainen ikkuna tulostusta varten
+  const printWindow = window.open("", "_blank");
+  const printContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Harjoittelupaikkaraportti</title>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #333; padding: 8px; text-align: left; font-size: 10px; }
+        th { background-color: #f0f0f0; font-weight: bold; }
+        h3 { text-align: center; margin-bottom: 20px; }
+        @media print {
+          body { margin: 0; }
+          table { font-size: 9px; }
+          th, td { padding: 4px; }
+        }
+      </style>
+    </head>
+    <body>
+      ${reportContent.innerHTML}
+    </body>
+    </html>
+  `;
+
+  printWindow.document.write(printContent);
+  printWindow.document.close();
+
+  // Ждем загрузки и открываем диалог печати
+  // Odotetaan latausta ja avataan tulostusdialoogi
+  printWindow.onload = function () {
+    printWindow.print();
+    // printWindow.close(); // Закомментировано, чтобы пользователь мог видеть результат
+  };
+}
+
+// Генерация отчета по компаниям
+// Yritysraportin luominen
+async function generateCompanyReport() {
+  const reportContent = document.getElementById("reportContent");
+  const exportBtn = document.getElementById("exportPdfBtn");
+
+  try {
+    // Показываем загрузку
+    // Näytetään latausviesti
+    reportContent.innerHTML =
+      '<p style="text-align: center; color: #357ab8;"><strong>Ladataan yritysraporttia...</strong></p>';
+
+    // Запрашиваем данные с сервера
+    // Pyydetään tiedot palvelimelta
+    const response = await fetch("http://localhost:3000/company-report");
+    if (!response.ok) {
+      throw new Error("Virhe ladattaessa yritysraporttia");
+    }
+
+    const data = await response.json();
+
+    if (data.length === 0) {
+      reportContent.innerHTML =
+        '<p style="text-align: center; color: #dc3545;"><strong>Ei tietoja yritysraportille</strong></p>';
+      return;
+    }
+
+    // Генерируем HTML для отчета по компаниям
+    // Luodaan HTML yritysraporttia varten
+    let htmlContent = `
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h3 style="margin: 0; color: #333;">Yritysraportti - Opiskelijamäärät</h3>
+        <p style="margin: 5px 0; color: #666;">Luotu: ${new Date().toLocaleDateString(
+          "fi-FI"
+        )}</p>
+      </div>
+      
+      <table style="width: 100%; border-collapse: collapse; margin: 0 auto; font-size: 14px;">
+        <thead>
+          <tr style="background-color: #f8f9fa;">
+            <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Yrityksen nimi</th>
+            <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Y-tunnus</th>
+            <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Osoite</th>
+            <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Opiskelijoiden määrä</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    let totalStudents = 0;
+
+    data.forEach((row, index) => {
+      const studentCount = parseInt(row["Number of students"] || 0);
+      totalStudents += studentCount;
+
+      htmlContent += `
+        <tr style="background-color: ${
+          index % 2 === 0 ? "#ffffff" : "#f8f9fa"
+        };">
+          <td style="border: 1px solid #ddd; padding: 10px; font-weight: 500;">${
+            row.company_name || ""
+          }</td>
+          <td style="border: 1px solid #ddd; padding: 10px;">${
+            row.tunnus || ""
+          }</td>
+          <td style="border: 1px solid #ddd; padding: 10px;">${
+            row.address || ""
+          }</td>
+          <td style="border: 1px solid #ddd; padding: 10px; text-align: center; font-weight: 600; color: #357ab8;">${studentCount}</td>
+        </tr>
+      `;
+    });
+
+    htmlContent += `
+        </tbody>
+        <tfoot>
+          <tr style="background-color: #e9ecef; font-weight: bold;">
+            <td colspan="3" style="border: 1px solid #ddd; padding: 12px; text-align: right;">Yhteensä:</td>
+            <td style="border: 1px solid #ddd; padding: 12px; text-align: center; color: #dc3545; font-size: 16px;">${totalStudents}</td>
+          </tr>
+        </tfoot>
+      </table>
+      
+      <div style="margin-top: 25px; text-align: center; font-size: 12px; color: #666;">
+        <p><strong>Tilastot:</strong></p>
+        <p>Yrityksiä yhteensä: ${data.length}</p>
+        <p>Harjoittelijoita yhteensä: ${totalStudents}</p>
+        <p>Keskimäärin ${(totalStudents / data.length).toFixed(
+          1
+        )} harjoittelijaa per yritys</p>
+      </div>
+    `;
+
+    reportContent.innerHTML = htmlContent;
+
+    // Показываем кнопку экспорта в PDF
+    // Näytetään PDF-vientipainike
+    if (exportBtn) {
+      exportBtn.style.display = "inline-block";
+    }
+  } catch (error) {
+    console.error("Virhe luotaessa yritysraporttia:", error);
+    reportContent.innerHTML =
+      '<p style="text-align: center; color: #dc3545;"><strong>Virhe luotaessa yritysraporttia: ' +
+      error.message +
+      "</strong></p>";
+  }
+}
+
 // Login form submit
 const loginForm = document.getElementById("login-form");
 if (loginForm) {
@@ -771,6 +1071,7 @@ function updateAuthButtons() {
   const listStudentBtn = document.getElementById("listStudentBtn");
   const addCompanyBtn = document.getElementById("addCompanyBtn");
   const addPlaceBtn = document.getElementById("addPlaceBtn");
+  const reportBtn = document.getElementById("reportBtn");
   const dataTable = document.getElementById("dataTable");
   const welcomeGif = document.getElementById("welcomeGif");
   const isLoggedIn = localStorage.getItem("isLoggedIn");
@@ -796,6 +1097,10 @@ function updateAuthButtons() {
         addPlaceBtn.disabled = false;
         addPlaceBtn.setAttribute("aria-disabled", "false");
       }
+      if (reportBtn) {
+        reportBtn.disabled = false;
+        reportBtn.setAttribute("aria-disabled", "false");
+      }
     } else {
       // Студент — просмотр списков + добавление компании + добавление места практики для себя
       if (addStudentBtn) {
@@ -813,6 +1118,10 @@ function updateAuthButtons() {
       if (addPlaceBtn) {
         addPlaceBtn.disabled = false;
         addPlaceBtn.setAttribute("aria-disabled", "false");
+      }
+      if (reportBtn) {
+        reportBtn.disabled = true;
+        reportBtn.setAttribute("aria-disabled", "true");
       }
     }
     // Показываем таблицу и скрываем GIF для всех залогиненных
@@ -836,6 +1145,10 @@ function updateAuthButtons() {
     if (addPlaceBtn) {
       addPlaceBtn.disabled = true;
       addPlaceBtn.setAttribute("aria-disabled", "true");
+    }
+    if (reportBtn) {
+      reportBtn.disabled = true;
+      reportBtn.setAttribute("aria-disabled", "true");
     }
     // Скрываем таблицу и показываем GIF для незалогиненных
     if (dataTable) dataTable.style.display = "none";

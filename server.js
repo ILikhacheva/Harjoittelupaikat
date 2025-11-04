@@ -449,6 +449,68 @@ app.put("/workplace", async (req, res) => {
   }
 });
 
+// =====================================================
+// ОТЧЕТЫ / RAPORTIT
+// =====================================================
+
+// Получение отчета по местам практики
+// Harjoittelupaikkaraportin hakeminen
+app.get("/report", async (req, res) => {
+  try {
+    // SQL запрос как указано в требованиях
+    // SQL-kysely kuten vaatimuksissa määritetty
+    const query = `
+      SELECT 
+        c.company_name, 
+        c.tunnus, 
+        c.address, 
+        s.st_name, 
+        s.st_s_name, 
+        s.st_group, 
+        w.boss_name, 
+        w.boss_phone, 
+        w.boss_email
+      FROM students s, companies c, workplace w
+      WHERE w.student_id = s.student_id 
+        AND w.company_id = c.company_id
+      ORDER BY c.company_name, s.st_name, s.st_s_name
+    `;
+
+    const result = await pool.query(query);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("SERVER ERROR /report:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Отчет по компаниям с количеством студентов
+// Yritysraportti opiskelijamäärän kanssa
+app.get("/company-report", async (req, res) => {
+  try {
+    // SQL запрос для отчета по компаниям
+    // SQL-kysely yritysraporttia varten
+    const query = `
+      SELECT 
+        c.company_name, 
+        c.tunnus, 
+        c.address, 
+        COUNT(w.row_id) as "Number of students"
+      FROM students s, companies c, workplace w
+      WHERE w.student_id = s.student_id 
+        AND w.company_id = c.company_id
+      GROUP BY c.company_name, c.tunnus, c.address
+      ORDER BY c.company_name
+    `;
+
+    const result = await pool.query(query);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("SERVER ERROR /company-report:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Удаление места практики
 app.delete("/workplace", async (req, res) => {
   const { student_id, company_id } = req.body;

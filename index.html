@@ -162,6 +162,13 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
         </button>
       <button
         class="side-btn"
+        onclick="openReportModal(); closeSideMenu();"
+        id="reportBtn"
+      >
+        Raportti
+      </button>
+      <button
+        class="side-btn"
         onclick="openLoginModal(); closeSideMenu();"
         id="loginBtn"
       >
@@ -516,6 +523,30 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
             </button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- Modal: Report -->
+    <div id="ReportModalOverlay" class="modal-overlay" style="display: none">
+      <div class="modal-window" style="max-width: 95%; width: 1200px;">
+        <button class="close-btn" onclick="closeReportModal()" title="Close">×</button>
+        <h2>Harjoittelupaikkaraportti</h2>
+        
+        <div style="margin-bottom: 15px; text-align: center;">
+          <button id="generateReportBtn" onclick="generateReport()" style="padding: 10px 20px; background: #357ab8; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">
+            Opiskelijaraportti
+          </button>
+          <button id="generateCompanyReportBtn" onclick="generateCompanyReport()" style="padding: 10px 20px; background: #6f42c1; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">
+            Yritysraportti
+          </button>
+          <button id="exportPdfBtn" onclick="exportToPdf()" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; display: none;">
+            Tallenna PDF
+          </button>
+        </div>
+
+        <div id="reportContent" style="background: white; padding: 20px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          <p style="text-align: center; color: #666;">Klikkaa 'Luo raportti' -painiketta luodaksesi raportin.</p>
+        </div>
       </div>
     </div>
 
