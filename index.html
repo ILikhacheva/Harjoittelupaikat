@@ -125,6 +125,7 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
             <thead>
               <tr>
                 <th>Nimi</th>
+                <th>Sukunimi</th>
                 <th>Ryhmä</th>
                 <th id="studentActionsHeader" style="display:none;">Toiminnot</th>
               </tr>
@@ -238,7 +239,13 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
       <table border="1">
         <thead>
           <tr>
-            <th>Oppilas</th>
+            <th class="sortable" data-column="student">
+              Oppilas 
+              <span class="sort-arrows">
+                <span class="sort-up" onclick="sortTable('student', 'asc')">▲</span>
+                <span class="sort-down" onclick="sortTable('student', 'desc')">▼</span>
+              </span>
+            </th>
             <th>Paikan nimi</th>
             <th>Ohjaaja</th>
             <th>Puhelin</th>
@@ -268,6 +275,10 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
           <div class="form-group">
             <label for="OppilasNimi">Oppilaan nimi:</label>
             <input type="text" id="OppilasNimi" name="OppilasNimi" required />
+          </div>
+          <div class="form-group">
+            <label for="OppilasSukunimi">Oppilaan sukunimi:</label>
+            <input type="text" id="OppilasSukunimi" name="OppilasSukunimi" required />
           </div>
           <div class="form-group">
             <label for="RyhmanNimi">Ryhmä:</label>

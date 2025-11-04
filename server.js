@@ -116,11 +116,11 @@ app.listen(3000, () => {
 
 // Добавление нового студента
 app.post("/add-student", async (req, res) => {
-  const { nimi, ryhma } = req.body;
+  const { nimi, sukunimi, ryhma } = req.body;
   try {
     await pool.query(
-      "INSERT INTO students (st_name, st_group) VALUES ($1, $2)",
-      [nimi, ryhma]
+      "INSERT INTO students (st_name, st_group, st_s_name) VALUES ($1, $2, $3)",
+      [nimi, ryhma, sukunimi]
     );
     res.sendStatus(200);
   } catch (err) {
@@ -143,11 +143,11 @@ app.post("/add-company", async (req, res) => {
   }
 });
 
-// Получить список студентов (id и имя)
+// Получить список студентов (id, имя и фамилия)
 app.get("/students", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT student_id, st_name FROM students ORDER BY st_name"
+      "SELECT student_id, st_name, st_s_name FROM students ORDER BY st_name, st_s_name"
     );
     res.json(result.rows);
   } catch (err) {
@@ -318,11 +318,11 @@ app.get("/companies-full", async (req, res) => {
   }
 });
 
-// Получить полный список студентов для списка (student_id, st_name, st_group)
+// Получить полный список студентов для списка (student_id, st_name, st_s_name, st_group)
 app.get("/students-full", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT student_id as st_id, st_name, st_group FROM students ORDER BY st_name"
+      "SELECT student_id as st_id, st_name, st_s_name, st_group FROM students ORDER BY st_name, st_s_name"
     );
     res.json(result.rows);
   } catch (err) {
@@ -344,15 +344,15 @@ app.put("/students/:id", async (req, res) => {
     }
 
     const studentId = req.params.id;
-    const { st_name, st_group } = req.body;
+    const { st_name, st_s_name, st_group } = req.body;
 
     if (!st_name || !st_group) {
       return res.status(400).send("Nimi ja ryhmä ovat pakollisia");
     }
 
     const result = await pool.query(
-      "UPDATE students SET st_name = $1, st_group = $2 WHERE student_id = $3 RETURNING *",
-      [st_name, st_group, studentId]
+      "UPDATE students SET st_name = $1, st_group = $2, st_s_name = $3 WHERE student_id = $4 RETURNING *",
+      [st_name, st_group, st_s_name, studentId]
     );
 
     if (result.rows.length === 0) {

@@ -121,7 +121,7 @@ async function loadStudentList() {
 
   // Определяем количество колонок для сообщений (с действиями или без)
   // Määritetään sarakkeiden määrä viestejä varten (toimintojen kanssa tai ilman)
-  const colspan = isTeacher ? "3" : "2";
+  const colspan = isTeacher ? "4" : "3";
 
   // Показываем сообщение о загрузке
   // Näytetään latausviesti
@@ -167,9 +167,11 @@ async function loadStudentList() {
       const actionButtons = isTeacher
         ? `<td><button class='edit-student-btn' data-idx='${idx}'>✏️</button></td>`
         : "";
-      // Заполняем строку данными: имя студента, группа и кнопки действий
-      // Täytetään rivi tiedoilla: opiskelijan nimi, ryhmä ja toimintopainikkeet
-      tr.innerHTML = `<td>${s.st_name}</td><td>${s.st_group}</td>${actionButtons}`;
+      // Заполняем строку данными: имя студента, фамилия, группа и кнопки действий
+      // Täytetään rivi tiedoilla: opiskelijan nimi, sukunimi, ryhmä ja toimintopainikkeet
+      tr.innerHTML = `<td>${s.st_name}</td><td>${s.st_s_name || ""}</td><td>${
+        s.st_group
+      }</td>${actionButtons}`;
 
       // Добавляем строку в тело таблицы
       // Lisätään rivi taulukon runkoon
@@ -377,8 +379,15 @@ function editStudentRow(tr, student, students, idx) {
   // Заменяем содержимое строки на поля ввода для редактирования
   // Korvataan rivin sisältö syöttökentillä muokkausta varten
   tr.innerHTML = `
-    <td><input type='text' class='edit-student-name' value="${student.st_name}" style="width:150px;"></td>
-    <td><input type='text' class='edit-student-group' value="${student.st_group}" style="width:120px;"></td>
+    <td><input type='text' class='edit-student-name' value="${
+      student.st_name
+    }" style="width:150px;"></td>
+    <td><input type='text' class='edit-student-surname' value="${
+      student.st_s_name || ""
+    }" style="width:150px;"></td>
+    <td><input type='text' class='edit-student-group' value="${
+      student.st_group
+    }" style="width:120px;"></td>
     <td>
       <button class='save-student-btn' data-idx='${idx}'>💾</button>
       <button class='cancel-student-btn' data-idx='${idx}'>✖️</button>
@@ -396,6 +405,7 @@ function editStudentRow(tr, student, students, idx) {
   saveBtn.onclick = async function (e) {
     e.preventDefault();
     const studentName = tr.querySelector(".edit-student-name").value;
+    const studentSurname = tr.querySelector(".edit-student-surname").value;
     const studentGroup = tr.querySelector(".edit-student-group").value;
 
     try {
@@ -409,6 +419,7 @@ function editStudentRow(tr, student, students, idx) {
           },
           body: JSON.stringify({
             st_name: studentName,
+            st_s_name: studentSurname,
             st_group: studentGroup,
           }),
         }
@@ -794,7 +805,10 @@ async function populateStudentsSelect() {
       if (st) {
         const opt = document.createElement("option");
         opt.value = st.student_id;
-        opt.textContent = st.st_name;
+        const fullName = st.st_s_name
+          ? `${st.st_name} ${st.st_s_name}`
+          : st.st_name;
+        opt.textContent = fullName;
         select.appendChild(opt);
         select.value = st.student_id;
         select.disabled = true; // нельзя выбрать другого
@@ -803,7 +817,10 @@ async function populateStudentsSelect() {
       students.forEach((st) => {
         const opt = document.createElement("option");
         opt.value = st.student_id;
-        opt.textContent = st.st_name;
+        const fullName = st.st_s_name
+          ? `${st.st_name} ${st.st_s_name}`
+          : st.st_name;
+        opt.textContent = fullName;
         select.appendChild(opt);
       });
       select.disabled = false;
@@ -1057,15 +1074,25 @@ function filterStudentTable(nameSearch, groupFilter) {
 
     // Проверяем только строки с данными (не сообщения типа "Ladataan...")
     // Tarkistetaan vain tietorivit (ei viestejä kuten "Ladataan...")
-    if (cells.length >= 2) {
+    if (cells.length >= 3) {
       const nameCell = cells[0]; // Имя студента / Opiskelijan nimi
-      const groupCell = cells[1]; // Группа / Ryhmä
+      const surnameCell = cells[1]; // Фамилия студента / Opiskelijan sukunimi
+      const groupCell = cells[2]; // Группа / Ryhmä
 
-      // Проверяем соответствие имени (если есть поисковый запрос)
-      // Tarkistetaan nimen vastaavuus (jos hakutermi on annettu)
-      if (nameSearch && nameCell) {
-        const nameText = nameCell.textContent.toLowerCase();
-        if (!nameText.includes(nameSearchLower)) {
+      // Проверяем соответствие имени или фамилии (если есть поисковый запрос)
+      // Tarkistetaan nimen tai sukunimen vastaavuus (jos hakutermi on annettu)
+      if (nameSearch && (nameCell || surnameCell)) {
+        const nameText = nameCell ? nameCell.textContent.toLowerCase() : "";
+        const surnameText = surnameCell
+          ? surnameCell.textContent.toLowerCase()
+          : "";
+        const fullName = (nameText + " " + surnameText).trim();
+
+        if (
+          !nameText.includes(nameSearchLower) &&
+          !surnameText.includes(nameSearchLower) &&
+          !fullName.includes(nameSearchLower)
+        ) {
           found = false;
         }
       }
@@ -1541,11 +1568,12 @@ document
   .addEventListener("submit", async function (e) {
     e.preventDefault();
     const nimi = document.getElementById("OppilasNimi").value;
+    const sukunimi = document.getElementById("OppilasSukunimi").value;
     const ryhma = document.getElementById("RyhmanNimi").value;
     const res = await fetch("http://localhost:3000/add-student", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nimi, ryhma }),
+      body: JSON.stringify({ nimi, sukunimi, ryhma }),
     });
     if (res.ok) {
       closeOppilasModal();
@@ -1639,3 +1667,77 @@ document
       alert("Virhe tallennuksessa: " + text);
     }
   });
+
+// =====================================================
+// ПРОСТАЯ СОРТИРОВКА ТАБЛИЦЫ ПО ИМЕНИ СТУДЕНТА
+// YKSINKERTAINEN TAULUKON LAJITTELU OPISKELIJAN NIMEN MUKAAN
+// =====================================================
+
+// Переменная для отслеживания направления сортировки
+// Muuttuja lajittelusuunnan seurantaan
+let currentSortDirection = null; // null, 'asc', 'desc'
+
+// Функция сортировки таблицы
+// Taulukon lajittelutoiminto
+function sortTable(column, direction) {
+  if (column !== "student") return; // Сортируем только по студентам / Lajitellaan vain opiskelijoiden mukaan
+
+  const tableBody = document.getElementById("tableBody");
+  const rows = Array.from(tableBody.getElementsByTagName("tr"));
+
+  // Обновляем визуальные индикаторы
+  // Päivitetään visuaaliset indikaattorit
+  updateSortIndicators(direction);
+
+  // Сохраняем текущее направление
+  // Tallennetaan nykyinen suunta
+  currentSortDirection = direction;
+
+  // Сортируем строки
+  // Lajitellaan rivit
+  const sortedRows = rows.sort((a, b) => {
+    // Получаем имена студентов (первая видимая колонка, индекс 3 если считать скрытые)
+    // Haetaan opiskelijoiden nimet (ensimmäinen näkyvä sarake, indeksi 3 jos lasketaan piilotetut)
+    const aStudentName = a.cells[3] ? a.cells[3].textContent.toLowerCase() : "";
+    const bStudentName = b.cells[3] ? b.cells[3].textContent.toLowerCase() : "";
+
+    // Сравниваем имена
+    // Verrataan nimet
+    const comparison = aStudentName.localeCompare(bStudentName, "fi");
+
+    return direction === "asc" ? comparison : -comparison;
+  });
+
+  // Очищаем таблицу и добавляем отсортированные строки
+  // Tyhjennetään taulukko ja lisätään lajitellut rivit
+  tableBody.innerHTML = "";
+  sortedRows.forEach((row) => tableBody.appendChild(row));
+
+  // Применяем поиск заново, если он активен
+  // Sovelletaan haku uudelleen, jos se on aktiivinen
+  const searchInput = document.getElementById("searchInput");
+  if (searchInput && searchInput.value) {
+    filterWorkplaceTable(searchInput.value);
+  }
+}
+
+// Обновление визуальных индикаторов сортировки
+// Lajittelun visuaalisten indikaattoreiden päivittäminen
+function updateSortIndicators(direction) {
+  // Убираем активный класс со всех стрелок
+  // Poistetaan aktiivinen luokka kaikista nuolista
+  document.querySelectorAll(".sort-up, .sort-down").forEach((arrow) => {
+    arrow.classList.remove("active");
+  });
+
+  // Добавляем активный класс к соответствующей стрелке
+  // Lisätään aktiivinen luokka vastaavaan nuoleen
+  const targetHeader = document.querySelector('[data-column="student"]');
+  if (targetHeader) {
+    const arrowClass = direction === "asc" ? ".sort-up" : ".sort-down";
+    const arrow = targetHeader.querySelector(arrowClass);
+    if (arrow) {
+      arrow.classList.add("active");
+    }
+  }
+}
