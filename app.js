@@ -36,6 +36,287 @@
 let studentsData = [];
 
 // =====================================================
+// ФУНКЦИИ МАСОК ВВОДА
+// SYÖTTÖMASKITOIMINNOT
+// =====================================================
+
+// Функция для применения маски телефона в финском формате
+// Funktio suomalaisen puhelinnumeron maskin soveltamiseen
+function applyPhoneMask(input) {
+  // Удаляем все не-цифровые символы кроме +
+  // Poistetaan kaikki ei-numeriset merkit paitsi +
+  let value = input.value.replace(/[^\d+]/g, "");
+
+  // Если начинается с +358, форматируем как международный номер
+  // Jos alkaa +358:lla, muotoillaan kansainvälisenä numerona
+  if (value.startsWith("+358")) {
+    let digits = value.substring(4); // Убираем +358
+    if (digits.length > 0) {
+      if (digits.length <= 2) {
+        value = "+358 " + digits;
+      } else if (digits.length <= 5) {
+        value = "+358 " + digits.substring(0, 2) + " " + digits.substring(2);
+      } else {
+        value =
+          "+358 " +
+          digits.substring(0, 2) +
+          " " +
+          digits.substring(2, 5) +
+          " " +
+          digits.substring(5, 9);
+      }
+    }
+  }
+  // Если начинается с 0, форматируем как местный номер
+  // Jos alkaa 0:lla, muotoillaan paikallisena numerona
+  else if (value.startsWith("0")) {
+    if (value.length <= 3) {
+      // 0XX
+    } else if (value.length <= 6) {
+      value = value.substring(0, 3) + " " + value.substring(3);
+    } else {
+      value =
+        value.substring(0, 3) +
+        " " +
+        value.substring(3, 6) +
+        " " +
+        value.substring(6, 10);
+    }
+  }
+  // Если начинается с +, но не +358
+  // Jos alkaa +:lla, mutta ei +358:lla
+  else if (value.startsWith("+")) {
+    // Оставляем как есть для других международных номеров
+    // Jätetään sellaisenaan muille kansainvälisille numeroille
+  }
+  // Если обычные цифры, добавляем +358
+  // Jos tavallisia numeroita, lisätään +358
+  else if (value.length > 0) {
+    let digits = value;
+    if (digits.length <= 2) {
+      value = "+358 " + digits;
+    } else if (digits.length <= 5) {
+      value = "+358 " + digits.substring(0, 2) + " " + digits.substring(2);
+    } else {
+      value =
+        "+358 " +
+        digits.substring(0, 2) +
+        " " +
+        digits.substring(2, 5) +
+        " " +
+        digits.substring(5, 9);
+    }
+  }
+
+  input.value = value;
+}
+
+// =====================================================
+// ФУНКЦИИ ВАЛИДАЦИИ EMAIL
+// SÄHKÖPOSTIOSOITTEEN VALIDOINTIFUNKTIOT
+// =====================================================
+
+// Функция для валидации email адреса
+// Funktio sähköpostiosoitteen validointiin
+function validateEmail(email) {
+  // Базовое регулярное выражение для email
+  // Perus säännöllinen lauseke sähköpostille
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  // Проверяем базовый формат
+  // Tarkistetaan perusmuoto
+  if (!emailRegex.test(email)) {
+    return {
+      valid: false,
+      message: "Virheellinen sähköpostiosoite. Käytä muotoa: nimi@domain.com",
+    };
+  }
+
+  // Дополнительные проверки
+  // Lisätarkistukset
+
+  // Проверка на двойные точки
+  // Tarkistus kahden pisteen varalta
+  if (email.includes("..")) {
+    return {
+      valid: false,
+      message: "Sähköpostiosoite ei saa sisältää peräkkäisiä pisteitä",
+    };
+  }
+
+  // Проверка на начало/конец с точки или @
+  // Tarkistus että ei ala tai pääty pisteellä tai @:lla
+  if (
+    email.startsWith(".") ||
+    email.startsWith("@") ||
+    email.endsWith(".") ||
+    email.endsWith("@")
+  ) {
+    return {
+      valid: false,
+      message: "Sähköpostiosoite ei saa alkaa tai päättyä pisteellä tai @:lla",
+    };
+  }
+
+  // Проверка длины частей
+  // Osien pituuden tarkistus
+  const [localPart, domain] = email.split("@");
+  if (localPart.length > 64) {
+    return {
+      valid: false,
+      message: "Käyttäjänimi (ennen @:aa) on liian pitkä (max 64 merkkiä)",
+    };
+  }
+
+  if (domain.length > 253) {
+    return {
+      valid: false,
+      message: "Domain-nimi on liian pitkä (max 253 merkkiä)",
+    };
+  }
+
+  return { valid: true, message: "Sähköpostiosoite on kelvollinen" };
+}
+
+// Функция для применения валидации к полю email
+// Funktio sähköpostivalidoinnin soveltamiseen kenttään
+function applyEmailValidation(input, showErrors = true) {
+  const email = input.value.trim();
+
+  // Если поле пустое, не показываем ошибку (required обработает)
+  // Jos kenttä on tyhjä, ei näytetä virhettä (required hoitaa)
+  if (email === "") {
+    input.setCustomValidity("");
+    return true;
+  }
+
+  const validation = validateEmail(email);
+
+  if (validation.valid) {
+    // Email валидный - убираем ошибки
+    // Sähköposti on kelvollinen - poistetaan virheet
+    input.setCustomValidity("");
+    input.classList.remove("email-error");
+    input.classList.add("email-valid");
+
+    // Убираем сообщение об ошибке если есть
+    // Poistetaan virheviesti jos se on olemassa
+    const errorDiv = input.parentNode.querySelector(".email-error-message");
+    if (errorDiv) {
+      errorDiv.remove();
+    }
+
+    return true;
+  } else {
+    // Email невалидный - показываем ошибку
+    // Sähköposti ei ole kelvollinen - näytetään virhe
+    if (showErrors) {
+      input.setCustomValidity(validation.message);
+      input.classList.remove("email-valid");
+      input.classList.add("email-error");
+
+      // Добавляем или обновляем сообщение об ошибке
+      // Lisätään tai päivitetään virheviesti
+      let errorDiv = input.parentNode.querySelector(".email-error-message");
+      if (!errorDiv) {
+        errorDiv = document.createElement("div");
+        errorDiv.className = "email-error-message";
+        errorDiv.style.color = "red";
+        errorDiv.style.fontSize = "12px";
+        errorDiv.style.marginTop = "2px";
+        input.parentNode.appendChild(errorDiv);
+      }
+      errorDiv.textContent = validation.message;
+    }
+
+    return false;
+  }
+}
+
+// Функция для инициализации масок ввода
+// Funktio syöttömaskien alustamiseen
+function initializeInputMasks() {
+  // Применяем маску телефона к полю Puhelin
+  // Sovelletaan puhelinmaski Puhelin-kenttään
+  const phoneInput = document.getElementById("Puhelin");
+  if (phoneInput) {
+    phoneInput.addEventListener("input", function (e) {
+      applyPhoneMask(e.target);
+    });
+
+    phoneInput.addEventListener("keydown", function (e) {
+      // Разрешаем служебные клавиши
+      // Sallitaan toimintonäppäimet
+      if (
+        e.key === "Backspace" ||
+        e.key === "Delete" ||
+        e.key === "Tab" ||
+        e.key === "Escape" ||
+        e.key === "Enter" ||
+        // Разрешаем Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+        // Sallitaan Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+        (e.ctrlKey &&
+          (e.key === "a" || e.key === "c" || e.key === "v" || e.key === "x")) ||
+        // Разрешаем стрелки
+        // Sallitaan nuolinäppäimet
+        e.key === "ArrowLeft" ||
+        e.key === "ArrowRight" ||
+        e.key === "ArrowUp" ||
+        e.key === "ArrowDown" ||
+        e.key === "Home" ||
+        e.key === "End"
+      ) {
+        return;
+      }
+
+      // Разрешаем только цифры и символ +
+      // Sallitaan vain numerot ja + merkki
+      if (!/[\d+]/.test(e.key)) {
+        e.preventDefault();
+      }
+    });
+  }
+
+  // Применяем валидацию email к полям email
+  // Sovelletaan sähköpostivalidointi sähköpostikenttiin
+  const emailFields = ["Email", "UserEmail", "loginEmail"];
+
+  emailFields.forEach((fieldId) => {
+    const emailInput = document.getElementById(fieldId);
+    if (emailInput) {
+      // Валидация при вводе (реальное время)
+      // Validointi syöttäessä (reaaliajassa)
+      emailInput.addEventListener("input", function (e) {
+        // Небольшая задержка для лучшего UX
+        // Pieni viive parempaa käyttökokemusta varten
+        clearTimeout(this.emailValidationTimeout);
+        this.emailValidationTimeout = setTimeout(() => {
+          applyEmailValidation(e.target, true);
+        }, 300);
+      });
+
+      // Валидация при потере фокуса
+      // Validointi kun fokus menetetään
+      emailInput.addEventListener("blur", function (e) {
+        applyEmailValidation(e.target, true);
+      });
+
+      // Убираем ошибки при получении фокуса
+      // Poistetaan virheet kun saadaan fokus
+      emailInput.addEventListener("focus", function (e) {
+        const errorDiv = e.target.parentNode.querySelector(
+          ".email-error-message"
+        );
+        if (errorDiv) {
+          errorDiv.style.display = "none";
+        }
+        e.target.classList.remove("email-error");
+      });
+    }
+  });
+}
+
+// =====================================================
 // ФУНКЦИИ УПРАВЛЕНИЯ ВИДИМОСТЬЮ КОЛОНОК И ЭЛЕМЕНТОВ
 // TOIMINTOJEN NÄKYVYYDEN HALLINTA FUNKTIOT
 // =====================================================
@@ -76,6 +357,10 @@ window.addEventListener("DOMContentLoaded", function () {
   // Инициализируем ограничения дат при загрузке страницы
   // Alustetaan päivämäärärajoitukset sivun latautuessa
   setMinDatesForWorkplace();
+
+  // Инициализируем маски ввода
+  // Alustetaan syöttömaskit
+  initializeInputMasks();
 });
 
 // Слушаем изменения в localStorage (например, при входе/выходе)
@@ -1395,7 +1680,7 @@ function loadWorkplaceTable(sortBy = null, sortOrder = null) {
             <td><select class='edit-company' style="width:110px;">${companyOptions}</select></td>
             <td><input type='text' class='edit-boss-name' value="${rowData.boss_name}" style="width:90px;"></td>
             <td><input type='text' class='edit-boss-phone' value="${rowData.boss_phone}" style="width:90px;"></td>
-            <td><input type='text' class='edit-boss-email' value="${rowData.boss_email}" style="width:110px;"></td>
+            <td><input type='email' class='edit-boss-email' value="${rowData.boss_email}" placeholder="nimi@domain.com" style="width:110px;"></td>
             <td><input type='date' class='edit-begin-date' value="${beginDateInputValue}" style="width:110px;"></td>
             <td><input type='date' class='edit-end-date' value="${endDateInputValue}" style="width:110px;"></td>
             <td><select class='edit-lunch' style="width:70px;">${lunchOptions}</select></td>
@@ -1418,6 +1703,88 @@ function loadWorkplaceTable(sortBy = null, sortOrder = null) {
           }
           if (endDateInput) {
             endDateInput.min = today;
+          }
+
+          // Применяем маску телефона к полю редактирования
+          // Sovelletaan puhelinmaski muokkauskenttään
+          const phoneEditInput = tr.querySelector(".edit-boss-phone");
+          if (phoneEditInput) {
+            // Сначала применяем маску к текущему значению
+            // Ensin sovelletaan maski nykyiseen arvoon
+            applyPhoneMask(phoneEditInput);
+
+            // Добавляем обработчики событий
+            // Lisätään tapahtumankäsittelijät
+            phoneEditInput.addEventListener("input", function (e) {
+              applyPhoneMask(e.target);
+            });
+
+            phoneEditInput.addEventListener("keydown", function (e) {
+              // Разрешаем служебные клавиши
+              // Sallitaan toimintonäppäimet
+              if (
+                e.key === "Backspace" ||
+                e.key === "Delete" ||
+                e.key === "Tab" ||
+                e.key === "Escape" ||
+                e.key === "Enter" ||
+                // Разрешаем Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                // Sallitaan Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                (e.ctrlKey &&
+                  (e.key === "a" ||
+                    e.key === "c" ||
+                    e.key === "v" ||
+                    e.key === "x")) ||
+                // Разрешаем стрелки
+                // Sallitaan nuolinäppäimet
+                e.key === "ArrowLeft" ||
+                e.key === "ArrowRight" ||
+                e.key === "ArrowUp" ||
+                e.key === "ArrowDown" ||
+                e.key === "Home" ||
+                e.key === "End"
+              ) {
+                return;
+              }
+
+              // Разрешаем только цифры и символ +
+              // Sallitaan vain numerot ja + merkki
+              if (!/[\d+]/.test(e.key)) {
+                e.preventDefault();
+              }
+            });
+          }
+
+          // Применяем валидацию email к полю редактирования
+          // Sovelletaan sähköpostivalidointi muokkauskenttään
+          const emailEditInput = tr.querySelector(".edit-boss-email");
+          if (emailEditInput) {
+            // Валидация при вводе
+            // Validointi syöttäessä
+            emailEditInput.addEventListener("input", function (e) {
+              clearTimeout(this.emailValidationTimeout);
+              this.emailValidationTimeout = setTimeout(() => {
+                applyEmailValidation(e.target, true);
+              }, 300);
+            });
+
+            // Валидация при потере фокуса
+            // Validointi kun fokus menetetään
+            emailEditInput.addEventListener("blur", function (e) {
+              applyEmailValidation(e.target, true);
+            });
+
+            // Убираем ошибки при получении фокуса
+            // Poistetaan virheet kun saadaan fokus
+            emailEditInput.addEventListener("focus", function (e) {
+              const errorDiv = e.target.parentNode.querySelector(
+                ".email-error-message"
+              );
+              if (errorDiv) {
+                errorDiv.style.display = "none";
+              }
+              e.target.classList.remove("email-error");
+            });
           }
 
           // Ensure end date is not before start date
@@ -1473,6 +1840,20 @@ function loadWorkplaceTable(sortBy = null, sortOrder = null) {
             city: cityInput ? cityInput.value : rowData.city,
             status: statusInput ? statusInput.value : rowData.status,
           };
+
+          // Валидация email перед сохранением
+          // Sähköpostivalidointi ennen tallennusta
+          if (bossEmailInput && bossEmailInput.value.trim() !== "") {
+            const emailValidation = applyEmailValidation(bossEmailInput, true);
+            if (!emailValidation) {
+              // Email невалидный - показываем ошибку и прерываем сохранение
+              // Sähköposti ei ole kelvollinen - näytetään virhe ja keskeytetään tallennus
+              alert("Korjaa sähköpostiosoite ennen tallentamista!");
+              bossEmailInput.focus();
+              return;
+            }
+          }
+
           fetch("http://localhost:3000/workplace", {
             method: "PUT",
             headers: {
