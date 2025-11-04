@@ -205,6 +205,11 @@ async function loadStudentList() {
         editStudentRow(tr, student, students, idx);
       };
     }
+
+    // Заполняем список групп для фильтра и инициализируем поиск
+    // Täytetään ryhmälista suodatinta varten ja alustetaan haku
+    populateGroupFilter(students);
+    initializeStudentSearch();
   } catch (e) {
     // Обработка ошибок - показываем сообщение об ошибке в таблице
     // Virheiden käsittely - näytetään virheviesti taulukossa
@@ -280,6 +285,11 @@ async function loadCompanyList() {
         editCompanyRow(tr, company, companies, idx);
       };
     }
+
+    // Заполняем список адресов для фильтра и инициализируем поиск
+    // Täytetään osoitelista suodatinta varten ja alustetaan haku
+    populateAddressFilter(companies);
+    initializeCompanySearch();
   } catch (e) {
     tbody.innerHTML = `<tr><td colspan='${isTeacher ? 5 : 4}'>Virhe: ${
       e.message
@@ -880,7 +890,345 @@ function closePaikkaModal() {
   document.getElementById("PaikkaModalOverlay").style.display = "none";
 }
 
-// Fetch and display workplace data
+// =====================================================
+// ФУНКЦИИ ПОИСКА ПО ТАБЛИЦЕ МЕСТ ПРАКТИКИ
+// HARJOITTELUPAIKKATAULUKON HAKUTOIMINNOT
+// =====================================================
+
+// Инициализация поиска - добавляем обработчики событий
+// Haun alustus - lisätään tapahtumankäsittelijät
+function initializeSearch() {
+  const searchInput = document.getElementById("searchInput");
+  const clearBtn = document.getElementById("clearSearchBtn");
+
+  if (searchInput) {
+    // Поиск в реальном времени при вводе текста
+    // Reaaliaikainen haku tekstin syöttämisen aikana
+    searchInput.addEventListener("input", function () {
+      filterWorkplaceTable(this.value);
+    });
+  }
+
+  if (clearBtn) {
+    // Очистка поиска и показ всех записей
+    // Haun tyhjentäminen ja kaikkien tietueiden näyttäminen
+    clearBtn.addEventListener("click", function () {
+      searchInput.value = "";
+      filterWorkplaceTable("");
+    });
+  }
+}
+
+// Фильтрация таблицы мест практики по поисковому запросу
+// Harjoittelupaikkataulukon suodatus hakukyselyn mukaan
+function filterWorkplaceTable(searchTerm) {
+  const tableBody = document.getElementById("tableBody");
+  const rows = tableBody.getElementsByTagName("tr");
+
+  // Приводим поисковый запрос к нижнему регистру для нечувствительного поиска
+  // Muutetaan hakutermi pieniksi kirjaimiksi case-insensitive hakua varten
+  const searchLower = searchTerm.toLowerCase();
+
+  // Проходим по всем строкам таблицы
+  // Käydään läpi kaikki taulukon rivit
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const cells = row.getElementsByTagName("td");
+    let found = false;
+
+    // Если нет поискового запроса, показываем все строки
+    // Jos ei ole hakutermiä, näytetään kaikki rivit
+    if (searchTerm === "") {
+      found = true;
+    } else {
+      // Ищем только в колонках с именами студентов и компаний:
+      // Индекс 3 - Имя студента (Oppilas)
+      // Индекс 4 - Название компании (Paikan nimi)
+      // Etsitään vain sarakkeissa joissa on opiskelijoiden ja yritysten nimet:
+      // Indeksi 3 - Opiskelijan nimi (Oppilas)
+      // Indeksi 4 - Yrityksen nimi (Paikan nimi)
+      const searchColumns = [3, 4]; // Индексы колонок для поиска
+
+      for (let colIndex of searchColumns) {
+        if (colIndex < cells.length) {
+          const cellText = cells[colIndex].textContent.toLowerCase();
+          if (cellText.includes(searchLower)) {
+            found = true;
+            break;
+          }
+        }
+      }
+    }
+
+    // Показываем или скрываем строку в зависимости от результата поиска
+    // Näytetään tai piilotetaan rivi hakutuloksen mukaan
+    row.style.display = found ? "" : "none";
+  }
+}
+
+// =====================================================
+// ФУНКЦИИ ПОИСКА И ФИЛЬТРАЦИИ КОМПАНИЙ
+// YRITYSTEN HAKU- JA SUODATUSTOIMINNOT
+// =====================================================
+
+// Заполнение выпадающего списка групп уникальными значениями
+// Ryhmien pudotusvalikon täyttäminen yksilöllisillä arvoilla
+function populateGroupFilter(students) {
+  const groupFilterSelect = document.getElementById("groupFilterSelect");
+  if (!groupFilterSelect) return;
+
+  // Очищаем список, оставляя только опцию "Все группы"
+  // Tyhjennetään lista, jätetään vain "Kaikki ryhmät" -vaihtoehto
+  groupFilterSelect.innerHTML = '<option value="">Kaikki ryhmät</option>';
+
+  // Собираем уникальные группы из списка студентов
+  // Kerätään yksilölliset ryhmät opiskelijalistasta
+  const uniqueGroups = [
+    ...new Set(students.map((s) => s.st_group).filter((group) => group)),
+  ];
+
+  // Добавляем опции для каждой уникальной группы
+  // Lisätään vaihtoehdot jokaiselle yksilölliselle ryhmälle
+  uniqueGroups.sort().forEach((group) => {
+    const option = document.createElement("option");
+    option.value = group;
+    option.textContent = group;
+    groupFilterSelect.appendChild(option);
+  });
+}
+
+// =====================================================
+// ФУНКЦИИ ПОИСКА И ФИЛЬТРАЦИИ СТУДЕНТОВ
+// OPISKELIJOIDEN HAKU- JA SUODATUSTOIMINNOT
+// =====================================================
+
+// Инициализация поиска студентов - добавляем обработчики событий
+// Opiskelijahaun alustus - lisätään tapahtumankäsittelijät
+function initializeStudentSearch() {
+  const studentSearchInput = document.getElementById("studentSearchInput");
+  const groupFilterSelect = document.getElementById("groupFilterSelect");
+  const clearStudentFiltersBtn = document.getElementById(
+    "clearStudentFiltersBtn"
+  );
+
+  if (studentSearchInput) {
+    // Поиск в реальном времени при вводе имени
+    // Reaaliaikainen haku nimen syöttämisen aikana
+    studentSearchInput.addEventListener("input", function () {
+      filterStudentTable(this.value, groupFilterSelect.value);
+    });
+  }
+
+  if (groupFilterSelect) {
+    // Фильтрация при выборе группы
+    // Suodatus ryhmän valitsemisen yhteydessä
+    groupFilterSelect.addEventListener("change", function () {
+      filterStudentTable(studentSearchInput.value, this.value);
+    });
+  }
+
+  if (clearStudentFiltersBtn) {
+    // Очистка всех фильтров
+    // Kaikkien suodattimien tyhjentäminen
+    clearStudentFiltersBtn.addEventListener("click", function () {
+      studentSearchInput.value = "";
+      groupFilterSelect.value = "";
+      filterStudentTable("", "");
+    });
+  }
+}
+
+// Фильтрация таблицы студентов по имени и группе
+// Opiskelijataulukon suodatus nimen ja ryhmän mukaan
+function filterStudentTable(nameSearch, groupFilter) {
+  const tableBody = document.getElementById("studentListTableBody");
+  const rows = tableBody.getElementsByTagName("tr");
+
+  // Приводим поисковый запрос к нижнему регистру для нечувствительного поиска
+  // Muutetaan hakutermi pieniksi kirjaimiksi case-insensitive hakua varten
+  const nameSearchLower = nameSearch.toLowerCase();
+
+  // Проходим по всем строкам таблицы студентов
+  // Käydään läpi kaikki opiskelijataulukon rivit
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const cells = row.getElementsByTagName("td");
+    let found = true;
+
+    // Проверяем только строки с данными (не сообщения типа "Ladataan...")
+    // Tarkistetaan vain tietorivit (ei viestejä kuten "Ladataan...")
+    if (cells.length >= 2) {
+      const nameCell = cells[0]; // Имя студента / Opiskelijan nimi
+      const groupCell = cells[1]; // Группа / Ryhmä
+
+      // Проверяем соответствие имени (если есть поисковый запрос)
+      // Tarkistetaan nimen vastaavuus (jos hakutermi on annettu)
+      if (nameSearch && nameCell) {
+        const nameText = nameCell.textContent.toLowerCase();
+        if (!nameText.includes(nameSearchLower)) {
+          found = false;
+        }
+      }
+
+      // Проверяем соответствие группе (если выбран фильтр)
+      // Tarkistetaan ryhmän vastaavuus (jos suodatin on valittu)
+      if (groupFilter && groupCell) {
+        const groupText = groupCell.textContent.trim();
+        if (groupText !== groupFilter) {
+          found = false;
+        }
+      }
+    }
+
+    // Показываем или скрываем строку в зависимости от результата фильтрации
+    // Näytetään tai piilotetaan rivi suodatuksen tuloksen mukaan
+    row.style.display = found ? "" : "none";
+  }
+}
+
+// Заполнение выпадающего списка групп уникальными значениями
+// Ryhmien pudotusvalikon täyttäminen yksilöllisillä arvoilla
+function populateGroupFilter(students) {
+  const groupFilterSelect = document.getElementById("groupFilterSelect");
+  if (!groupFilterSelect) return;
+
+  // Очищаем список, оставляя только опцию "Все группы"
+  // Tyhjennetään lista, jätetään vain "Kaikki ryhmät" -vaihtoehto
+  groupFilterSelect.innerHTML = '<option value="">Kaikki ryhmät</option>';
+
+  // Собираем уникальные группы из списка студентов
+  // Kerätään yksilölliset ryhmät opiskelijalistasta
+  const uniqueGroups = [
+    ...new Set(students.map((s) => s.st_group).filter((group) => group)),
+  ];
+
+  // Добавляем опции для каждой уникальной группы
+  // Lisätään vaihtoehdot jokaiselle yksilölliselle ryhmälle
+  uniqueGroups.sort().forEach((group) => {
+    const option = document.createElement("option");
+    option.value = group;
+    option.textContent = group;
+    groupFilterSelect.appendChild(option);
+  });
+}
+
+// =====================================================
+// ФУНКЦИИ ПОИСКА И ФИЛЬТРАЦИИ КОМПАНИЙ
+// YRITYSTEN HAKU- JA SUODATUSTOIMINNOT
+// =====================================================
+
+// Инициализация поиска компаний - добавляем обработчики событий
+// Yrityshaun alustus - lisätään tapahtumankäsittelijät
+function initializeCompanySearch() {
+  const companySearchInput = document.getElementById("companySearchInput");
+  const addressFilterSelect = document.getElementById("addressFilterSelect");
+  const clearCompanyFiltersBtn = document.getElementById(
+    "clearCompanyFiltersBtn"
+  );
+
+  if (companySearchInput) {
+    // Поиск в реальном времени при вводе названия
+    // Reaaliaikainen haku nimen syöttämisen aikana
+    companySearchInput.addEventListener("input", function () {
+      filterCompanyTable(this.value, addressFilterSelect.value);
+    });
+  }
+
+  if (addressFilterSelect) {
+    // Фильтрация при выборе адреса
+    // Suodatus osoitteen valitsemisen yhteydessä
+    addressFilterSelect.addEventListener("change", function () {
+      filterCompanyTable(companySearchInput.value, this.value);
+    });
+  }
+
+  if (clearCompanyFiltersBtn) {
+    // Очистка всех фильтров
+    // Kaikkien suodattimien tyhjentäminen
+    clearCompanyFiltersBtn.addEventListener("click", function () {
+      companySearchInput.value = "";
+      addressFilterSelect.value = "";
+      filterCompanyTable("", "");
+    });
+  }
+}
+
+// Фильтрация таблицы компаний по названию и адресу
+// Yritystaulukon suodatus nimen ja osoitteen mukaan
+function filterCompanyTable(nameSearch, addressFilter) {
+  const tableBody = document.getElementById("companyListTableBody");
+  const rows = tableBody.getElementsByTagName("tr");
+
+  // Приводим поисковый запрос к нижнему регистру для нечувствительного поиска
+  // Muutetaan hakutermi pieniksi kirjaimiksi case-insensitive hakua varten
+  const nameSearchLower = nameSearch.toLowerCase();
+
+  // Проходим по всем строкам таблицы компаний
+  // Käydään läpi kaikki yritystaulukon rivit
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const cells = row.getElementsByTagName("td");
+    let found = true;
+
+    // Проверяем только строки с данными (не сообщения типа "Ladataan...")
+    // Tarkistetaan vain tietorivit (ei viestejä kuten "Ladataan...")
+    if (cells.length >= 4) {
+      const nameCell = cells[0]; // Название компании / Yrityksen nimi
+      const addressCell = cells[3]; // Адрес / Osoite
+
+      // Проверяем соответствие названию (если есть поисковый запрос)
+      // Tarkistetaan nimen vastaavuus (jos hakutermi on annettu)
+      if (nameSearch && nameCell) {
+        const nameText = nameCell.textContent.toLowerCase();
+        if (!nameText.includes(nameSearchLower)) {
+          found = false;
+        }
+      }
+
+      // Проверяем соответствие адресу (если выбран фильтр)
+      // Tarkistetaan osoitteen vastaavuus (jos suodatin on valittu)
+      if (addressFilter && addressCell) {
+        const addressText = addressCell.textContent.trim();
+        if (addressText !== addressFilter) {
+          found = false;
+        }
+      }
+    }
+
+    // Показываем или скрываем строку в зависимости от результата фильтрации
+    // Näytetään tai piilotetaan rivi suodatuksen tuloksen mukaan
+    row.style.display = found ? "" : "none";
+  }
+}
+
+// Заполнение выпадающего списка адресов уникальными значениями
+// Osoitteiden pudotusvalikon täyttäminen yksilöllisillä arvoilla
+function populateAddressFilter(companies) {
+  const addressFilterSelect = document.getElementById("addressFilterSelect");
+  if (!addressFilterSelect) return;
+
+  // Очищаем список, оставляя только опцию "Все адреса"
+  // Tyhjennetään lista, jätetään vain "Kaikki osoitteet" -vaihtoehto
+  addressFilterSelect.innerHTML = '<option value="">Kaikki osoitteet</option>';
+
+  // Собираем уникальные адреса из списка компаний
+  // Kerätään yksilölliset osoitteet yrityslistasta
+  const uniqueAddresses = [
+    ...new Set(companies.map((c) => c.address).filter((address) => address)),
+  ];
+
+  // Добавляем опции для каждого уникального адреса
+  // Lisätään vaihtoehdot jokaiselle yksilölliselle osoitteelle
+  uniqueAddresses.sort().forEach((address) => {
+    const option = document.createElement("option");
+    option.value = address;
+    option.textContent = address;
+    addressFilterSelect.appendChild(option);
+  });
+}
+
+// Загрузить и отобразить данные мест практики
+// Lataa ja näytä harjoittelupaikkojen tiedot
 function loadWorkplaceTable() {
   fetch("http://localhost:3000/workplace")
     .then((response) => response.json())
@@ -1180,7 +1528,10 @@ function loadWorkplaceTable() {
     });
 }
 // Call on load and after login/logout
-window.addEventListener("DOMContentLoaded", loadWorkplaceTable);
+window.addEventListener("DOMContentLoaded", function () {
+  loadWorkplaceTable();
+  initializeSearch(); // Инициализируем поиск / Alustetaan haku
+});
 window.addEventListener("storage", loadWorkplaceTable);
 // Also reload table after login/logout
 

@@ -96,6 +96,30 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
       <div class="modal-window" style="min-width: 420px; max-width: 90vw;">
         <button class="close-btn" onclick="closeStudentListModal()" title="Close">×</button>
         <h2>Opiskelijat</h2>
+        
+        <!-- Поиск и фильтры для студентов / Haku ja suodattimet opiskelijoille -->
+        <div class="student-search-container" style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <input 
+            type="text" 
+            id="studentSearchInput" 
+            placeholder="Etsi nimellä..."
+            style="flex: 1; min-width: 150px; padding: 6px 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px;"
+          />
+          <select 
+            id="groupFilterSelect" 
+            style="padding: 6px 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px;"
+          >
+            <option value="">Kaikki ryhmät</option>
+          </select>
+          <button 
+            id="clearStudentFiltersBtn" 
+            style="padding: 6px 10px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;"
+            title="Tyhjennä suodattimet"
+          >
+            ✖️
+          </button>
+        </div>
+        
         <div class="modal-table-scroll">
           <table border="1" style="width:100%;margin-top:10px;">
             <thead>
@@ -112,7 +136,6 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
         </div>
       </div>
     </div>
-      <!-- удалено дублирующее меню компаний -->
         <div class="side-btn submenu-parent" id="companiesMenuBtn">
           Yritykset
           <span class="submenu-arrow">▶</span>
@@ -145,6 +168,30 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
       <div class="modal-window" style="min-width: 420px; max-width: 90vw;">
         <button class="close-btn" onclick="closeCompanyListModal()" title="Close">×</button>
         <h2>Yritykset</h2>
+
+        <!-- Поиск и фильтры для компаний / Haku ja suodattimet yrityksille -->
+        <div class="company-search-container" style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <input 
+            type="text" 
+            id="companySearchInput" 
+            placeholder="Etsi nimellä..."
+            style="flex: 1; min-width: 150px; padding: 6px 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px;"
+          />
+          <select 
+            id="addressFilterSelect" 
+            style="padding: 6px 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px;"
+          >
+            <option value="">Kaikki osoitteet</option>
+          </select>
+          <button 
+            id="clearCompanyFiltersBtn" 
+            style="padding: 6px 10px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;"
+            title="Tyhjennä suodattimet / Очистить фильтры"
+          >
+            ✖️
+          </button>
+        </div>
+
         <div class="modal-table-scroll">
           <table border="1" style="width:100%;margin-top:10px;">
             <thead>
@@ -164,9 +211,30 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
       </div>
     </div>
 
-    <!-- Таблица данных с местами практики Заголовок-->
+    <!-- =====================================================
+         ТАБЛИЦА МЕСТ ПРАКТИКИ С ПОИСКОМ
+         HARJOITTELUPAIKKATAULUKKO HAULLA
+         ===================================================== -->
     <div id="dataTable" style="display:none;">
       <h2>Harjoittelupaikat</h2>
+      
+      <!-- Поле поиска / Hakukenttä -->
+      <div class="search-container" style="margin-bottom: 15px;">
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Etsi opiskelijaa tai harjoittelupaikkaa..."
+          style="width: 100%; max-width: 400px; padding: 8px 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px;"
+        />
+        <button 
+          id="clearSearchBtn" 
+          style="margin-left: 8px; padding: 8px 12px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;"
+          title="Tyhjennä haku / Очистить поиск"
+        >
+          ✖️
+        </button>
+      </div>
+      
       <table border="1">
         <thead>
           <tr>

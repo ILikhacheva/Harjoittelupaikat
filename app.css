@@ -6,6 +6,212 @@
   width: 100%;
   margin: 0 0 12px 0;
 }
+
+/* =====================================================
+   СТИЛИ ДЛЯ ПОИСКА ПО ТАБЛИЦЕ
+   TAULUKON HAKUTYYLIEN MÄÄRITTELYT
+   ===================================================== */
+
+/* Контейнер поиска / Hakukontin */
+.search-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+  gap: 8px;
+}
+
+/* Поле ввода поиска / Hakusyöttökenttä */
+#searchInput {
+  width: 100%;
+  max-width: 400px;
+  padding: 8px 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: border-color 0.3s;
+}
+
+#searchInput:focus {
+  outline: none;
+  border-color: #357ab8;
+  box-shadow: 0 0 5px rgba(53, 122, 184, 0.3);
+}
+
+/* Кнопка очистки поиска / Haun tyhjennys painike */
+#clearSearchBtn {
+  padding: 8px 12px;
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#clearSearchBtn:hover {
+  background: #e0e0e0;
+}
+
+/* Адаптивность для мобильных устройств / Responsiivisuus mobiililaitteille */
+@media (max-width: 600px) {
+  .search-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #searchInput {
+    max-width: none;
+    margin-bottom: 8px;
+  }
+}
+
+/* =====================================================
+   СТИЛИ ДЛЯ ПОИСКА СТУДЕНТОВ В МОДАЛЬНОМ ОКНЕ
+   OPISKELIJAHAKUTYYLIEN MÄÄRITTELYT MODAL-IKKUNASSA
+   ===================================================== */
+
+/* Контейнер поиска студентов / Opiskelijahakukontin */
+.student-search-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+/* Поле поиска по имени студента / Opiskelijan nimen hakukenttä */
+#studentSearchInput {
+  flex: 1;
+  min-width: 150px;
+  padding: 6px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: border-color 0.3s;
+}
+
+#studentSearchInput:focus {
+  outline: none;
+  border-color: #357ab8;
+  box-shadow: 0 0 3px rgba(53, 122, 184, 0.3);
+}
+
+/* Фильтр по группе / Ryhmäsuodatin */
+#groupFilterSelect {
+  padding: 6px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: white;
+  transition: border-color 0.3s;
+}
+
+#groupFilterSelect:focus {
+  outline: none;
+  border-color: #357ab8;
+}
+
+/* Кнопка очистки фильтров / Suodattimien tyhjennys painike */
+#clearStudentFiltersBtn {
+  padding: 6px 10px;
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#clearStudentFiltersBtn:hover {
+  background: #e0e0e0;
+}
+
+/* Адаптивность для поиска студентов на мобильных / Responsiivisuus opiskelijahaulle mobiilissa */
+@media (max-width: 600px) {
+  .student-search-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #studentSearchInput,
+  #groupFilterSelect {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+}
+
+/* =====================================================
+   СТИЛИ ДЛЯ ПОИСКА КОМПАНИЙ В МОДАЛЬНОМ ОКНЕ
+   YRITYSHAUN TYYLIEN MÄÄRITTELYT MODAL-IKKUNASSA
+   ===================================================== */
+
+/* Контейнер поиска компаний / Yrityshaun kontti */
+.company-search-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+/* Поле поиска по названию компании / Yrityksen nimen hakukenttä */
+#companySearchInput {
+  flex: 1;
+  min-width: 150px;
+  padding: 6px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: border-color 0.3s;
+}
+
+#companySearchInput:focus {
+  outline: none;
+  border-color: #357ab8;
+  box-shadow: 0 0 3px rgba(53, 122, 184, 0.3);
+}
+
+/* Фильтр по адресу / Osoitesuodatin */
+#addressFilterSelect {
+  padding: 6px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: white;
+  transition: border-color 0.3s;
+}
+
+#addressFilterSelect:focus {
+  outline: none;
+  border-color: #357ab8;
+}
+
+/* Кнопка очистки фильтров компаний / Yrityssuodattimien tyhjennys painike */
+#clearCompanyFiltersBtn {
+  padding: 6px 10px;
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#clearCompanyFiltersBtn:hover {
+  background: #e0e0e0;
+}
+
+/* Адаптивность для поиска компаний на мобильных / Responsiivisuus yrityshaulla mobiilissa */
+@media (max-width: 600px) {
+  .company-search-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #companySearchInput,
+  #addressFilterSelect {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+}
 /* Disabled menu button style */
 .submenu-btn[disabled],
 .side-btn[disabled] {
