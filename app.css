@@ -52,16 +52,85 @@
   background: #e0e0e0;
 }
 
-/* Адаптивность для мобильных устройств / Responsiivisuus mobiililaitteille */
+/* =====================================================
+   УЛУЧШЕННАЯ МОБИЛЬНАЯ АДАПТАЦИЯ
+   PARANNETTU MOBIILISOVITUS
+   ===================================================== */
+
+/* Планшеты и большие мобильные устройства / Tabletit ja isot mobiililaitteet */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+
+  .header h1 {
+    font-size: 36px;
+  }
+
+  /* Улучшенные модальные окна для планшетов */
+  .modal-window {
+    max-width: 95vw !important;
+    margin: 10px;
+  }
+
+  /* Компактные кнопки */
+  .side-btn,
+  .submenu-parent {
+    font-size: 18px;
+    padding: 10px 0;
+  }
+}
+
+/* Мобильные устройства / Mobiililaitteet */
 @media (max-width: 600px) {
   .search-container {
     flex-direction: column;
     align-items: stretch;
+    gap: 10px;
   }
 
   #searchInput {
     max-width: none;
-    margin-bottom: 8px;
+    margin-bottom: 0;
+    font-size: 16px; /* Предотвращает зум на iOS */
+    padding: 12px 16px;
+  }
+
+  /* Улучшенные кнопки для мобильных */
+  button,
+  .side-btn,
+  .submenu-btn {
+    min-height: 44px; /* Apple рекомендует минимум 44px для тач-целей */
+    padding: 12px 16px;
+    font-size: 16px;
+  }
+
+  /* Touch-friendly навигация */
+  #burgerMenu {
+    width: 50px;
+    height: 50px;
+  }
+
+  .bar {
+    height: 4px; /* Толще для лучшей видимости */
+  }
+}
+
+/* Очень маленькие экраны / Hyvin pienet näytöt */
+@media (max-width: 480px) {
+  .header h1 {
+    font-size: 28px;
+    line-height: 1.2;
+  }
+
+  /* Стэкинг форм */
+  .form-row {
+    flex-direction: column !important;
+  }
+
+  .form-row > * {
+    width: 100% !important;
+    margin-bottom: 10px;
   }
 }
 
@@ -689,30 +758,66 @@ footer > div {
   text-align: center;
   margin: 0;
 }
+/* =====================================================
+   РАСШИРЕННАЯ МОБИЛЬНАЯ АДАПТАЦИЯ ОСНОВНЫХ ЭЛЕМЕНТОВ
+   LAAJENNETTU PÄÄELEMENTTIEN MOBIILISOVITUS  
+   ===================================================== */
+
 @media (max-width: 600px) {
   body {
     font-size: 16px;
-    padding: 10px;
+    padding: 5px;
+    /* Убираем отступы для максимального использования пространства */
   }
 
   .container {
     width: 100%;
     margin: 0;
-    padding: 0;
+    padding: 5px;
   }
+
+  /* Улучшенная таблица с лучшей прокруткой */
   #dataTable {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     padding: 0;
     margin: 0;
+    /* Добавляем тень для индикации прокрутки */
+    background: linear-gradient(90deg, white 30%, rgba(255, 255, 255, 0)),
+      linear-gradient(90deg, rgba(255, 255, 255, 0), white 70%);
+    background-size: 40px 100%, 40px 100%;
+    background-position: left, right;
+    background-repeat: no-repeat;
+    background-attachment: local, local;
   }
+
   table {
     min-width: 700px;
-    font-size: 14px;
+    font-size: 13px;
     border-collapse: collapse;
     width: 100%;
     display: table;
   }
+
+  /* Компактные ячейки таблицы */
+  td,
+  th {
+    padding: 8px 6px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+  }
+
+  /* Важные колонки делаем шире */
+  td:first-child,
+  th:first-child,
+  td:nth-child(2),
+  th:nth-child(2) {
+    max-width: 150px;
+    min-width: 100px;
+  }
+
   thead,
   tbody,
   tr,
@@ -721,26 +826,51 @@ footer > div {
     display: revert;
   }
 
-  /* Header: stack burger under title on small screens */
+  /* Улучшенный заголовок для мобильных */
   .header {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
     position: relative;
-    padding-top: 12px;
-    padding-bottom: 8px;
+    padding: 8px 5px;
+    margin-bottom: 10px;
   }
+
   .header h1 {
     flex: none;
-    margin-bottom: 8px;
-    margin-top: 0;
-    font-size: 32px;
+    margin: 0 0 10px 0;
+    font-size: 24px;
+    text-align: center;
+    line-height: 1.2;
   }
+
   #burgerMenu {
     position: static;
     transform: none;
-    margin: 0 0 0 0;
+    margin: 0;
     align-self: flex-end;
+  }
+}
+
+/* Дополнительные улучшения для очень маленьких экранов */
+@media (max-width: 360px) {
+  .header h1 {
+    font-size: 20px;
+  }
+
+  table {
+    font-size: 12px;
+  }
+
+  td,
+  th {
+    padding: 6px 4px !important;
+    max-width: 100px;
+  }
+
+  /* Скрываем менее важные колонки на очень маленьких экранах */
+  .hide-on-tiny {
+    display: none !important;
   }
 }
 
@@ -824,5 +954,322 @@ h1 {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* =====================================================
+   ДОПОЛНИТЕЛЬНЫЕ МОБИЛЬНЫЕ УЛУЧШЕНИЯ
+   LISÄÄ MOBIILIPARANNUKSIA
+   ===================================================== */
+
+/* Улучшения для сенсорных устройств */
+@media (hover: none) and (pointer: coarse) {
+  /* Увеличиваем области нажатия для touch устройств */
+  button,
+  .sortable,
+  .side-btn,
+  .submenu-btn {
+    min-height: 44px;
+    padding: 12px 16px;
+  }
+
+  /* Убираем hover эффекты на touch устройствах */
+  .sortable:hover,
+  .side-btn:hover,
+  button:hover {
+    background-color: inherit;
+  }
+
+  /* Добавляем активное состояние для touch */
+  button:active,
+  .side-btn:active,
+  .sortable:active {
+    background-color: #e9ecef;
+    transform: scale(0.98);
+  }
+}
+
+/* Ландшафтная ориентация на мобильных */
+@media (max-width: 768px) and (orientation: landscape) {
+  .header {
+    flex-direction: row;
+    padding: 8px 15px;
+  }
+
+  .header h1 {
+    font-size: 28px;
+    margin: 0;
+  }
+
+  #burgerMenu {
+    position: static;
+    margin-left: auto;
+  }
+
+  /* Компактная боковая панель в ландшафте */
+  .side-menu {
+    width: 250px;
+  }
+}
+
+/* Темная тема для устройств с dark mode */
+@media (prefers-color-scheme: dark) {
+  /* Пока оставляем базовую поддержку, можно расширить позже */
+  .modal-overlay {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* Высокие DPI экраны (Retina) */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Более четкие границы для высоких DPI */
+  table,
+  th,
+  td {
+    border-width: 0.5px;
+  }
+}
+
+/* Улучшения для модальных окон на мобильных */
+@media (max-width: 600px) {
+  .modal-overlay {
+    padding: 10px;
+    align-items: flex-start;
+    padding-top: 20px;
+  }
+
+  .modal-window {
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Закрытие модального окна свайпом (визуальная подсказка) */
+  .modal-window::before {
+    content: "";
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: #ccc;
+    border-radius: 2px;
+    margin: 8px auto;
+  }
+
+  /* Улучшенные формы в модальных окнах */
+  .modal-window input,
+  .modal-window select,
+  .modal-window textarea {
+    font-size: 16px; /* Предотвращает зум на iOS */
+    padding: 12px;
+    border-radius: 8px;
+  }
+}
+
+/* Поддержка notch (вырез) на iPhone X и новее */
+@media (max-width: 600px) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .header {
+    padding-top: max(8px, env(safe-area-inset-top));
+  }
+}
+
+/* =====================================================
+   УТИЛИТЫ ДЛЯ АДАПТИВНОСТИ
+   RESPONSIIVISUUSTYÖKALUT
+   ===================================================== */
+
+/* Классы для скрытия/показа на разных экранах */
+.hide-mobile {
+  display: block;
+}
+.show-mobile {
+  display: none;
+}
+.hide-tablet {
+  display: block;
+}
+.show-tablet {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .hide-tablet {
+    display: none !important;
+  }
+  .show-tablet {
+    display: block !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .hide-mobile {
+    display: none !important;
+  }
+  .show-mobile {
+    display: block !important;
+  }
+  .show-mobile-inline {
+    display: inline !important;
+  }
+  .show-mobile-flex {
+    display: flex !important;
+  }
+}
+
+/* Дополнительные мобильные классы */
+.mobile-device .mobile-full-width {
+  width: 100% !important;
+}
+
+.mobile-device .mobile-text-center {
+  text-align: center !important;
+}
+
+.mobile-device .mobile-padding {
+  padding: 10px !important;
+}
+
+/* Улучшенные кнопки для мобильных */
+.mobile-device button,
+.mobile-device .side-btn {
+  min-height: 44px;
+  font-size: 16px;
+}
+
+/* Компактный режим таблиц */
+.mobile-device .compact-table {
+  font-size: 12px;
+}
+
+.mobile-device .compact-table td,
+.mobile-device .compact-table th {
+  padding: 6px 4px !important;
+}
+
+/* =====================================================
+   СТИЛИ ДЛЯ ОТЧЕТОВ НА МОБИЛЬНЫХ УСТРОЙСТВАХ
+   RAPORTTITYYLIEN MÄÄRITTELYT MOBIILILAITTEILLE
+   ===================================================== */
+
+/* Контейнер отчета */
+#reportContent {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* Таблицы в отчетах */
+#reportContent table {
+  width: 100% !important;
+  min-width: 600px !important;
+  max-width: none !important;
+  table-layout: auto !important;
+  border-collapse: collapse !important;
+}
+
+/* Мобильные улучшения для отчетов */
+@media (max-width: 768px) {
+  #ReportModalOverlay .modal-window {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    margin: 10px !important;
+    padding: 15px !important;
+  }
+
+  #reportContent {
+    padding: 10px !important;
+    margin: 0 !important;
+  }
+
+  #reportContent table {
+    font-size: 11px !important;
+    min-width: 800px !important;
+  }
+
+  #reportContent th,
+  #reportContent td {
+    padding: 4px 6px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Заголовки отчетов */
+  #reportContent h3 {
+    font-size: 18px !important;
+    margin-bottom: 15px !important;
+  }
+
+  /* Кнопки в отчетах */
+  #generateReportBtn,
+  #generateCompanyReportBtn,
+  #exportPdfBtn {
+    padding: 8px 12px !important;
+    font-size: 14px !important;
+    margin: 5px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  #reportContent table {
+    font-size: 10px !important;
+    min-width: 700px !important;
+  }
+
+  #reportContent th,
+  #reportContent td {
+    padding: 3px 4px !important;
+    max-width: 80px !important;
+  }
+
+  /* Более компактные заголовки колонок */
+  #reportContent th {
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Стэкинг кнопок на очень маленьких экранах */
+  .modal-window > div[style*="text-align: center"] {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  #generateReportBtn,
+  #generateCompanyReportBtn,
+  #exportPdfBtn {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+}
+
+/* Улучшение прокрутки для отчетов */
+@media (max-width: 768px) {
+  #reportContent {
+    /* Градиентные тени для индикации прокрутки */
+    background: linear-gradient(90deg, white 30%, rgba(255, 255, 255, 0)),
+      linear-gradient(90deg, rgba(255, 255, 255, 0), white 70%);
+    background-size: 40px 100%, 40px 100%;
+    background-position: left, right;
+    background-repeat: no-repeat;
+    background-attachment: local, local;
+  }
+
+  #reportContent::before {
+    content: "← Vieritä taulukkoa vaakasuunnassa →";
+    display: block;
+    text-align: center;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 10px;
+    padding: 5px;
+    background: #f8f9fa;
+    border-radius: 4px;
   }
 }

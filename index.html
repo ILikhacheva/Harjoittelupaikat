@@ -28,9 +28,17 @@ tämä sivu sisältää käyttöliittymän hallintaan:
 -->
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Улучшенный viewport для мобильных устройств -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <!-- PWA и мобильные мета-теги -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="theme-color" content="#357ab8" />
     <title>Harjoittelupaikat</title>
     <link rel="icon" type="image/png" href="clock.png" />
+    <!-- Apple Touch Icon для лучшего вида на iOS -->
+    <link rel="apple-touch-icon" href="clock.png" />
     <link rel="stylesheet" href="app.css" />
   </head>
   <body>

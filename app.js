@@ -36,6 +36,104 @@
 let studentsData = [];
 
 // ---
+// мобильные улучшения
+// mobiiliparannukset
+// ---
+
+// Определение мобильного устройства
+// Mobiililaitteen tunnistus
+function isMobileDevice() {
+  return (
+    window.innerWidth <= 768 ||
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    )
+  );
+}
+
+// Улучшенная прокрутка таблиц на мобильных
+// Parannettu taulukoiden vieritys mobiilissa
+function initMobileTableScrolling() {
+  if (!isMobileDevice()) return;
+
+  const tableContainer = document.getElementById("dataTable");
+  if (!tableContainer) return;
+
+  let isScrolling = false;
+  let scrollTimeout;
+
+  tableContainer.addEventListener("scroll", function () {
+    if (!isScrolling) {
+      tableContainer.style.pointerEvents = "none";
+      isScrolling = true;
+    }
+
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(function () {
+      tableContainer.style.pointerEvents = "auto";
+      isScrolling = false;
+    }, 150);
+  });
+}
+
+// Автозакрытие модальных окон при повороте экрана
+// Modaalien automaattinen sulkeminen näytön kiertämisessä
+function initOrientationHandler() {
+  if (!isMobileDevice()) return;
+
+  window.addEventListener("orientationchange", function () {
+    // Закрываем все открытые модальные окна при повороте
+    const modals = document.querySelectorAll(".modal-overlay");
+    modals.forEach((modal) => {
+      if (modal.style.display !== "none") {
+        modal.style.display = "none";
+      }
+    });
+
+    // Закрываем боковое меню
+    closeSideMenu();
+  });
+}
+
+// Улучшенное управление фокусом для мобильных
+// Parannettu fokuksen hallinta mobiililaitteille
+function initMobileFocusManagement() {
+  if (!isMobileDevice()) return;
+
+  // Предотвращаем зум при фокусе на input элементах
+  const inputs = document.querySelectorAll(
+    'input[type="text"], input[type="email"], input[type="tel"], input[type="password"], textarea, select'
+  );
+
+  inputs.forEach((input) => {
+    input.addEventListener("focus", function () {
+      // Временно устанавливаем font-size 16px для предотвращения зума на iOS
+      if (parseFloat(getComputedStyle(this).fontSize) < 16) {
+        this.style.fontSize = "16px";
+      }
+    });
+
+    input.addEventListener("blur", function () {
+      // Возвращаем оригинальный размер шрифта
+      this.style.fontSize = "";
+    });
+  });
+}
+
+// Инициализация мобильных улучшений
+// Mobiiliparannusten alustus
+function initMobileEnhancements() {
+  initMobileTableScrolling();
+  initOrientationHandler();
+  initMobileFocusManagement();
+
+  // Добавляем класс для мобильных устройств
+  if (isMobileDevice()) {
+    document.body.classList.add("mobile-device");
+  }
+}
+
+// ---
 // функции масок ввода
 // syöttömaskitoiminnot
 // ---
@@ -939,27 +1037,28 @@ async function generateReport() {
     // Генерируем HTML для отчета
     // Luodaan HTML raporttia varten
     let htmlContent = `
-      <div style="text-align: center; margin-bottom: 30px;">
+      <div style="text-align: center; margin-bottom: 20px;">
         <h3 style="margin: 0; color: #333;">Harjoittelupaikkaraportti</h3>
         <p style="margin: 5px 0; color: #666;">Luotu: ${new Date().toLocaleDateString(
           "fi-FI"
         )}</p>
       </div>
       
-      <table style="width: 100%; border-collapse: collapse; margin: 0 auto; font-size: 12px;">
-        <thead>
-          <tr style="background-color: #f8f9fa;">
-            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Yritys</th>
-            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Y-tunnus</th>
-            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Osoite</th>
-            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Opiskelija</th>
-            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Ryhmä</th>
-            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Ohjaaja</th>
-            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Puhelin</th>
-            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Sähköposti</th>
-          </tr>
-        </thead>
-        <tbody>
+      <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+        <table style="width: 100%; min-width: 800px; border-collapse: collapse; margin: 0 auto; font-size: 12px;">
+          <thead>
+            <tr style="background-color: #f8f9fa;">
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: left; white-space: nowrap;">Yritys</th>
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: left; white-space: nowrap;">Y-tunnus</th>
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: left; white-space: nowrap;">Osoite</th>
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: left; white-space: nowrap;">Opiskelija</th>
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: left; white-space: nowrap;">Ryhmä</th>
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: left; white-space: nowrap;">Ohjaaja</th>
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: left; white-space: nowrap;">Puhelin</th>
+              <th style="border: 1px solid #ddd; padding: 8px; text-align: left; white-space: nowrap;">Sähköpости</th>
+            </tr>
+          </thead>
+          <tbody>
     `;
 
     data.forEach((row, index) => {
@@ -970,35 +1069,36 @@ async function generateReport() {
         <tr style="background-color: ${
           index % 2 === 0 ? "#ffffff" : "#f8f9fa"
         };">
-          <td style="border: 1px solid #ddd; padding: 6px;">${
+          <td style="border: 1px solid #ddd; padding: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;" title="${
             row.company_name || ""
-          }</td>
-          <td style="border: 1px solid #ddd; padding: 6px;">${
+          }">${row.company_name || ""}</td>
+          <td style="border: 1px solid #ddd; padding: 6px; white-space: nowrap;" title="${
             row.tunnus || ""
-          }</td>
-          <td style="border: 1px solid #ddd; padding: 6px;">${
+          }">${row.tunnus || ""}</td>
+          <td style="border: 1px solid #ddd; padding: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px;" title="${
             row.address || ""
-          }</td>
-          <td style="border: 1px solid #ddd; padding: 6px;">${studentFullName}</td>
-          <td style="border: 1px solid #ddd; padding: 6px;">${
+          }">${row.address || ""}</td>
+          <td style="border: 1px solid #ddd; padding: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;" title="${studentFullName}">${studentFullName}</td>
+          <td style="border: 1px solid #ddd; padding: 6px; white-space: nowrap;" title="${
             row.st_group || ""
-          }</td>
-          <td style="border: 1px solid #ddd; padding: 6px;">${
+          }">${row.st_group || ""}</td>
+          <td style="border: 1px solid #ddd; padding: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px;" title="${
             row.boss_name || ""
-          }</td>
-          <td style="border: 1px solid #ddd; padding: 6px;">${
+          }">${row.boss_name || ""}</td>
+          <td style="border: 1px solid #ddd; padding: 6px; white-space: nowrap;" title="${
             row.boss_phone || ""
-          }</td>
-          <td style="border: 1px solid #ddd; padding: 6px;">${
+          }">${row.boss_phone || ""}</td>
+          <td style="border: 1px solid #ddd; padding: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;" title="${
             row.boss_email || ""
-          }</td>
+          }">${row.boss_email || ""}</td>
         </tr>
       `;
     });
 
     htmlContent += `
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
       
       <div style="margin-top: 20px; text-align: center; font-size: 11px; color: #666;">
         <p>Yhteensä: ${data.length} harjoittelupaikkaa</p>
@@ -1044,14 +1144,23 @@ function exportToPdf() {
       <meta charset="utf-8">
       <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        th, td { border: 1px solid #333; padding: 8px; text-align: left; font-size: 10px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; table-layout: auto; }
+        th, td { border: 1px solid #333; padding: 8px; text-align: left; font-size: 10px; word-wrap: break-word; }
         th { background-color: #f0f0f0; font-weight: bold; }
         h3 { text-align: center; margin-bottom: 20px; }
+        div[style*="overflow-x"] { overflow: visible !important; }
         @media print {
           body { margin: 0; }
+          table { font-size: 8px; page-break-inside: auto; }
+          th, td { padding: 3px; font-size: 8px; }
+          tr { page-break-inside: avoid; }
+          thead { display: table-header-group; }
+          tfoot { display: table-footer-group; }
+        }
+        @media screen and (max-width: 600px) {
+          body { margin: 10px; font-size: 12px; }
           table { font-size: 9px; }
-          th, td { padding: 4px; }
+          th, td { padding: 4px; font-size: 9px; }
         }
       </style>
     </head>
@@ -1102,23 +1211,24 @@ async function generateCompanyReport() {
     // Генерируем HTML для отчета по компаниям
     // Luodaan HTML yritysraporttia varten
     let htmlContent = `
-      <div style="text-align: center; margin-bottom: 30px;">
+      <div style="text-align: center; margin-bottom: 20px;">
         <h3 style="margin: 0; color: #333;">Yritysraportti - Opiskelijamäärät</h3>
         <p style="margin: 5px 0; color: #666;">Luotu: ${new Date().toLocaleDateString(
           "fi-FI"
         )}</p>
       </div>
       
-      <table style="width: 100%; border-collapse: collapse; margin: 0 auto; font-size: 14px;">
-        <thead>
-          <tr style="background-color: #f8f9fa;">
-            <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Yrityksen nimi</th>
-            <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Y-tunnus</th>
-            <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Osoite</th>
-            <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Opiskelijoiden määrä</th>
-          </tr>
-        </thead>
-        <tbody>
+      <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+        <table style="width: 100%; min-width: 600px; border-collapse: collapse; margin: 0 auto; font-size: 14px;">
+          <thead>
+            <tr style="background-color: #f8f9fa;">
+              <th style="border: 1px solid #ddd; padding: 12px; text-align: left; white-space: nowrap;">Yrityksen nimi</th>
+              <th style="border: 1px solid #ddd; padding: 12px; text-align: left; white-space: nowrap;">Y-tunnus</th>
+              <th style="border: 1px solid #ddd; padding: 12px; text-align: left; white-space: nowrap;">Osoite</th>
+              <th style="border: 1px solid #ddd; padding: 12px; text-align: center; white-space: nowrap;">Opiskelijoiden määrä</th>
+            </tr>
+          </thead>
+          <tbody>
     `;
 
     let totalStudents = 0;
@@ -1131,29 +1241,30 @@ async function generateCompanyReport() {
         <tr style="background-color: ${
           index % 2 === 0 ? "#ffffff" : "#f8f9fa"
         };">
-          <td style="border: 1px solid #ddd; padding: 10px; font-weight: 500;">${
+          <td style="border: 1px solid #ddd; padding: 10px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;" title="${
             row.company_name || ""
-          }</td>
-          <td style="border: 1px solid #ddd; padding: 10px;">${
+          }">${row.company_name || ""}</td>
+          <td style="border: 1px solid #ddd; padding: 10px; white-space: nowrap;" title="${
             row.tunnus || ""
-          }</td>
-          <td style="border: 1px solid #ddd; padding: 10px;">${
+          }">${row.tunnus || ""}</td>
+          <td style="border: 1px solid #ddd; padding: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;" title="${
             row.address || ""
-          }</td>
-          <td style="border: 1px solid #ddd; padding: 10px; text-align: center; font-weight: 600; color: #357ab8;">${studentCount}</td>
+          }">${row.address || ""}</td>
+          <td style="border: 1px solid #ddd; padding: 10px; text-align: center; font-weight: 600; color: #357ab8; white-space: nowrap;">${studentCount}</td>
         </tr>
       `;
     });
 
     htmlContent += `
-        </tbody>
-        <tfoot>
-          <tr style="background-color: #e9ecef; font-weight: bold;">
-            <td colspan="3" style="border: 1px solid #ddd; padding: 12px; text-align: right;">Yhteensä:</td>
-            <td style="border: 1px solid #ddd; padding: 12px; text-align: center; color: #dc3545; font-size: 16px;">${totalStudents}</td>
-          </tr>
-        </tfoot>
-      </table>
+          </tbody>
+          <tfoot>
+            <tr style="background-color: #e9ecef; font-weight: bold;">
+              <td colspan="3" style="border: 1px solid #ddd; padding: 12px; text-align: right; white-space: nowrap;">Yhteensä:</td>
+              <td style="border: 1px solid #ddd; padding: 12px; text-align: center; color: #dc3545; font-size: 16px; white-space: nowrap;">${totalStudents}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
       
       <div style="margin-top: 25px; text-align: center; font-size: 12px; color: #666;">
         <p><strong>Tilastot:</strong></p>
@@ -3033,3 +3144,19 @@ function filterAdminUsers() {
     }
   });
 }
+
+// Инициализация всех улучшений при загрузке страницы
+// Kaikkien parannusten alustus sivun latauksessa
+document.addEventListener("DOMContentLoaded", function () {
+  // Инициализируем мобильные улучшения
+  initMobileEnhancements();
+
+  // Проверяем и обновляем размеры при изменении окна
+  window.addEventListener("resize", function () {
+    if (isMobileDevice()) {
+      document.body.classList.add("mobile-device");
+    } else {
+      document.body.classList.remove("mobile-device");
+    }
+  });
+});
