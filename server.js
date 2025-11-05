@@ -652,8 +652,6 @@ app.get("/admin/users", async (req, res) => {
       ORDER BY u.user_role, u.user_email
     `);
 
-    console.log("Admin users query result:", result.rows.length, "rows");
-    console.log("Sample user:", result.rows[0]);
     res.json(result.rows);
   } catch (err) {
     console.error("DB ERROR /admin/users:", err);
@@ -711,20 +709,13 @@ app.post("/admin/reset-user-password", async (req, res) => {
 app.post("/user/change-password", async (req, res) => {
   const { userId, newPassword } = req.body;
 
-  console.log("Change password request:", {
-    userId,
-    passwordLength: newPassword?.length,
-  });
-
   if (!userId || !newPassword) {
-    console.log("Missing userId or newPassword");
     return res
       .status(400)
       .json({ error: "User ID and new password are required" });
   }
 
   if (newPassword.length < 6) {
-    console.log("Password too short:", newPassword.length);
     return res
       .status(400)
       .json({ error: "Password must be at least 6 characters long" });
@@ -738,15 +729,11 @@ app.post("/user/change-password", async (req, res) => {
       [userId]
     );
 
-    console.log("User check result:", userCheck.rows);
-
     if (userCheck.rows.length === 0) {
-      console.log("User not found for userId:", userId);
       return res.status(404).json({ error: "User not found" });
     }
 
     if (!userCheck.rows[0].password_reset) {
-      console.log("Password reset flag is false for user:", userId);
       return res.status(403).json({
         error:
           "Password change not allowed. Contact administrator to reset your password first.",
@@ -758,14 +745,10 @@ app.post("/user/change-password", async (req, res) => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
-    console.log("Updating password for userId:", userId);
-
-    const updateResult = await pool.query(
+    await pool.query(
       "UPDATE users SET user_password = $1, password_reset = false WHERE user_id = $2",
       [hashedPassword, userId]
     );
-
-    console.log("Update result rowCount:", updateResult.rowCount);
 
     res.json({
       success: true,

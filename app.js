@@ -717,19 +717,21 @@ function closeLogoutModal() {
 // ---
 
 function openForgotPasswordModal() {
-  document.getElementById("ForgotPasswordModalOverlay").style.display = "flex";
-  // Сбрасываем форму при открытии
-  // Nollataan lomake avaamisen yhteydessä
-  document.getElementById("forgot-password-form").reset();
-  document.getElementById("passwordResetFields").style.display = "none";
-  document.getElementById("checkEmailBtn").style.display = "inline-block";
-  document.getElementById("resetPasswordBtn").style.display = "none";
-  document.getElementById("emailCheckMessage").innerHTML = "";
-  document.getElementById("passwordMatchMessage").innerHTML = "";
+  // показываем сообщение о необходимости связаться с администратором
+  // näytetään viesti yhteyttä ylläpitäjään
+  alert(
+    "Salasanan palauttamiseksi ota yhteyttä järjestelmän ylläpitäjään.\n\n" +
+      "Sähköposti: kpedu@kpedu.fi\n\n" +
+      "Kerro viestissä käyttäjätunnuksesi (sähköpostiosoite) ja pyydä salasanan nollausta."
+  );
+
+  // оставляем окно входа открытым
+  // pidetään kirjautumisikkuna auki
 }
 
 function closeForgotPasswordModal() {
-  document.getElementById("ForgotPasswordModalOverlay").style.display = "none";
+  // модальное окно больше не используется, функция оставлена для совместимости
+  // modaali-ikkunaa ei enää käytetä, funktio jätetty yhteensopivuuden vuoksi
 }
 
 // ---
@@ -750,7 +752,6 @@ function closeAdminModal() {
 // lataa käyttäjälista
 async function loadUsersList() {
   try {
-    console.log("Загружаем список пользователей...");
     const response = await fetch("/admin/users");
 
     if (!response.ok) {
@@ -758,12 +759,9 @@ async function loadUsersList() {
     }
 
     const users = await response.json();
-    console.log("Получено пользователей:", users.length);
-    console.log("Данные пользователей:", users);
 
     const tbody = document.getElementById("adminUsersTableBody");
     if (!tbody) {
-      console.error("Элемент adminUsersTableBody не найден!");
       return;
     }
 
@@ -1289,23 +1287,14 @@ function updateAuthButtons() {
   const isLoggedIn = localStorage.getItem("isLoggedIn");
   const userRole = localStorage.getItem("userRole");
 
-  // отладочная информация / debug-tiedot
-  console.log("updateAuthButtons - isLoggedIn:", isLoggedIn);
-  console.log("updateAuthButtons - userRole:", userRole);
-  console.log("updateAuthButtons - adminBtn element:", adminBtn);
-
   if (isLoggedIn) {
     if (loginBtn) loginBtn.style.display = "none";
     if (logoutBtn) logoutBtn.style.display = "block";
 
     // админ (роль 1) — показываем кнопку настроек
     if (userRole === "1") {
-      console.log("Показываем кнопку админа для роли 1");
       if (adminBtn) {
         adminBtn.style.display = "block";
-        console.log("Кнопка админа установлена как видимая");
-      } else {
-        console.log("Элемент adminBtn не найден!");
       }
     } else {
       if (adminBtn) adminBtn.style.display = "none";
@@ -2921,12 +2910,6 @@ document.addEventListener("DOMContentLoaded", function () {
       ).value;
       const userId = localStorage.getItem("userId");
 
-      console.log("Change password attempt:", {
-        userId,
-        passwordLength: newPassword?.length,
-        hasConfirmPassword: !!confirmPassword,
-      });
-
       // проверяем все поля
       // tarkistetaan kaikki kentät
       if (!newPassword || !confirmPassword) {
@@ -2961,9 +2944,7 @@ document.addEventListener("DOMContentLoaded", function () {
           }),
         });
 
-        console.log("Server response status:", response.status);
         const result = await response.json();
-        console.log("Server response data:", result);
 
         if (result.success) {
           alert("salasana vaihdettu onnistuneesti!");
@@ -2977,7 +2958,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
           // всегда обновляем кеш списка пользователей для админ-панели
           // päivitetään aina käyttäjälistan välimuisti admin-paneelia varten
-          console.log("Обновляем список пользователей после смены пароля");
 
           // добавляем небольшую задержку, чтобы база данных успела обновиться
           // lisätään pieni viive, jotta tietokanta ehtii päivittyä
@@ -2985,7 +2965,6 @@ document.addEventListener("DOMContentLoaded", function () {
             // проверяем, есть ли функция loadUsersList
             if (typeof loadUsersList === "function") {
               loadUsersList();
-              console.log("Список пользователей обновлен");
             }
           }, 500);
         } else {
