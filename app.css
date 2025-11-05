@@ -1,4 +1,5 @@
-/* Center table titles in main table and modals */
+/* Центрирование заголовков таблиц в основной таблице и модальных окнах
+  Taulukon otsikoiden keskitys päätaulukossa ja modaaleissa */
 #dataTable h2,
 #CompanyListModalOverlay .modal-window h2,
 #StudentListModalOverlay .modal-window h2 {
@@ -7,10 +8,10 @@
   margin: 0 0 12px 0;
 }
 
-/* =====================================================
-   СТИЛИ ДЛЯ ПОИСКА ПО ТАБЛИЦЕ
-   TAULUKON HAKUTYYLIEN MÄÄRITTELYT
-   ===================================================== */
+/* ---
+  стили для поиска по таблице
+  taulukon hakutyylien määritykset
+  --- */
 
 /* Контейнер поиска / Hakukontin */
 .search-container {
@@ -52,10 +53,10 @@
   background: #e0e0e0;
 }
 
-/* =====================================================
+/* ---
    УЛУЧШЕННАЯ МОБИЛЬНАЯ АДАПТАЦИЯ
    PARANNETTU MOBIILISOVITUS
-   ===================================================== */
+   --- */
 
 /* Планшеты и большие мобильные устройства / Tabletit ja isot mobiililaitteet */
 @media (max-width: 768px) {
@@ -67,13 +68,13 @@
     font-size: 36px;
   }
 
-  /* Улучшенные модальные окна для планшетов */
+  /* Улучшенные модальные окна для планшетов / Parannetut modaali-ikkunat tableteille */
   .modal-window {
     max-width: 95vw !important;
     margin: 10px;
   }
 
-  /* Компактные кнопки */
+  /* Компактные кнопки / Kompakti painikkeet */
   .side-btn,
   .submenu-parent {
     font-size: 18px;
@@ -92,27 +93,27 @@
   #searchInput {
     max-width: none;
     margin-bottom: 0;
-    font-size: 16px; /* Предотвращает зум на iOS */
+    font-size: 16px; /* Предотвращает зум на iOS / Estää zoomauksen iOS:llä */
     padding: 12px 16px;
   }
 
-  /* Улучшенные кнопки для мобильных */
+  /* Улучшенные кнопки для мобильных устройств / Parannetut painikkeet mobiililaitteille */
   button,
   .side-btn,
   .submenu-btn {
-    min-height: 44px; /* Apple рекомендует минимум 44px для тач-целей */
+    min-height: 44px; /* Apple рекомендует минимум 44px для тач-целей / Apple suosittelee vähintään 44px kosketusalueille */
     padding: 12px 16px;
     font-size: 16px;
   }
 
-  /* Touch-friendly навигация */
+  /* Touch-friendly навигация / Kosketusystävällinen navigointi */
   #burgerMenu {
     width: 50px;
     height: 50px;
   }
 
   .bar {
-    height: 4px; /* Толще для лучшей видимости */
+    height: 4px; /* Толще для лучшей видимости / Paksumpi paremman näkyvyyden vuoksi */
   }
 }
 
@@ -123,7 +124,7 @@
     line-height: 1.2;
   }
 
-  /* Стэкинг форм */
+  /* Стэкинг форм / Lomakkeiden pinottaminen */
   .form-row {
     flex-direction: column !important;
   }
@@ -134,10 +135,10 @@
   }
 }
 
-/* =====================================================
-   СТИЛИ ДЛЯ СОРТИРОВКИ ТАБЛИЦЫ
-   TAULUKON LAJITTELUN TYYLIEN MÄÄRITTELYT
-   ===================================================== */
+/* ---
+  стили для сортировки таблицы
+  taulukon lajittelun tyylien määritykset
+  --- */
 
 /* Сортируемые заголовки / Lajiteltavat otsikot */
 .sortable {
@@ -185,10 +186,10 @@
   font-weight: bold;
 }
 
-/* =====================================================
-   СТИЛИ ДЛЯ ПОИСКА СТУДЕНТОВ В МОДАЛЬНОМ ОКНЕ
-   OPISKELIJAHAKUTYYLIEN MÄÄRITTELYT MODAL-IKKUNASSA
-   ===================================================== */
+/* ---
+  стили для поиска студентов в модальном окне
+  opiskelijahakutyylien määritykset modal-ikkunassa
+  --- */
 
 /* Контейнер поиска студентов / Opiskelijahakukontin */
 .student-search-container {
@@ -259,10 +260,10 @@
   }
 }
 
-/* =====================================================
-   СТИЛИ ДЛЯ ПОИСКА КОМПАНИЙ В МОДАЛЬНОМ ОКНЕ
-   YRITYSHAUN TYYLIEN MÄÄRITTELYT MODAL-IKKUNASSA
-   ===================================================== */
+/* ---
+  стили для поиска компаний в модальном окне
+  yrityshaun tyylien määritykset modal-ikkunassa
+  --- */
 
 /* Контейнер поиска компаний / Yrityshaun kontti */
 .company-search-container {
@@ -332,14 +333,14 @@
     margin-bottom: 8px;
   }
 }
-/* Disabled menu button style */
+/* стили для отключенных кнопок меню / tyylit poistetuilla valikkopainikkeilla */
 .submenu-btn[disabled],
 .side-btn[disabled] {
   opacity: 0.5;
   pointer-events: none;
   cursor: not-allowed;
 }
-/* Center and unify menu button styles */
+/* стили для кнопок меню / tyylit valikkopainikkeille */
 .side-btn,
 .submenu-parent {
   font-size: 20px;
@@ -363,8 +364,7 @@
   margin-left: 8px;
   margin-top: 3px;
 }
-/* Scrollable modal table area for company and student lists */
-/* Scrollable modal table area for company and student lists */
+/* прокручиваемая область таблицы в модальном окне для компаний и студентов / vieritettävä taulukkoalue modal-ikkunassa yrityksille ja opiskelijoille */
 .modal-table-scroll {
   max-height: 340px;
   overflow-y: scroll;
@@ -383,7 +383,7 @@
   padding: 6px 10px;
   text-align: left;
 }
-/* Submenu styles for burger menu */
+/* стили для бокового меню / tyylit sivuvalikolle */
 .side-menu {
   position: fixed;
   top: 0;
@@ -470,7 +470,7 @@ table {
   margin-left: auto;
   margin-right: auto;
 }
-/* Прозрачный фоновый рисунок для всего сайта */
+/* прозрачный фоновый рисунок для всего сайта / läpinäkyvä taustakuva koko sivulle */
 body {
   position: relative;
   z-index: 0;
@@ -484,7 +484,7 @@ body::before {
   opacity: 0.6;
   pointer-events: none;
 }
-/* Закрепление первого столбца таблицы при скролле */
+/* Закрепление первого столбца таблицы при скролле / Ensimmäisen sarakkeen kiinnitys vieritettäessä */
 table th:first-child,
 table td:first-child {
   position: sticky;
@@ -495,21 +495,21 @@ table td:first-child {
 table th:first-child {
   z-index: 3;
 }
-/* Глобальные стили для таблицы */
+/* Глобальные стили для таблицы / Taulukon globaalit tyylit */
 table td {
   background-color: #fff;
-  color: #1e1a1a; /* цвет текста в ячейках */
+  color: #1e1a1a; /* цвет текста в ячейках / Solujen tekstin väri */
 }
 
 table th {
   background-color: #fff;
-  color: #1e1a1a; /* цвет текста в ячейках */
+  color: #1e1a1a; /* цвет текста в ячейках / Solujen tekstin väri */
 }
 
-/* =====================================================
+/* ---
    СТИЛИ ДЛЯ СОРТИРОВКИ ТАБЛИЦЫ
    TAULUKON LAJITTELUN TYYLIEN MÄÄRITTELYT
-   ===================================================== */
+   --- */
 
 /* Сортируемые заголовки / Lajiteltavat otsikot */
 .sortable {
@@ -557,7 +557,7 @@ table th {
   font-weight: bold;
 }
 
-/* Глобальные стили для обеспечения липкого футера */
+/* Глобальные стили для обеспечения липкого футера / Globaalit tyylit tahmealle footerille */
 html,
 body {
   height: 100%;
@@ -580,7 +580,7 @@ footer > div {
   padding-left: 24px;
   margin-top: 24px;
 }
-/* Цветные статусы для таблицы Harjoittelupaikat */
+/* Цветные статусы для таблицы Harjoittelupaikat / Väritetyt statukset Harjoittelupaikat-taulukolle */
 .status-on {
   color: #fff;
   background: #4caf50;
@@ -602,7 +602,7 @@ footer > div {
   padding: 2px 10px;
   display: inline-block;
 }
-/* Выравнивание и стилизация modal forms */
+/* Выравнивание и стилизация modal forms / Modal-lomakkeiden tasaus ja tyyli */
 .modal-window form {
   width: 100%;
   max-width: 350px;
@@ -639,7 +639,7 @@ footer > div {
   justify-content: flex-end;
   gap: 12px;
 }
-/* Modal overlay and window styles */
+/* стили для модального оверлея и окна / Modalin peite- ja ikkunatyylit */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -681,8 +681,7 @@ footer > div {
   color: #888;
 }
 
-/* Burger menu styles */
-/* ...existing code... */
+/* Стили для бургер-меню /  Burgerivalikon tyylit */
 
 #burgerMenu .bar {
   width: 28px;
@@ -693,7 +692,7 @@ footer > div {
   transition: 0.3s;
 }
 
-/* Side menu styles */
+/* Стили для бокового меню /Sivupalkin tyylit */
 .side-menu {
   position: fixed;
   top: 0;
@@ -737,7 +736,7 @@ footer > div {
   background: #357ab8;
 }
 
-/* Header flex layout: burger left, title center */
+/*  /Оtsikon flex-asettelu: burger vasemmalla, otsikko keskellä */
 .header {
   display: flex;
   flex-direction: row;
@@ -751,23 +750,20 @@ footer > div {
   padding-bottom: 8px;
 }
 
-/* ...existing code... */
-
 .header h1 {
   flex: 1;
   text-align: center;
   margin: 0;
 }
-/* =====================================================
-   РАСШИРЕННАЯ МОБИЛЬНАЯ АДАПТАЦИЯ ОСНОВНЫХ ЭЛЕМЕНТОВ
-   LAAJENNETTU PÄÄELEMENTTIEN MOBIILISOVITUS  
-   ===================================================== */
+/* ---
+  расширенная мобильная адаптация основных элементов
+  laajennettu pääelementtien mobiilisovitus
+  --- */
 
 @media (max-width: 600px) {
   body {
     font-size: 16px;
     padding: 5px;
-    /* Убираем отступы для максимального использования пространства */
   }
 
   .container {
@@ -776,13 +772,13 @@ footer > div {
     padding: 5px;
   }
 
-  /* Улучшенная таблица с лучшей прокруткой */
+  /* Улучшенная таблица с лучшей прокруткой / Improved table with better scrolling */
   #dataTable {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     padding: 0;
     margin: 0;
-    /* Добавляем тень для индикации прокрутки */
+    /* Добавляем тень для индикации прокрутки / Adding shadow to indicate scrolling */
     background: linear-gradient(90deg, white 30%, rgba(255, 255, 255, 0)),
       linear-gradient(90deg, rgba(255, 255, 255, 0), white 70%);
     background-size: 40px 100%, 40px 100%;
@@ -799,7 +795,7 @@ footer > div {
     display: table;
   }
 
-  /* Компактные ячейки таблицы */
+  /* Компактные ячейки таблицы / Compact table cells */
   td,
   th {
     padding: 8px 6px !important;
@@ -809,7 +805,7 @@ footer > div {
     max-width: 120px;
   }
 
-  /* Важные колонки делаем шире */
+  /* Важные колонки делаем шире / Tärkeitä sarakkeita laajennetaan */
   td:first-child,
   th:first-child,
   td:nth-child(2),
@@ -826,7 +822,7 @@ footer > div {
     display: revert;
   }
 
-  /* Улучшенный заголовок для мобильных */
+  /* Улучшенный заголовок для мобильных / Improved header for mobile */
   .header {
     flex-direction: column;
     align-items: center;
@@ -852,7 +848,7 @@ footer > div {
   }
 }
 
-/* Дополнительные улучшения для очень маленьких экранов */
+/* Дополнительные улучшения для очень маленьких экранов / Lisäparannuksia erittäin pienille näytöille */
 @media (max-width: 360px) {
   .header h1 {
     font-size: 20px;
@@ -868,7 +864,7 @@ footer > div {
     max-width: 100px;
   }
 
-  /* Скрываем менее важные колонки на очень маленьких экранах */
+  /* Скрываем менее важные колонки на очень маленьких экранах / Hide less important columns on very small screens */
   .hide-on-tiny {
     display: none !important;
   }
@@ -914,10 +910,9 @@ h1 {
   position: relative;
 }
 
-/* =====================================================
-   СТИЛИ ДЛЯ ВАЛИДАЦИИ EMAIL
-   SÄHKÖPOSTIVALIDOINNIN TYYLIT
-   ===================================================== */
+/* ---
+  стили для валидации email / sähköpostivalidoinnin tyylit
+  --- */
 
 /* Валидный email / Kelvollinen sähköposti */
 .email-valid {
@@ -957,14 +952,14 @@ h1 {
   }
 }
 
-/* =====================================================
-   ДОПОЛНИТЕЛЬНЫЕ МОБИЛЬНЫЕ УЛУЧШЕНИЯ
-   LISÄÄ MOBIILIPARANNUKSIA
-   ===================================================== */
+/* ---
+  дополнительные мобильные улучшения
+  lisää mobiiliparannuksia
+  --- */
 
-/* Улучшения для сенсорных устройств */
+/* Улучшения для сенсорных устройств / Parannuksia kosketuslaitteille */
 @media (hover: none) and (pointer: coarse) {
-  /* Увеличиваем области нажатия для touch устройств */
+  /* Увеличиваем области нажатия для touch устройств / Suurennetaan kosketusalueita touch-laitteille */
   button,
   .sortable,
   .side-btn,
@@ -973,14 +968,14 @@ h1 {
     padding: 12px 16px;
   }
 
-  /* Убираем hover эффекты на touch устройствах */
+  /* Убираем hover эффекты на touch устройствах / Poistetaan hover-efektit kosketuslaitteilla */
   .sortable:hover,
   .side-btn:hover,
   button:hover {
     background-color: inherit;
   }
 
-  /* Добавляем активное состояние для touch */
+  /* Добавляем активное состояние для touch / Lisätään aktiivinen tila kosketukselle */
   button:active,
   .side-btn:active,
   .sortable:active {
@@ -989,7 +984,7 @@ h1 {
   }
 }
 
-/* Ландшафтная ориентация на мобильных */
+/* Ландшафтная ориентация на мобильных / Maisemaorientaatio mobiililaitteilla */
 @media (max-width: 768px) and (orientation: landscape) {
   .header {
     flex-direction: row;
@@ -1006,23 +1001,23 @@ h1 {
     margin-left: auto;
   }
 
-  /* Компактная боковая панель в ландшафте */
+  /* Компактная боковая панель в ландшафте / Kompakti sivupalkki vaaka-asennossa */
   .side-menu {
     width: 250px;
   }
 }
 
-/* Темная тема для устройств с dark mode */
+/* Темная тема для устройств с dark mode / Tumma teema laitteille, joissa on tumma tila */
 @media (prefers-color-scheme: dark) {
-  /* Пока оставляем базовую поддержку, можно расширить позже */
+  /* Пока оставляем базовую поддержку, можно расширить позже / Jätetään perustuki toistaiseksi, voidaan laajentaa myöhemmin */
   .modal-overlay {
     background-color: rgba(0, 0, 0, 0.8);
   }
 }
 
-/* Высокие DPI экраны (Retina) */
+/* Высокие DPI экраны (Retina) / Korkean DPI:n näytöt (Retina) */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  /* Более четкие границы для высоких DPI */
+  /* Более четкие границы для высоких DPI / Terävämmät reunat korkean DPI:n näytöille */
   table,
   th,
   td {
@@ -1030,7 +1025,7 @@ h1 {
   }
 }
 
-/* Улучшения для модальных окон на мобильных */
+/* Улучшения для модальных окон на мобильных / Parannuksia mobiililaitteiden modaalille */
 @media (max-width: 600px) {
   .modal-overlay {
     padding: 10px;
@@ -1045,7 +1040,7 @@ h1 {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   }
 
-  /* Закрытие модального окна свайпом (визуальная подсказка) */
+  /* Закрытие модального окна свайпом (визуальная подсказка) / Modalin sulkeminen pyyhkäisyllä (visuaalinen vihje) */
   .modal-window::before {
     content: "";
     display: block;
@@ -1056,17 +1051,17 @@ h1 {
     margin: 8px auto;
   }
 
-  /* Улучшенные формы в модальных окнах */
+  /* Улучшенные формы в модальных окнах / Parannetut lomakkeet modaalissa */
   .modal-window input,
   .modal-window select,
   .modal-window textarea {
-    font-size: 16px; /* Предотвращает зум на iOS */
+    font-size: 16px; /* Предотвращает зум на iOS / Prevents zoom on iOS */
     padding: 12px;
     border-radius: 8px;
   }
 }
 
-/* Поддержка notch (вырез) на iPhone X и новее */
+/* Поддержка notch (вырез) на iPhone X и новее / iPhone X:n ja uudemman notch-tuki */
 @media (max-width: 600px) {
   body {
     padding-left: env(safe-area-inset-left);
@@ -1078,12 +1073,12 @@ h1 {
   }
 }
 
-/* =====================================================
-   УТИЛИТЫ ДЛЯ АДАПТИВНОСТИ
-   RESPONSIIVISUUSTYÖKALUT
-   ===================================================== */
+/* ---
+  утилиты для адаптивности
+  responsiivisuustyökalut
+  --- */
 
-/* Классы для скрытия/показа на разных экранах */
+/* Классы для скрытия/показа на разных экранах / Luokat eri näyttöjen piilottamiseen/näyttämiseen */
 .hide-mobile {
   display: block;
 }
@@ -1121,7 +1116,7 @@ h1 {
   }
 }
 
-/* Дополнительные мобильные классы */
+/* Дополнительные мобильные классы / Lisä mobiililuokkia */
 .mobile-device .mobile-full-width {
   width: 100% !important;
 }
@@ -1151,10 +1146,10 @@ h1 {
   padding: 6px 4px !important;
 }
 
-/* =====================================================
+/* ---
    СТИЛИ ДЛЯ ОТЧЕТОВ НА МОБИЛЬНЫХ УСТРОЙСТВАХ
    RAPORTTITYYLIEN MÄÄRITTELYT MOBIILILAITTEILLE
-   ===================================================== */
+   --- */
 
 /* Контейнер отчета */
 #reportContent {

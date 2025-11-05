@@ -209,10 +209,10 @@ function applyPhoneMask(input) {
   input.value = value;
 }
 
-// =====================================================
+// ---
 // ФУНКЦИИ ВАЛИДАЦИИ EMAIL
 // SÄHKÖPOSTIOSOITTEEN VALIDOINTIFUNKTIOT
-// =====================================================
+// ---
 
 // Функция для валидации email адреса
 // Funktio sähköpostiosoitteen validointiin
@@ -414,10 +414,10 @@ function initializeInputMasks() {
   });
 }
 
-// =====================================================
+// ---
 // ФУНКЦИИ УПРАВЛЕНИЯ ВИДИМОСТЬЮ КОЛОНОК И ЭЛЕМЕНТОВ
 // TOIMINTOJEN NÄKYVYYDEN HALLINTA FUNKTIOT
-// =====================================================
+// ---
 
 // Показать/скрыть заголовок колонки действий для учителей и студентов
 // Näytä/piilota toimintojen sarakkeen otsikko opettajille ja opiskelijoille
@@ -440,10 +440,10 @@ function updateActionsHeader() {
   actionsHeader.style.display = isTeacher || isStudent ? "table-cell" : "none";
 }
 
-// =====================================================
+// ---
 // ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ
 // SOVELLUKSEN ALUSTUS SIVUN LATAUTUESSA
-// =====================================================
+// ---
 
 // Вызываем функции после загрузки страницы и после входа/выхода
 // Kutsutaan funktioita sivun latauduttua ja kirjautumisen/uloskirjautumisen jälkeen
@@ -465,10 +465,10 @@ window.addEventListener("DOMContentLoaded", function () {
 // Kuunnellaan localStorage muutoksia (esim. kirjautumisessa/uloskirjautumisessa)
 window.addEventListener("storage", updateActionsHeader);
 
-// =====================================================
+// ---
 // ФУНКЦИИ МОДАЛЬНОГО ОКНА СПИСКА СТУДЕНТОВ
 // OPISKELIJALUETTELON MODAL-IKKUNAN FUNKTIOT
-// =====================================================
+// ---
 
 // Открыть модальное окно со списком студентов
 // Avaa opiskelijaluettelon modal-ikkuna
@@ -561,10 +561,10 @@ async function loadStudentList(sortBy = "st_name", sortOrder = "asc") {
   }
 }
 
-// =====================================================
+// ---
 // ФУНКЦИИ МОДАЛЬНОГО ОКНА СПИСКА КОМПАНИЙ
 // YRITYSLUETTELON MODAL-IKKUNAN FUNKTIOT
-// =====================================================
+// ---
 
 // Открыть модальное окно со списком компаний
 // Avaa yritysluettelon modal-ikkuna
@@ -706,10 +706,10 @@ function editCompanyRow(tr, company, companies, idx) {
   };
 }
 
-// =====================================================
+// ---
 // ФУНКЦИИ ВСТРОЕННОГО РЕДАКТИРОВАНИЯ СТРОК ТАБЛИЦЫ
 // TAULUKKORIVIEN SISÄÄNRAKENNETUT MUOKKAUSTOIMINNOT
-// =====================================================
+// ---
 
 // Функция редактирования строки студента прямо в таблице
 // Opiskelijan rivin muokkaustoiminto suoraan taulukossa
@@ -1754,10 +1754,10 @@ function openPaikkaModal() {
   setMinDatesForWorkplace();
 }
 
-// =====================================================
+// ---
 // ФУНКЦИИ УПРАВЛЕНИЯ ДАТАМИ И ОГРАНИЧЕНИЯМИ
 // PÄIVÄMÄÄRIEN JA RAJOITUSTEN HALLINTA
-// =====================================================
+// ---
 
 // Устанавливает минимальные даты для формы рабочего места (только сегодня и будущие даты)
 // Asettaa vähimmäispäivämäärät työpaikkaformulaarille (vain tänään ja tulevat päivämäärät)
@@ -1797,10 +1797,10 @@ function closePaikkaModal() {
   document.getElementById("PaikkaModalOverlay").style.display = "none";
 }
 
-// =====================================================
+// ---
 // ФУНКЦИИ ПОИСКА ПО ТАБЛИЦЕ МЕСТ ПРАКТИКИ
 // HARJOITTELUPAIKKATAULUKON HAKUTOIMINNOT
-// =====================================================
+// ---
 
 // Инициализация поиска - добавляем обработчики событий
 // Haun alustus - lisätään tapahtumankäsittelijät
@@ -1873,10 +1873,10 @@ function filterWorkplaceTable(searchTerm) {
   }
 }
 
-// =====================================================
+// ---
 // ФУНКЦИИ ПОИСКА И ФИЛЬТРАЦИИ КОМПАНИЙ
 // YRITYSTEN HAKU- JA SUODATUSTOIMINNOT
-// =====================================================
+// ---
 
 // Заполнение выпадающего списка групп уникальными значениями
 // Ryhmien pudotusvalikon täyttäminen yksilöllisillä arvoilla
@@ -1904,10 +1904,10 @@ function populateGroupFilter(students) {
   });
 }
 
-// =====================================================
+// ---
 // ФУНКЦИИ ПОИСКА И ФИЛЬТРАЦИИ СТУДЕНТОВ
 // OPISKELIJOIDEN HAKU- JA SUODATUSTOIMINNOT
-// =====================================================
+// ---
 
 // Инициализация поиска студентов - добавляем обработчики событий
 // Opiskelijahaun alustus - lisätään tapahtumankäsittelijät
@@ -2029,10 +2029,10 @@ function populateGroupFilter(students) {
   });
 }
 
-// =====================================================
+// ---
 // ФУНКЦИИ ПОИСКА И ФИЛЬТРАЦИИ КОМПАНИЙ
 // YRITYSTEN HAKU- JA SUODATUSTOIMINNOT
-// =====================================================
+// ---
 
 // Инициализация поиска компаний - добавляем обработчики событий
 // Yrityshaun alustus - lisätään tapahtumankäsittelijät
@@ -2662,10 +2662,10 @@ document
     }
   });
 
-// =====================================================
+// ---
 // ПРОСТАЯ СОРТИРОВКА ТАБЛИЦЫ ПО ИМЕНИ СТУДЕНТА
 // YKSINKERTAINEN TAULUKON LAJITTELU OPISKELIJAN NIMEN MUKAAN
-// =====================================================
+// ---
 
 // Переменная для отслеживания направления сортировки
 // Muuttuja lajittelusuunnan seurantaan
@@ -2710,10 +2710,10 @@ function updateSortIndicators(direction) {
   }
 }
 
-// =====================================================
+// ---
 // ФУНКЦИИ СОРТИРОВКИ ТАБЛИЦЫ СТУДЕНТОВ
 // OPISKELIJATAULUKON LAJITTELUFUNKTIOT
-// =====================================================
+// ---
 
 // Функция для отображения списка студентов в таблице
 // Funktio opiskelijalistan näyttämiseen taulukossa

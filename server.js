@@ -53,10 +53,10 @@ app.use(express.static(__dirname));
 // Kytketään middleware JSON:n jäsentämiseen pyynnöissä
 app.use(express.json());
 
-// =====================================================
+// ---
 // НАСТРОЙКА ПОДКЛЮЧЕНИЯ К БАЗЕ ДАННЫХ
 // TIETOKANTAYHTEYDEN KONFIGURAATIO
-// =====================================================
+// ---
 
 // Создаем пул подключений к PostgreSQL базе данных
 // Luodaan PostgreSQL tietokantayhteyksien pool
@@ -77,10 +77,10 @@ pool.on("error", (err) => {
   console.error("❌ Connection error to PostgreSQL:", err);
 });
 
-// =====================================================
+// ---
 // API ENDPOINTS ДЛЯ РАБОТЫ С ДАННЫМИ
 // API-PÄÄTEPISTEET TIETOJEN KÄSITTELYYN
-// =====================================================
+// ---
 
 // Получить список мест практики с фильтрацией по ролям
 // Hae harjoittelupaikkojen luettelo roolisuodatuksella
@@ -131,6 +131,7 @@ app.listen(3000, () => {
 });
 
 // Добавление нового студента
+// Uuden opiskelijan lisääminen
 app.post("/add-student", async (req, res) => {
   const { nimi, sukunimi, ryhma } = req.body;
   try {
@@ -145,6 +146,7 @@ app.post("/add-student", async (req, res) => {
   }
 });
 // Добавление новой компании
+// Uuden yrityksen lisääminen
 app.post("/add-company", async (req, res) => {
   const { nimi, count_place, y_tunnus, address } = req.body;
   try {
@@ -160,6 +162,7 @@ app.post("/add-company", async (req, res) => {
 });
 
 // Получить список студентов (id, имя и фамилия)
+// Hae opiskelijoiden luettelo (id, etunimi ja sukunimi)
 app.get("/students", async (req, res) => {
   try {
     const result = await pool.query(
@@ -173,6 +176,7 @@ app.get("/students", async (req, res) => {
 });
 
 // Получить список компаний (id и имя)
+// Hae yritysten luettelo (id ja nimi)
 app.get("/companies", async (req, res) => {
   try {
     const result = await pool.query(
@@ -186,6 +190,7 @@ app.get("/companies", async (req, res) => {
 });
 
 // Обновление компании
+// Yrityksen päivitys
 app.put("/companies/:id", async (req, res) => {
   const { id } = req.params;
   const { company_name, count_place, tunnus, address } = req.body;
@@ -206,6 +211,7 @@ app.put("/companies/:id", async (req, res) => {
 });
 
 // Добавление нового места практики
+// Uuden harjoittelupaikan lisääminen
 app.post("/add-workplace", async (req, res) => {
   let {
     student_id,
@@ -251,16 +257,19 @@ app.post("/add-workplace", async (req, res) => {
 });
 
 // Endpoint для получения кодового слова преподавателя (для проверки)
+// Päätepiste opettajan koodisanan hakemiseksi (tarkistusta varten)
 app.get("/api/teacher-code", (req, res) => {
   const code = process.env.OppiKodi || "secret123";
   res.json({ code: code });
 });
 
 // Добавление пользователя с хешированием пароля
+// Käyttäjän lisääminen salasanan tiivistyksellä
 app.post("/add-user", async (req, res) => {
   const { nimi, email, password, role, student_id } = req.body;
   try {
     // Проверка на существование email
+    // Tarkistus sähköpostin olemassaolosta
     const check = await pool.query(
       "SELECT user_id FROM users WHERE user_email = $1",
       [email]
@@ -292,6 +301,7 @@ app.post("/add-user", async (req, res) => {
 });
 
 // Логин пользователя
+// Käyttäjän kirjautuminen
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -323,6 +333,7 @@ app.post("/api/login", async (req, res) => {
 });
 
 // Получить полный список компаний для списка (company_name, count_place, tunnus, address)
+// Hae yritysten täydellinen luettelo (company_name, count_place, tunnus, address)
 app.get("/companies-full", async (req, res) => {
   try {
     const result = await pool.query(
@@ -336,6 +347,7 @@ app.get("/companies-full", async (req, res) => {
 });
 
 // Получить полный список студентов для списка (student_id, st_name, st_s_name, st_group)
+// Hae opiskelijoiden täydellinen luettelo (student_id, st_name, st_s_name, st_group)
 app.get("/students-full", async (req, res) => {
   try {
     // Получаем параметры сортировки из query string
@@ -369,11 +381,13 @@ app.get("/students-full", async (req, res) => {
 });
 
 // Обновить студента (только для учителей)
+// Päivitä opiskelija (vain opettajille)
 app.put("/students/:id", async (req, res) => {
   try {
     const userRole = req.headers["x-user-role"];
 
     // Проверяем, что это учитель
+    // Tarkistetaan, että käyttäjä on opettaja
     if (userRole !== "2") {
       return res
         .status(403)
@@ -404,6 +418,7 @@ app.put("/students/:id", async (req, res) => {
 });
 
 // Обновление места практики
+// Harjoittelupaikan päivitys
 app.put("/workplace", async (req, res) => {
   const {
     row_id,
@@ -450,9 +465,9 @@ app.put("/workplace", async (req, res) => {
   }
 });
 
-// =====================================================
+// ---
 // ОТЧЕТЫ / RAPORTIT
-// =====================================================
+// ---
 
 // Получение отчета по местам практики
 // Harjoittelupaikkaraportin hakeminen
@@ -513,6 +528,7 @@ app.get("/company-report", async (req, res) => {
 });
 
 // Удаление места практики
+// Harjoittelupaikan poistaminen
 app.delete("/workplace", async (req, res) => {
   const { student_id, company_id } = req.body;
   try {

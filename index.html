@@ -28,16 +28,16 @@ tämä sivu sisältää käyttöliittymän hallintaan:
 -->
   <head>
     <meta charset="UTF-8" />
-    <!-- Улучшенный viewport для мобильных устройств -->
+  <!-- Улучшенный viewport для мобильных устройств / Parannettu viewport mobiililaitteille -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <!-- PWA и мобильные мета-теги -->
+  <!-- PWA и мобильные мета-теги / PWA- ja mobiilimetatunnisteet -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="theme-color" content="#357ab8" />
     <title>Harjoittelupaikat</title>
     <link rel="icon" type="image/png" href="clock.png" />
-    <!-- Apple Touch Icon для лучшего вида на iOS -->
+  <!-- Apple Touch Icon для лучшего вида на iOS / Apple Touch -kuvake parempaan ulkoasuun iOS:llä -->
     <link rel="apple-touch-icon" href="clock.png" />
     <link rel="stylesheet" href="app.css" />
   </head>
@@ -90,7 +90,7 @@ tämä sivu sisältää käyttöliittymän hallintaan:
       style="display: none"
       onmouseleave="closeSideMenu()"
     >
-      <!-- боковое меню кнопок -->
+  <!-- боковое меню кнопок / Sivupainikkeiden valikko -->
         <div class="side-btn submenu-parent" id="studentsMenuBtn">
           Opiskelijat
           <span class="submenu-arrow">▶</span>
@@ -151,7 +151,7 @@ tämä sivu sisältää käyttöliittymän hallintaan:
               </tr>
             </thead>
             <tbody id="studentListTableBody">
-              <!-- täytetään js:llä -->
+              <!-- заполняется через js / täytetään js:llä -->
             </tbody>
           </table>
         </div>
@@ -240,7 +240,7 @@ tämä sivu sisältää käyttöliittymän hallintaan:
               </tr>
             </thead>
             <tbody id="companyListTableBody">
-              <!-- täytetään js:llä -->
+              <!-- заполняется через js / täytetään js:llä -->
             </tbody>
           </table>
         </div>
@@ -294,12 +294,12 @@ tämä sivu sisältää käyttöliittymän hallintaan:
           </tr>
         </thead>
         <tbody id="tableBody">
-          <!-- данные будут подгружаться через js -->
+          <!-- данные будут подгружаться через js / Tiedot ladataan js:n kautta -->
         </tbody>
       </table>
     </div>
 
-    <!-- modal ikkuna: uusi opiskelija -->
+  <!-- модальное окно: новый студент / modal ikkuna: uusi opiskelija -->
     <div id="OppilasModalOverlay" class="modal-overlay" style="display: none">
       <div id="OppilasModal" class="modal-window">
         <button class="close-btn" onclick="closeOppilasModal()" title="Close">
@@ -333,7 +333,7 @@ tämä sivu sisältää käyttöliittymän hallintaan:
       </div>
     </div>
 
-    <!-- modal ikkuna: uusi paikka -->
+  <!-- модальное окно: новое место / modal ikkuna: uusi paikka -->
     <div id="PaikkaModalOverlay" class="modal-overlay" style="display: none">
       <div id="PaikkaModal" class="modal-window">
         <button class="close-btn" onclick="closePaikkaModal()" title="Close">
@@ -408,7 +408,7 @@ tämä sivu sisältää käyttöliittymän hallintaan:
       </div>
     </div>
 
-    <!-- modal ikkuna: uusi yritys -->
+  <!-- модальное окно: новая компания / modal ikkuna: uusi yritys -->
     <div id="YritysModalOverlay" class="modal-overlay" style="display: none">
       <div id="YritysModal" class="modal-window">
         <button class="close-btn" onclick="closeYritysModal()" title="Close">
@@ -466,7 +466,7 @@ tämä sivu sisältää käyttöliittymän hallintaan:
       </div>
     </div>
 
-    <!-- modal ikkuna: uusi kayttaja -->
+  <!-- модальное окно: новый пользователь / modal ikkuna: uusi kayttaja -->
     <div id="UsersModalOverlay" class="modal-overlay" style="display: none">
       <div id="UsersModal" class="modal-window">
         <button class="close-btn" onclick="closeUsersModal()" title="Close">
@@ -747,7 +747,7 @@ tämä sivu sisältää käyttöliittymän hallintaan:
               </tr>
             </thead>
             <tbody id="adminUsersTableBody">
-              <!-- täytetään js:llä -->
+              <!-- заполняется через js / täytetään js:llä -->
             </tbody>
           </table>
         </div>
