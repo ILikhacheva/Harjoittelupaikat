@@ -1,30 +1,30 @@
 <!DOCTYPE html>
 <html lang="fi">
 <!--
-=====================================================
-СИСТЕМА УПРАВЛЕНИЯ МЕСТАМИ ПРАКТИКИ - ГЛАВНАЯ СТРАНИЦА
-HARJOITTELUPAIKKOJEN HALLINTAJÄRJESTELMÄ - PÄÄSIVU
-=====================================================
+---
+система управления местами практики - главная страница
+harjoittelupaikkojen hallintajärjestelmä - pääsivu
+---
 
-Эта страница содержит интерфейс для управления:
-Tämä sivu sisältää käyttöliittymän hallintaan:
+эта страница содержит интерфейс для управления:
+tämä sivu sisältää käyttöliittymän hallintaan:
 
-- Студентов и их данных (добавление, просмотр, редактирование)
-  Opiskelijat ja heidän tietonsa (lisäys, katselu, muokkaus)
+- студентов и их данных (добавление, просмотр, редактирование)
+  opiskelijat ja heidän tietonsa (lisäys, katselu, muokkaus)
 
-- Компаний и мест практики (управление для учителей)
-  Yritykset ja harjoittelupaikat (hallinta opettajille)
+- компаний и мест практики (управление для учителей)
+  yritykset ja harjoittelupaikat (hallinta opettajille)
 
-- Системы входа и ролевой авторизации
-  Kirjautumisjärjestelmä ja roolipohjainen valtuutus
+- системы входа и ролевой авторизации
+  kirjautumisjärjestelmä ja roolipohjainen valtuutus
 
-Роли пользователей / Käyttäjäroolit:
-- Студент (3): может видеть только свои данные
-  Opiskelija (3): voi nähdä vain omat tietonsa
-- Учитель (2): полный доступ к управлению
-  Opettaja (2): täysi hallintaoikeus
+роли пользователей / käyttäjäroolit:
+- студент (3): может видеть только свои данные
+  opiskelija (3): voi nähdä vain omat tietonsa
+- учитель (2): полный доступ к управлению
+  opettaja (2): täysi hallintaoikeus
 
-=====================================================
+---
 -->
   <head>
     <meta charset="UTF-8" />
@@ -34,12 +34,12 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
     <link rel="stylesheet" href="app.css" />
   </head>
   <body>
-    <!-- =====================================================
-         ЗАГОЛОВОК И НАВИГАЦИЯ
-         OTSIKKO JA NAVIGOINTI
-         ===================================================== -->
+    <!-- ---
+         заголовок и навигация
+         otsikko ja navigointi
+         --- -->
     
-    <!-- Объединяем бургер меню и заголовок / Yhdistetään burgeri-valikko ja otsikko -->
+    <!-- объединяем бургер меню и заголовок / yhdistetään burgeri-valikko ja otsikko -->
     <div class="header">
       <h1>Tervetuloa harjoittelupaikat sivustolle!</h1>
       <div id="burgerMenu" onclick="openSideMenu()">
@@ -61,28 +61,28 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
     </div>
     <div class="divider"></div>
     
-    <!-- =====================================================
-         ЭКРАН ПРИВЕТСТВИЯ ДЛЯ НЕАВТОРИЗОВАННЫХ ПОЛЬЗОВАТЕЛЕЙ
-         TERVETULORUUTU VALTUUTTAMATTOMILLE KÄYTTÄJILLE
-         ===================================================== -->
+    <!-- ---
+         экран приветствия для неавторизованных пользователей
+         tervetuloruutu valtuuttamattomille käyttäjille
+         --- -->
     
-    <!-- Показывается когда никто не вошел / Näytetään kun kukaan ei ole kirjautunut -->
+    <!-- показывается когда никто не вошел / näytetään kun kukaan ei ole kirjautunut -->
     <div id="welcomeGif" style="text-align: center; margin: 50px auto; display: block;">
       <img src="odotta.gif" alt="Odottaa..." style="max-width: 400px; height: auto;">
       <p style="font-size: 48px; font-weight: #32404f; margin-top: 48px;">Kirjaudu sisään nähdäksesi harjoittelupaikat</p>
     </div>
     
-    <!-- =====================================================
-         БОКОВОЕ МЕНЮ НАВИГАЦИИ
-         SIVUNAVIGOINTIVALIKKO
-         ===================================================== -->
+    <!-- ---
+         боковое меню навигации
+         sivunavigointivalikko
+         --- -->
     <div  
       id="sideMenu"
       class="side-menu"
       style="display: none"
       onmouseleave="closeSideMenu()"
     >
-      <!-- Боковое меню кнопок -->
+      <!-- боковое меню кнопок -->
         <div class="side-btn submenu-parent" id="studentsMenuBtn">
           Opiskelijat
           <span class="submenu-arrow">▶</span>
@@ -91,13 +91,13 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
             <button class="submenu-btn" id="listStudentBtn" aria-disabled="true" disabled onclick="openStudentListModal(); event.stopPropagation();">Lista</button>
           </div>
         </div>
-    <!-- Modal: Student List -->
+    <!-- modal: student list -->
     <div id="StudentListModalOverlay" class="modal-overlay" style="display: none">
       <div class="modal-window" style="min-width: 420px; max-width: 90vw;">
         <button class="close-btn" onclick="closeStudentListModal()" title="Close">×</button>
         <h2>Opiskelijat</h2>
         
-        <!-- Поиск и фильтры для студентов / Haku ja suodattimet opiskelijoille -->
+        <!-- поиск и фильтры для студентов / haku ja suodattimet opiskelijoille -->
         <div class="student-search-container" style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
           <input 
             type="text" 
@@ -143,7 +143,7 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
               </tr>
             </thead>
             <tbody id="studentListTableBody">
-              <!-- Täytetään JS:llä -->
+              <!-- täytetään js:llä -->
             </tbody>
           </table>
         </div>
@@ -169,6 +169,14 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
       </button>
       <button
         class="side-btn"
+        onclick="openAdminModal(); closeSideMenu();"
+        id="adminBtn"
+        style="display: none"
+      >
+        Asetukset
+      </button>
+      <button
+        class="side-btn"
         onclick="openLoginModal(); closeSideMenu();"
         id="loginBtn"
       >
@@ -183,13 +191,13 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
         Kirjaudu ulos
       </button>
     </div>
-    <!-- Modal: Company List -->
+    <!-- modal: company list -->
     <div id="CompanyListModalOverlay" class="modal-overlay" style="display: none">
       <div class="modal-window" style="min-width: 420px; max-width: 90vw;">
         <button class="close-btn" onclick="closeCompanyListModal()" title="Close">×</button>
         <h2>Yritykset</h2>
 
-        <!-- Поиск и фильтры для компаний / Haku ja suodattimet yrityksille -->
+        <!-- поиск и фильтры для компаний / haku ja suodattimet yrityksille -->
         <div class="company-search-container" style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
           <input 
             type="text" 
@@ -203,10 +211,10 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
           >
             <option value="">Kaikki osoitteet</option>
           </select>
-          <button 
+            <button 
             id="clearCompanyFiltersBtn" 
             style="padding: 6px 10px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;"
-            title="Tyhjennä suodattimet / Очистить фильтры"
+            title="tyhjennä suodattimet / очистить фильтры"
           >
             ✖️
           </button>
@@ -224,21 +232,21 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
               </tr>
             </thead>
             <tbody id="companyListTableBody">
-              <!-- Täytetään JS:llä -->
+              <!-- täytetään js:llä -->
             </tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- =====================================================
-         ТАБЛИЦА МЕСТ ПРАКТИКИ С ПОИСКОМ
-         HARJOITTELUPAIKKATAULUKKO HAULLA
-         ===================================================== -->
+    <!-- ---
+         таблица мест практики с поиском
+         harjoittelupaikkataulukko haulla
+         --- -->
     <div id="dataTable" style="display:none;">
       <h2>Harjoittelupaikat</h2>
       
-      <!-- Поле поиска / Hakukenttä -->
+      <!-- поле поиска / hakukenttä -->
       <div class="search-container" style="margin-bottom: 15px;">
         <input 
           type="text" 
@@ -246,10 +254,10 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
           placeholder="Etsi opiskelijaa tai harjoittelupaikkaa..."
           style="width: 100%; max-width: 400px; padding: 8px 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px;"
         />
-        <button 
+          <button 
           id="clearSearchBtn" 
           style="margin-left: 8px; padding: 8px 12px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;"
-          title="Tyhjennä haku / Очистить поиск"
+          title="tyhjennä haku / очистить поиск"
         >
           ✖️
         </button>
@@ -278,12 +286,12 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
           </tr>
         </thead>
         <tbody id="tableBody">
-          <!-- Данные будут подгружаться через JS -->
+          <!-- данные будут подгружаться через js -->
         </tbody>
       </table>
     </div>
 
-    <!-- Modal ikkuna: uusi opiskelija -->
+    <!-- modal ikkuna: uusi opiskelija -->
     <div id="OppilasModalOverlay" class="modal-overlay" style="display: none">
       <div id="OppilasModal" class="modal-window">
         <button class="close-btn" onclick="closeOppilasModal()" title="Close">
@@ -317,7 +325,7 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
       </div>
     </div>
 
-    <!-- Modal ikkuna: uusi paikka -->
+    <!-- modal ikkuna: uusi paikka -->
     <div id="PaikkaModalOverlay" class="modal-overlay" style="display: none">
       <div id="PaikkaModal" class="modal-window">
         <button class="close-btn" onclick="closePaikkaModal()" title="Close">
@@ -392,7 +400,7 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
       </div>
     </div>
 
-    <!-- Modal ikkuna: uusi yritys -->
+    <!-- modal ikkuna: uusi yritys -->
     <div id="YritysModalOverlay" class="modal-overlay" style="display: none">
       <div id="YritysModal" class="modal-window">
         <button class="close-btn" onclick="closeYritysModal()" title="Close">
@@ -450,7 +458,7 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
       </div>
     </div>
 
-    <!-- Modal ikkuna: uusi kayttaja -->
+    <!-- modal ikkuna: uusi kayttaja -->
     <div id="UsersModalOverlay" class="modal-overlay" style="display: none">
       <div id="UsersModal" class="modal-window">
         <button class="close-btn" onclick="closeUsersModal()" title="Close">
@@ -526,7 +534,7 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
       </div>
     </div>
 
-    <!-- Modal: Report -->
+    <!-- modal: report -->
     <div id="ReportModalOverlay" class="modal-overlay" style="display: none">
       <div class="modal-window" style="max-width: 95%; width: 1200px;">
         <button class="close-btn" onclick="closeReportModal()" title="Close">×</button>
@@ -550,7 +558,7 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
       </div>
     </div>
 
-    <!-- Modal: Login -->
+    <!-- modal: login -->
     <div id="LoginModalOverlay" class="modal-overlay" style="display: none">
       <div class="modal-window">
         <button class="close-btn" onclick="closeLoginModal()" title="Close">
@@ -571,15 +579,9 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
               required
             />
           </div>
-          <div class="buttons">
-            <button type="submit" class="btn btn-primary">Kirjaudu</button>
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="closeLoginModal()"
-            >
-              Peruuta
-            </button>
+          
+          <!-- ссылки под полем пароля / linkit salasanakentän alla -->
+          <div style="margin-bottom: 15px; text-align: center;">
             <button
               type="button"
               class="btn btn-link"
@@ -589,18 +591,207 @@ Tämä sivu sisältää käyttöliittymän hallintaan:
                 color: #357ab8;
                 text-decoration: underline;
                 cursor: pointer;
-                padding-left: 0;
+                padding: 5px 10px;
+                margin-right: 15px;
+                font-size: 14px;
               "
               onclick="closeLoginModal(); openKirjauduModal();"
             >
               Rekisteröidy
+            </button>
+            <button
+              type="button"
+              class="btn btn-link"
+              style="
+                background: none;
+                border: none;
+                color: #dc3545;
+                text-decoration: underline;
+                cursor: pointer;
+                padding: 5px 10px;
+                font-size: 14px;
+              "
+              onclick="closeLoginModal(); openForgotPasswordModal();"
+            >
+              Unohdin salasanan
+            </button>
+          </div>
+          
+          <div class="buttons">
+            <button type="submit" class="btn btn-primary">Kirjaudu</button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeLoginModal()"
+            >
+              Peruuta
             </button>
           </div>
         </form>
       </div>
     </div>
 
-    <!-- Modal: Logout -->
+    <!-- modal: forgot password -->
+    <div id="ForgotPasswordModalOverlay" class="modal-overlay" style="display: none">
+      <div class="modal-window">
+        <button class="close-btn" onclick="closeForgotPasswordModal()" title="Close">
+          ×
+        </button>
+        <h2>Salasanan palautus</h2>
+        <form id="forgot-password-form" method="post" action="#">
+          <div class="form-group">
+            <label for="forgotEmail">Sähköposti:</label>
+            <input type="email" id="forgotEmail" name="forgotEmail" placeholder="nimi@domain.com" required />
+            <div id="emailCheckMessage" style="margin-top: 5px; font-size: 14px;"></div>
+          </div>
+          <div id="passwordResetFields" style="display: none;">
+            <div class="form-group">
+              <label for="newPassword">Uusi salasana:</label>
+              <input
+                type="password"
+                id="newPassword"
+                name="newPassword"
+                minlength="6"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="confirmPassword">Vahvista salasana:</label>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                minlength="6"
+                required
+              />
+              <div id="passwordMatchMessage" style="margin-top: 5px; font-size: 14px;"></div>
+            </div>
+          </div>
+          <div class="buttons">
+            <button type="button" id="checkEmailBtn" class="btn btn-primary" onclick="checkEmailExists()">
+              Tarkista sähköposti
+            </button>
+            <button type="submit" id="resetPasswordBtn" class="btn btn-primary" style="display: none;">
+              Vaihda salasana
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeForgotPasswordModal()"
+            >
+              Peruuta
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- modal: admin panel -->
+    <div id="AdminModalOverlay" class="modal-overlay" style="display: none">
+      <div class="modal-window" style="max-width: 90%; width: 800px;">
+        <button class="close-btn" onclick="closeAdminModal()" title="Close">×</button>
+        <h2>Hallintapaneeli</h2>
+        
+        <div style="margin-bottom: 20px;">
+          <h3>Käyttäjien hallinta</h3>
+          
+          <!-- поиск пользователей / käyttäjähaku -->
+          <div class="admin-search-container" style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <input 
+              type="text" 
+              id="adminUserSearchInput" 
+              placeholder="etsi nimellä tai sähköpostilla..."
+              style="flex: 1; min-width: 200px; padding: 6px 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px;"
+            />
+            <select 
+              id="adminRoleFilterSelect" 
+              style="padding: 6px 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px;"
+            >
+              <option value="">kaikki roolit</option>
+              <option value="2">opettaja</option>
+              <option value="3">opiskelija</option>
+            </select>
+            <button 
+              id="clearAdminFiltersBtn" 
+              style="padding: 6px 10px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;"
+              title="tyhjennä suodattimet"
+            >
+              ✖️
+            </button>
+            <button 
+              onclick="loadUsersList()"
+              style="padding: 6px 12px; background: #357ab8; color: white; border: none; border-radius: 4px; cursor: pointer;"
+            >
+              päivitä lista
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-table-scroll">
+          <table border="1" style="width:100%;">
+            <thead>
+              <tr>
+                <th>nimi</th>
+                <th>sähköposti</th>
+                <th>rooli</th>
+                <th>salasana</th>
+                <th>toiminnot</th>
+              </tr>
+            </thead>
+            <tbody id="adminUsersTableBody">
+              <!-- täytetään js:llä -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- modal: change password -->
+    <div id="ChangePasswordModalOverlay" class="modal-overlay" style="display: none">
+      <div class="modal-window">
+        <button class="close-btn" onclick="closeChangePasswordModal()" title="Close">
+          ×
+        </button>
+        <h2>vaihda salasana</h2>
+        <p style="margin-bottom: 15px; color: #666;">ylläpitäjä on nollannut salasanasi. aseta uusi salasana.</p>
+        
+        <form id="change-password-form" method="post" action="#">
+          <div class="form-group">
+            <label for="userNewPassword">uusi salasana:</label>
+            <input
+              type="password"
+              id="userNewPassword"
+              name="userNewPassword"
+              minlength="6"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="userConfirmPassword">vahvista salasana:</label>
+            <input
+              type="password"
+              id="userConfirmPassword"
+              name="userConfirmPassword"
+              minlength="6"
+              required
+            />
+            <div id="userPasswordMatchMessage" style="margin-top: 5px; font-size: 14px;"></div>
+          </div>
+          <div class="buttons">
+            <button type="submit" class="btn btn-primary">vaihda salasana</button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="closeChangePasswordModal()"
+            >
+              peruuta
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- modal: logout -->
     <div id="LogoutModalOverlay" class="modal-overlay" style="display: none">
       <div class="modal-window">
         <button class="close-btn" onclick="closeLogoutModal()" title="Close">

@@ -1,24 +1,24 @@
-// =====================================================
-// СЕРВЕРНАЯ ЧАСТЬ СИСТЕМЫ УПРАВЛЕНИЯ МЕСТАМИ ПРАКТИКИ
-// HARJOITTELUPAIKKOJEN HALLINTAJÄRJESTELMÄN PALVELINPUOLI
-// =====================================================
+// ---
+// серверная часть системы управления местами практики
+// harjoittelupaikkojen hallintajärjestelmän palvelinpuoli
+// ---
 //
-// Этот файл содержит Express.js сервер с API endpoints для:
-// Tämä tiedosto sisältää Express.js palvelimen API-päätepisteineen:
+// этот файл содержит express.js сервер с api endpoints для:
+// tämä tiedosto sisältää express.js palvelimen api-päätepisteineen:
 //
-// - Аутентификация пользователей (логин/регистрация)
-//   Käyttäjien autentikointi (kirjautuminen/rekisteröinti)
+// - аутентификация пользователей (логин/регистрация)
+//   käyttäjien autentikointi (kirjautuminen/rekisteröinti)
 //
-// - CRUD операции для студентов, компаний и мест практики
-//   CRUD-toiminnot opiskelijoille, yrityksille ja harjoittelupaikoille
+// - crud операции для студентов, компаний и мест практики
+//   crud-toiminnot opiskelijoille, yrityksille ja harjoittelupaikoille
 //
-// - Управление правами доступа по ролям
-//   Roolipohjainen käyttöoikeuksien hallinta
+// - управление правами доступа по ролям
+//   roolipohjainen käyttöoikeuksien hallinta
 //
-// - Подключение к PostgreSQL базе данных
-//   PostgreSQL tietokantayhteys
+// - подключение к postgresql базе данных
+//   postgresql tietokantayhteys
 //
-// =====================================================
+// ---
 
 // Загружаем переменные окружения из .env файла
 // Ladataan ympäristömuuttujat .env tiedostosta
@@ -32,10 +32,10 @@ const cors = require("cors"); // Для кросс-доменных запрос
 const { Pool } = require("pg"); // PostgreSQL клиент / PostgreSQL asiakasohjelma
 const app = express();
 
-// =====================================================
-// НАСТРОЙКА MIDDLEWARE
-// MIDDLEWARE KONFIGURAATIO
-// =====================================================
+// ---
+// настройка middleware
+// middleware konfiguraatio
+// ---
 
 // Настраиваем CORS для разрешения кросс-доменных запросов
 // Konfiguroidaan CORS sallimaan cross-origin pyynnöt
@@ -296,7 +296,7 @@ app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
   try {
     const result = await pool.query(
-      "SELECT user_id, user_email, user_password, user_name, user_role, student_id FROM users WHERE user_email = $1",
+      "SELECT user_id, user_email, user_password, user_name, user_role, student_id, password_reset FROM users WHERE user_email = $1",
       [email]
     );
     if (result.rows.length === 0) {
@@ -313,6 +313,7 @@ app.post("/api/login", async (req, res) => {
       user_name: user.user_name,
       user_role: user.user_role,
       student_id: user.student_id || null,
+      password_reset: user.password_reset || false,
     };
     res.json(response);
   } catch (err) {
@@ -523,5 +524,258 @@ app.delete("/workplace", async (req, res) => {
   } catch (err) {
     console.error("DB ERROR /workplace DELETE:", err);
     res.status(500).send("DB error");
+  }
+});
+
+// ---
+// endpoints для восстановления пароля
+// salasanan palautuksen päätepisteet
+// ---
+
+// Проверить существование email в базе данных
+// Tarkista sähköpostin olemassaolo tietokannassa
+app.post("/check-email", async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: "Email is required" });
+  }
+
+  try {
+    const result = await pool.query(
+      "SELECT user_id FROM users WHERE user_email = $1",
+      [email]
+    );
+
+    res.json({ exists: result.rows.length > 0 });
+  } catch (err) {
+    console.error("DB ERROR /check-email:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+// Сброс пароля
+// Salasanan nollaus
+app.post("/reset-password", async (req, res) => {
+  const { email, newPassword } = req.body;
+
+  if (!email || !newPassword) {
+    return res
+      .status(400)
+      .json({ error: "Email and new password are required" });
+  }
+
+  if (newPassword.length < 6) {
+    return res
+      .status(400)
+      .json({ error: "Password must be at least 6 characters long" });
+  }
+
+  try {
+    // Проверяем, существует ли пользователь
+    // Tarkistetaan, onko käyttäjä olemassa
+    const userCheck = await pool.query(
+      "SELECT user_id FROM users WHERE user_email = $1",
+      [email]
+    );
+
+    if (userCheck.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Хешируем новый пароль
+    // Tiivistetään uusi salasana
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // Обновляем пароль в базе данных
+    // Päivitetään salasana tietokannassa
+    await pool.query(
+      "UPDATE users SET user_password = $1 WHERE user_email = $2",
+      [hashedPassword, email]
+    );
+
+    res.json({
+      success: true,
+      message: "Password updated successfully",
+    });
+  } catch (err) {
+    console.error("DB ERROR /reset-password:", err);
+    res.status(500).json({
+      error: "Database error",
+      success: false,
+    });
+  }
+});
+
+// ---
+// endpoints для админ-панели
+// admin-paneelin päätepisteet
+// ---
+
+// создание поля password_reset в таблице users (если не существует)
+// password_reset-kentän luominen users-taulukkoon (jos ei ole olemassa)
+async function ensurePasswordResetColumn() {
+  try {
+    await pool.query(`
+      ALTER TABLE users 
+      ADD COLUMN IF NOT EXISTS password_reset BOOLEAN DEFAULT false
+    `);
+    console.log("Password reset column ensured");
+  } catch (err) {
+    console.error("Error ensuring password_reset column:", err);
+  }
+}
+
+// вызываем при старте сервера
+// kutsutaan palvelimen käynnistyessä
+ensurePasswordResetColumn();
+
+// получить список всех пользователей (кроме админов)
+// hae kaikkien käyttäjien lista (paitsi admin)
+app.get("/admin/users", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        u.user_id,
+        u.user_email as email,
+        u.user_role,
+        COALESCE(u.password_reset, false) as password_reset,
+        CASE 
+          WHEN u.user_role = 2 THEN u.user_name
+          WHEN u.user_role = 3 THEN CONCAT(s.st_name, ' ', s.st_s_name)
+          ELSE 'unknown'
+        END as name
+      FROM users u 
+      LEFT JOIN students s ON u.student_id = s.student_id 
+      WHERE u.user_role != 1
+      ORDER BY u.user_role, u.user_email
+    `);
+
+    console.log("Admin users query result:", result.rows.length, "rows");
+    console.log("Sample user:", result.rows[0]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("DB ERROR /admin/users:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+// сброс пароля пользователя администратором
+// käyttäjän salasanan nollaus ylläpitäjän toimesta
+app.post("/admin/reset-user-password", async (req, res) => {
+  const { userId } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required" });
+  }
+
+  try {
+    // проверяем, что пользователь не админ
+    // tarkistetaan, että käyttäjä ei ole admin
+    const userCheck = await pool.query(
+      "SELECT user_role FROM users WHERE user_id = $1",
+      [userId]
+    );
+
+    if (userCheck.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (userCheck.rows[0].user_role === 1) {
+      return res.status(403).json({ error: "Cannot reset admin password" });
+    }
+
+    // устанавливаем флаг сброса пароля
+    // asetetaan salasanan nollauslippu
+    await pool.query(
+      "UPDATE users SET password_reset = true WHERE user_id = $1",
+      [userId]
+    );
+
+    res.json({
+      success: true,
+      message: "Password reset flag set successfully",
+    });
+  } catch (err) {
+    console.error("DB ERROR /admin/reset-user-password:", err);
+    res.status(500).json({
+      error: "Database error",
+      success: false,
+    });
+  }
+});
+
+// изменение пароля пользователем (только если пароль сброшен)
+// käyttäjän salasanan vaihto (vain jos salasana on nollattu)
+app.post("/user/change-password", async (req, res) => {
+  const { userId, newPassword } = req.body;
+
+  console.log("Change password request:", {
+    userId,
+    passwordLength: newPassword?.length,
+  });
+
+  if (!userId || !newPassword) {
+    console.log("Missing userId or newPassword");
+    return res
+      .status(400)
+      .json({ error: "User ID and new password are required" });
+  }
+
+  if (newPassword.length < 6) {
+    console.log("Password too short:", newPassword.length);
+    return res
+      .status(400)
+      .json({ error: "Password must be at least 6 characters long" });
+  }
+
+  try {
+    // проверяем, что у пользователя установлен флаг сброса
+    // tarkistetaan, että käyttäjällä on nollauslippu asetettu
+    const userCheck = await pool.query(
+      "SELECT password_reset FROM users WHERE user_id = $1",
+      [userId]
+    );
+
+    console.log("User check result:", userCheck.rows);
+
+    if (userCheck.rows.length === 0) {
+      console.log("User not found for userId:", userId);
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (!userCheck.rows[0].password_reset) {
+      console.log("Password reset flag is false for user:", userId);
+      return res.status(403).json({
+        error:
+          "Password change not allowed. Contact administrator to reset your password first.",
+      });
+    }
+
+    // хешируем новый пароль и сбрасываем флаг
+    // tiivistetään uusi salasana ja nollataan lippu
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    console.log("Updating password for userId:", userId);
+
+    const updateResult = await pool.query(
+      "UPDATE users SET user_password = $1, password_reset = false WHERE user_id = $2",
+      [hashedPassword, userId]
+    );
+
+    console.log("Update result rowCount:", updateResult.rowCount);
+
+    res.json({
+      success: true,
+      message: "Password changed successfully",
+    });
+  } catch (err) {
+    console.error("DB ERROR /user/change-password:", err);
+    res.status(500).json({
+      error: "Database error",
+      success: false,
+    });
   }
 });

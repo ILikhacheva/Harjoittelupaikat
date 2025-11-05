@@ -1,44 +1,44 @@
-// =====================================================
-// СИСТЕМА УПРАВЛЕНИЯ МЕСТАМИ ПРАКТИКИ
-// HARJOITTELUPAIKKOJEN HALLINTAJÄRJESTELMÄ
-// =====================================================
+// ---
+// система управления местами практики
+// harjoittelupaikkojen hallintajärjestelmä
+// ---
 //
-// Этот файл содержит весь клиентский JavaScript код для системы
-// управления местами практики. Включает функции для:
+// этот файл содержит весь клиентский javascript код для системы
+// управления местами практики. включает функции для:
 //
-// Tämä tiedosto sisältää kaiken asiakaspuolen JavaScript-koodin
-// harjoittelupaikkojen hallintajärjestelmälle. Sisältää toiminnot:
+// tämä tiedosto sisältää kaiken asiakaspuolen javascript-koodin
+// harjoittelupaikkojen hallintajärjestelmälle. sisältää toiminnot:
 //
-// - Управление модальными окнами (студенты, компании, места практики)
-//   Modal-ikkunoiden hallinta (opiskelijat, yritykset, harjoittelupaikat)
+// - управление модальными окнами (студенты, компании, места практики)
+//   modal-ikkunoiden hallinta (opiskelijat, yritykset, harjoittelupaikat)
 //
-// - Встроенное редактирование в таблицах (для учителей)
-//   Sisäänrakennettu taulukkomuokkaus (opettajille)
+// - встроенное редактирование в таблицах (для учителей)
+//   sisäänrakennettu taulukkomuokkaus (opettajille)
 //
-// - Аутентификация и авторизация пользователей
-//   Käyttäjien autentikointi ja auktorisointi
+// - аутентификация и авторизация пользователей
+//   käyttäjien autentikointi ja auktorisointi
 //
-// - Управление правами доступа по ролям (студент/учитель)
-//   Roolipohjainen käyttöoikeuksien hallinta (opiskelija/opettaja)
+// - управление правами доступа по ролям (студент/учитель)
+//   roolipohjainen käyttöoikeuksien hallinta (opiskelija/opettaja)
 //
-// - Ограничения дат (только будущие даты)
-//   Päivämäärärajoitukset (vain tulevat päivämäärät)
+// - ограничения дат (только будущие даты)
+//   päivämäärärajoitukset (vain tulevat päivämäärät)
 //
-// =====================================================
+// ---
 
-// =====================================================
-// ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
-// GLOBAALIT MUUTTUJAT
-// =====================================================
+// ---
+// глобальные переменные
+// globaalit muuttujat
+// ---
 
 // Массив для хранения данных студентов для сортировки
 // Taulukko opiskelijatietojen säilyttämiseen lajittelua varten
 let studentsData = [];
 
-// =====================================================
-// ФУНКЦИИ МАСОК ВВОДА
-// SYÖTTÖMASKITOIMINNOT
-// =====================================================
+// ---
+// функции масок ввода
+// syöttömaskitoiminnot
+// ---
 
 // Функция для применения маски телефона в финском формате
 // Funktio suomalaisen puhelinnumeron maskin soveltamiseen
@@ -688,6 +688,18 @@ function editStudentRow(tr, student, students, idx) {
 // --- Login/Logout modal logic ---
 function openLoginModal() {
   document.getElementById("LoginModalOverlay").style.display = "flex";
+
+  // сбрасываем поля при открытии формы входа
+  // tyhjennetään kentät kirjautumislomakkeen avaamisen yhteydessä
+  const loginEmailField = document.getElementById("loginEmail");
+  const loginPasswordField = document.getElementById("loginPassword");
+
+  if (loginEmailField) {
+    loginEmailField.value = "";
+  }
+  if (loginPasswordField) {
+    loginPasswordField.value = "";
+  }
 }
 function closeLoginModal() {
   document.getElementById("LoginModalOverlay").style.display = "none";
@@ -699,10 +711,182 @@ function closeLogoutModal() {
   document.getElementById("LogoutModalOverlay").style.display = "none";
 }
 
-// =====================================================
-// ФУНКЦИИ МОДАЛЬНОГО ОКНА ОТЧЕТОВ
-// RAPORTTIEN MODAL-IKKUNAN FUNKTIOT
-// =====================================================
+// ---
+// функции модального окна восстановления пароля
+// salasanan palautuksen modal-ikkunan funktiot
+// ---
+
+function openForgotPasswordModal() {
+  document.getElementById("ForgotPasswordModalOverlay").style.display = "flex";
+  // Сбрасываем форму при открытии
+  // Nollataan lomake avaamisen yhteydessä
+  document.getElementById("forgot-password-form").reset();
+  document.getElementById("passwordResetFields").style.display = "none";
+  document.getElementById("checkEmailBtn").style.display = "inline-block";
+  document.getElementById("resetPasswordBtn").style.display = "none";
+  document.getElementById("emailCheckMessage").innerHTML = "";
+  document.getElementById("passwordMatchMessage").innerHTML = "";
+}
+
+function closeForgotPasswordModal() {
+  document.getElementById("ForgotPasswordModalOverlay").style.display = "none";
+}
+
+// ---
+// функции админ-панели
+// admin-paneelin funktiot
+// ---
+
+function openAdminModal() {
+  document.getElementById("AdminModalOverlay").style.display = "flex";
+  loadUsersList();
+}
+
+function closeAdminModal() {
+  document.getElementById("AdminModalOverlay").style.display = "none";
+}
+
+// загрузить список пользователей
+// lataa käyttäjälista
+async function loadUsersList() {
+  try {
+    console.log("Загружаем список пользователей...");
+    const response = await fetch("/admin/users");
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const users = await response.json();
+    console.log("Получено пользователей:", users.length);
+    console.log("Данные пользователей:", users);
+
+    const tbody = document.getElementById("adminUsersTableBody");
+    if (!tbody) {
+      console.error("Элемент adminUsersTableBody не найден!");
+      return;
+    }
+
+    tbody.innerHTML = "";
+
+    if (users.length === 0) {
+      tbody.innerHTML =
+        '<tr><td colspan="5" style="text-align: center;">Ei käyttäjiä löytynyt</td></tr>';
+      return;
+    }
+
+    users.forEach((user) => {
+      const row = document.createElement("tr");
+
+      const roleText =
+        user.user_role === 2
+          ? "opettaja"
+          : user.user_role === 3
+          ? "opiskelija"
+          : "tuntematon";
+
+      const passwordStatus = user.password_reset
+        ? '<span style="color: orange;">nollattu</span>'
+        : '<span style="color: green;">asetettu</span>';
+
+      row.innerHTML = `
+        <td>${user.name || "ei nimeä"}</td>
+        <td>${user.email}</td>
+        <td>${roleText}</td>
+        <td>${passwordStatus}</td>
+        <td>
+          <button 
+            onclick="resetUserPassword(${user.user_id})" 
+            style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; margin-right: 5px;"
+            ${user.password_reset ? "disabled" : ""}
+          >
+            nollaa salasana
+          </button>
+        </td>
+      `;
+
+      tbody.appendChild(row);
+    });
+  } catch (error) {
+    console.error("virhe käyttäjälistan latauksessa:", error);
+    alert("virhe käyttäjälistan latauksessa");
+  }
+}
+
+// сброс пароля пользователя
+// käyttäjän salasanan nollaus
+async function resetUserPassword(userId) {
+  if (!confirm("haluatko varmasti nollata käyttäjän salasanan?")) {
+    return;
+  }
+
+  try {
+    const response = await fetch("/admin/reset-user-password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId: userId }),
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      alert(
+        "salasana nollattu onnistuneesti! käyttäjä voi nyt vaihtaa salasanan."
+      );
+      loadUsersList(); // обновляем список
+    } else {
+      alert("virhe: " + (result.error || "tuntematon virhe"));
+    }
+  } catch (error) {
+    console.error("virhe salasanan nollauksessa:", error);
+    alert("tapahtui virhe. yritä uudelleen.");
+  }
+}
+
+// ---
+// функции окна смены пароля для пользователей
+// käyttäjien salasanan vaihtotoiminnot
+// ---
+
+function openChangePasswordModal() {
+  document.getElementById("ChangePasswordModalOverlay").style.display = "flex";
+  document.getElementById("change-password-form").reset();
+  document.getElementById("userPasswordMatchMessage").innerHTML = "";
+}
+
+function closeChangePasswordModal() {
+  document.getElementById("ChangePasswordModalOverlay").style.display = "none";
+}
+
+// проверка совпадения паролей для пользователя
+// käyttäjän salasanojen vastaavuuden tarkistus
+function checkUserPasswordMatch() {
+  const newPassword = document.getElementById("userNewPassword").value;
+  const confirmPassword = document.getElementById("userConfirmPassword").value;
+  const messageDiv = document.getElementById("userPasswordMatchMessage");
+
+  if (confirmPassword === "") {
+    messageDiv.innerHTML = "";
+    return;
+  }
+
+  if (newPassword === confirmPassword) {
+    messageDiv.innerHTML =
+      '<span style="color: green;">salasanat täsmäävät ✓</span>';
+    return true;
+  } else {
+    messageDiv.innerHTML =
+      '<span style="color: red;">salasanat eivät täsmää</span>';
+    return false;
+  }
+}
+
+// ---
+// функции модального окна отчетов
+// raporttien modal-ikkunan funktiot
+// ---
 
 // Открыть модальное окно отчетов
 // Avaa raporttien modal-ikkuna
@@ -1014,23 +1198,36 @@ if (loginForm) {
     if (res.ok) {
       const user = await res.json();
       closeLoginModal();
-      // Сохраняем статус авторизации, имя и роль
+
+      // сохраняем данные пользователя
+      // tallennetaan käyttäjätiedot
       localStorage.setItem("isLoggedIn", "1");
+      if (user && user.user_id) {
+        localStorage.setItem("userId", String(user.user_id));
+      }
       if (user && user.user_name) {
         localStorage.setItem("userName", user.user_name);
       }
       if (user && user.user_role !== undefined) {
         localStorage.setItem("userRole", String(user.user_role));
       }
-      // Store student_id if present (for students)
+      // store student_id if present (for students)
       if (user && user.student_id) {
         localStorage.setItem("studentId", String(user.student_id));
       } else {
         localStorage.removeItem("studentId");
       }
+
+      // проверяем, нужно ли сменить пароль
+      // tarkistetaan, pitääkö salasana vaihtaa
+      if (user && user.password_reset) {
+        openChangePasswordModal();
+        return; // не обновляем интерфейс пока пароль не сменен
+      }
+
       updateAuthButtons();
       updateGreeting();
-      // Перезагружаем таблицу после логина
+      // перезагружаем таблицу после логина
       loadWorkplaceTable();
     } else {
       alert("Virhe kirjautumisessa!");
@@ -1038,13 +1235,27 @@ if (loginForm) {
   });
 }
 
-// Logout logic
+// logout logic
 function logoutUser() {
   closeLogoutModal();
   localStorage.removeItem("isLoggedIn");
+  localStorage.removeItem("userId");
   localStorage.removeItem("userName");
   localStorage.removeItem("userRole");
   localStorage.removeItem("studentId");
+
+  // сбрасываем поля формы входа
+  // tyhjennetään kirjautumislomakkeen kentät
+  const loginEmailField = document.getElementById("loginEmail");
+  const loginPasswordField = document.getElementById("loginPassword");
+
+  if (loginEmailField) {
+    loginEmailField.value = "";
+  }
+  if (loginPasswordField) {
+    loginPasswordField.value = "";
+  }
+
   updateAuthButtons();
   updateGreeting();
 }
@@ -1072,14 +1283,35 @@ function updateAuthButtons() {
   const addCompanyBtn = document.getElementById("addCompanyBtn");
   const addPlaceBtn = document.getElementById("addPlaceBtn");
   const reportBtn = document.getElementById("reportBtn");
+  const adminBtn = document.getElementById("adminBtn");
   const dataTable = document.getElementById("dataTable");
   const welcomeGif = document.getElementById("welcomeGif");
   const isLoggedIn = localStorage.getItem("isLoggedIn");
   const userRole = localStorage.getItem("userRole");
+
+  // отладочная информация / debug-tiedot
+  console.log("updateAuthButtons - isLoggedIn:", isLoggedIn);
+  console.log("updateAuthButtons - userRole:", userRole);
+  console.log("updateAuthButtons - adminBtn element:", adminBtn);
+
   if (isLoggedIn) {
     if (loginBtn) loginBtn.style.display = "none";
     if (logoutBtn) logoutBtn.style.display = "block";
-    // Учитель (роль 2) — всё доступно
+
+    // админ (роль 1) — показываем кнопку настроек
+    if (userRole === "1") {
+      console.log("Показываем кнопку админа для роли 1");
+      if (adminBtn) {
+        adminBtn.style.display = "block";
+        console.log("Кнопка админа установлена как видимая");
+      } else {
+        console.log("Элемент adminBtn не найден!");
+      }
+    } else {
+      if (adminBtn) adminBtn.style.display = "none";
+    }
+
+    // учитель (роль 2) — всё доступно
     if (userRole === "2") {
       if (addStudentBtn) {
         addStudentBtn.disabled = false;
@@ -1130,6 +1362,7 @@ function updateAuthButtons() {
   } else {
     if (loginBtn) loginBtn.style.display = "block";
     if (logoutBtn) logoutBtn.style.display = "none";
+    if (adminBtn) adminBtn.style.display = "none";
     if (addStudentBtn) {
       addStudentBtn.disabled = true;
       addStudentBtn.setAttribute("aria-disabled", "true");
@@ -1150,7 +1383,7 @@ function updateAuthButtons() {
       reportBtn.disabled = true;
       reportBtn.setAttribute("aria-disabled", "true");
     }
-    // Скрываем таблицу и показываем GIF для незалогиненных
+    // скрываем таблицу и показываем gif для незалогиненных
     if (dataTable) dataTable.style.display = "none";
     if (welcomeGif) welcomeGif.style.display = "block";
   }
@@ -2512,4 +2745,312 @@ function updateStudentSortArrows(activeColumn, direction) {
   if (arrow) {
     arrow.classList.add("active");
   }
+}
+
+// ---
+// функции восстановления пароля
+// salasanan palautuksen funktiot
+// ---
+
+// Проверить существование email в базе данных
+// Tarkista sähköpostin olemassaolo tietokannassa
+async function checkEmailExists() {
+  const email = document.getElementById("forgotEmail").value.trim();
+  const messageDiv = document.getElementById("emailCheckMessage");
+
+  if (!email) {
+    messageDiv.innerHTML =
+      '<span style="color: red;">Syötä sähköpostiosoite</span>';
+    return;
+  }
+
+  // Проверяем формат email
+  // Tarkistetaan sähköpostin muoto
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    messageDiv.innerHTML =
+      '<span style="color: red;">Virheellinen sähköpostiosoite</span>';
+    return;
+  }
+
+  try {
+    const response = await fetch("/check-email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: email }),
+    });
+
+    const result = await response.json();
+
+    if (result.exists) {
+      messageDiv.innerHTML =
+        '<span style="color: green;">Sähköposti löytyi! Voit nyt vaihtaa salasanan.</span>';
+      document.getElementById("passwordResetFields").style.display = "block";
+      document.getElementById("checkEmailBtn").style.display = "none";
+      document.getElementById("resetPasswordBtn").style.display =
+        "inline-block";
+    } else {
+      messageDiv.innerHTML =
+        '<span style="color: red;">Sähköpostiosoitetta ei löytynyt järjestelmästä</span>';
+    }
+  } catch (error) {
+    console.error("Virhe sähköpostin tarkistuksessa:", error);
+    messageDiv.innerHTML =
+      '<span style="color: red;">Tapahtui virhe. Yritä uudelleen.</span>';
+  }
+}
+
+// Проверить совпадение паролей в реальном времени
+// Tarkista salasanojen vastaavuus reaaliajassa
+function checkPasswordMatch() {
+  const newPassword = document.getElementById("newPassword").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
+  const messageDiv = document.getElementById("passwordMatchMessage");
+
+  if (confirmPassword === "") {
+    messageDiv.innerHTML = "";
+    return;
+  }
+
+  if (newPassword === confirmPassword) {
+    messageDiv.innerHTML =
+      '<span style="color: green;">Salasanat täsmäävät ✓</span>';
+    return true;
+  } else {
+    messageDiv.innerHTML =
+      '<span style="color: red;">Salasanat eivät täsmää</span>';
+    return false;
+  }
+}
+
+// Добавляем обработчики событий для проверки паролей
+// Lisätään tapahtumankäsittelijät salasanojen tarkistukseen
+document.addEventListener("DOMContentLoaded", function () {
+  const confirmPasswordInput = document.getElementById("confirmPassword");
+  const newPasswordInput = document.getElementById("newPassword");
+
+  if (confirmPasswordInput) {
+    confirmPasswordInput.addEventListener("input", checkPasswordMatch);
+  }
+  if (newPasswordInput) {
+    newPasswordInput.addEventListener("input", checkPasswordMatch);
+  }
+
+  // Обработчик формы восстановления пароля
+  // Salasanan palautuslomakkeen käsittelijä
+  const forgotForm = document.getElementById("forgot-password-form");
+  if (forgotForm) {
+    forgotForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const email = document.getElementById("forgotEmail").value.trim();
+      const newPassword = document.getElementById("newPassword").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+
+      // Проверяем все поля
+      // Tarkistetaan kaikki kentät
+      if (!email || !newPassword || !confirmPassword) {
+        alert("Täytä kaikki kentät");
+        return;
+      }
+
+      if (newPassword.length < 6) {
+        alert("Salasanan tulee olla vähintään 6 merkkiä pitkä");
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        alert("Salasanat eivät täsmää");
+        return;
+      }
+
+      try {
+        const response = await fetch("/reset-password", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email,
+            newPassword: newPassword,
+          }),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert("Salasana vaihdettu onnistuneesti!");
+          closeForgotPasswordModal();
+          openLoginModal();
+        } else {
+          alert(
+            "Virhe salasanan vaihdossa: " + (result.error || "Tuntematon virhe")
+          );
+        }
+      } catch (error) {
+        console.error("Virhe salasanan vaihdossa:", error);
+        alert("Tapahtui virhe. Yritä uudelleen.");
+      }
+    });
+  }
+
+  // обработчик формы смены пароля для пользователей
+  // käyttäjien salasanan vaihdon lomakekäsittelijä
+  const userConfirmPasswordInput = document.getElementById(
+    "userConfirmPassword"
+  );
+  const userNewPasswordInput = document.getElementById("userNewPassword");
+
+  if (userConfirmPasswordInput) {
+    userConfirmPasswordInput.addEventListener("input", checkUserPasswordMatch);
+  }
+  if (userNewPasswordInput) {
+    userNewPasswordInput.addEventListener("input", checkUserPasswordMatch);
+  }
+
+  const changePasswordForm = document.getElementById("change-password-form");
+  if (changePasswordForm) {
+    changePasswordForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const newPassword = document.getElementById("userNewPassword").value;
+      const confirmPassword = document.getElementById(
+        "userConfirmPassword"
+      ).value;
+      const userId = localStorage.getItem("userId");
+
+      console.log("Change password attempt:", {
+        userId,
+        passwordLength: newPassword?.length,
+        hasConfirmPassword: !!confirmPassword,
+      });
+
+      // проверяем все поля
+      // tarkistetaan kaikki kentät
+      if (!newPassword || !confirmPassword) {
+        alert("täytä kaikki kentät");
+        return;
+      }
+
+      if (newPassword.length < 6) {
+        alert("salasanan tulee olla vähintään 6 merkkiä pitkä");
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        alert("salasanat eivät täsmää");
+        return;
+      }
+
+      if (!userId) {
+        alert("käyttäjä id puuttuu. kirjaudu uudelleen.");
+        return;
+      }
+
+      try {
+        const response = await fetch("/user/change-password", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: userId,
+            newPassword: newPassword,
+          }),
+        });
+
+        console.log("Server response status:", response.status);
+        const result = await response.json();
+        console.log("Server response data:", result);
+
+        if (result.success) {
+          alert("salasana vaihdettu onnistuneesti!");
+          closeChangePasswordModal();
+
+          // обновляем интерфейс после смены пароля
+          // päivitetään käyttöliittymä salasanan vaihdon jälkeen
+          updateAuthButtons();
+          updateGreeting();
+          loadWorkplaceTable();
+
+          // всегда обновляем кеш списка пользователей для админ-панели
+          // päivitetään aina käyttäjälistan välimuisti admin-paneelia varten
+          console.log("Обновляем список пользователей после смены пароля");
+
+          // добавляем небольшую задержку, чтобы база данных успела обновиться
+          // lisätään pieni viive, jotta tietokanta ehtii päivittyä
+          setTimeout(() => {
+            // проверяем, есть ли функция loadUsersList
+            if (typeof loadUsersList === "function") {
+              loadUsersList();
+              console.log("Список пользователей обновлен");
+            }
+          }, 500);
+        } else {
+          alert(
+            "virhe salasanan vaihdossa: " + (result.error || "tuntematon virhe")
+          );
+        }
+      } catch (error) {
+        console.error("virhe salasanan vaihdossa:", error);
+        alert("tapahtui virhe. yritä uudelleen.");
+      }
+    });
+  }
+
+  // добавим фильтрацию и поиск в админ-панели
+  // lisätään suodatus ja haku admin-paneeliin
+  const adminSearchInput = document.getElementById("adminUserSearchInput");
+  const adminRoleFilter = document.getElementById("adminRoleFilterSelect");
+  const clearAdminFiltersBtn = document.getElementById("clearAdminFiltersBtn");
+
+  if (adminSearchInput) {
+    adminSearchInput.addEventListener("input", filterAdminUsers);
+  }
+
+  if (adminRoleFilter) {
+    adminRoleFilter.addEventListener("change", filterAdminUsers);
+  }
+
+  if (clearAdminFiltersBtn) {
+    clearAdminFiltersBtn.addEventListener("click", function () {
+      if (adminSearchInput) adminSearchInput.value = "";
+      if (adminRoleFilter) adminRoleFilter.value = "";
+      filterAdminUsers();
+    });
+  }
+});
+
+// функция фильтрации пользователей в админ-панели
+// käyttäjien suodatusfunktio admin-paneelissa
+function filterAdminUsers() {
+  const searchInput = document.getElementById("adminUserSearchInput");
+  const roleFilter = document.getElementById("adminRoleFilterSelect");
+
+  if (!searchInput || !roleFilter) return;
+
+  const searchTerm = searchInput.value.toLowerCase();
+  const roleFilterValue = roleFilter.value;
+  const rows = document.querySelectorAll("#adminUsersTableBody tr");
+
+  rows.forEach((row) => {
+    const name = row.cells[0].textContent.toLowerCase();
+    const email = row.cells[1].textContent.toLowerCase();
+    const role = row.cells[2].textContent;
+
+    const matchesSearch =
+      name.includes(searchTerm) || email.includes(searchTerm);
+    const matchesRole =
+      roleFilterValue === "" ||
+      (roleFilterValue === "2" && role === "opettaja") ||
+      (roleFilterValue === "3" && role === "opiskelija");
+
+    if (matchesSearch && matchesRole) {
+      row.style.display = "";
+    } else {
+      row.style.display = "none";
+    }
+  });
 }
