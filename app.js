@@ -36,102 +36,21 @@
 let studentsData = [];
 
 // ---
-// мобильные улучшения
-// mobiiliparannukset
+// Простая адаптация для мобильных устройств
+// Yksinkertainen mobiilisovitus
 // ---
 
-// Определение мобильного устройства
-// Mobiililaitteen tunnistus
-function isMobileDevice() {
-  return (
-    window.innerWidth <= 768 ||
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    )
-  );
-}
-
-// Улучшенная прокрутка таблиц на мобильных
-// Parannettu taulukoiden vieritys mobiilissa
-function initMobileTableScrolling() {
-  if (!isMobileDevice()) return;
-
-  const tableContainer = document.getElementById("dataTable");
-  if (!tableContainer) return;
-
-  let isScrolling = false;
-  let scrollTimeout;
-
-  tableContainer.addEventListener("scroll", function () {
-    if (!isScrolling) {
-      tableContainer.style.pointerEvents = "none";
-      isScrolling = true;
-    }
-
-    clearTimeout(scrollTimeout);
-    scrollTimeout = setTimeout(function () {
-      tableContainer.style.pointerEvents = "auto";
-      isScrolling = false;
-    }, 150);
-  });
-}
-
-// Автозакрытие модальных окон при повороте экрана
-// Modaalien automaattinen sulkeminen näytön kiertämisessä
-function initOrientationHandler() {
-  if (!isMobileDevice()) return;
-
-  window.addEventListener("orientationchange", function () {
-    // Закрываем все открытые модальные окна при повороте
-    const modals = document.querySelectorAll(".modal-overlay");
-    modals.forEach((modal) => {
-      if (modal.style.display !== "none") {
-        modal.style.display = "none";
-      }
-    });
-
-    // Закрываем боковое меню
-    closeSideMenu();
-  });
-}
-
-// Улучшенное управление фокусом для мобильных
-// Parannettu fokuksen hallinta mobiililaitteille
-function initMobileFocusManagement() {
-  if (!isMobileDevice()) return;
-
-  // Предотвращаем зум при фокусе на input элементах
-  const inputs = document.querySelectorAll(
-    'input[type="text"], input[type="email"], input[type="tel"], input[type="password"], textarea, select'
-  );
-
-  inputs.forEach((input) => {
-    input.addEventListener("focus", function () {
-      // Временно устанавливаем font-size 16px для предотвращения зума на iOS
-      if (parseFloat(getComputedStyle(this).fontSize) < 16) {
-        this.style.fontSize = "16px";
-      }
-    });
-
-    input.addEventListener("blur", function () {
-      // Возвращаем оригинальный размер шрифта
-      this.style.fontSize = "";
-    });
-  });
-}
-
-// Инициализация мобильных улучшений
-// Mobiiliparannusten alustus
-function initMobileEnhancements() {
-  initMobileTableScrolling();
-  initOrientationHandler();
-  initMobileFocusManagement();
-
-  // Добавляем класс для мобильных устройств
-  if (isMobileDevice()) {
-    document.body.classList.add("mobile-device");
+// Простая адаптация: добавляем класс 'mobile' если ширина экрана <= 600px
+function updateMobileClass() {
+  if (window.innerWidth <= 600) {
+    document.body.classList.add("mobile");
+  } else {
+    document.body.classList.remove("mobile");
   }
 }
+
+window.addEventListener("resize", updateMobileClass);
+document.addEventListener("DOMContentLoaded", updateMobileClass);
 
 // ---
 // функции масок ввода
@@ -3147,16 +3066,4 @@ function filterAdminUsers() {
 
 // Инициализация всех улучшений при загрузке страницы
 // Kaikkien parannusten alustus sivun latauksessa
-document.addEventListener("DOMContentLoaded", function () {
-  // Инициализируем мобильные улучшения
-  initMobileEnhancements();
-
-  // Проверяем и обновляем размеры при изменении окна
-  window.addEventListener("resize", function () {
-    if (isMobileDevice()) {
-      document.body.classList.add("mobile-device");
-    } else {
-      document.body.classList.remove("mobile-device");
-    }
-  });
-});
+// ...existing code...

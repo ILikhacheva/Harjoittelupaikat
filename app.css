@@ -9,129 +9,105 @@
 }
 
 /* ---
-  стили для поиска по таблице
-  taulukon hakutyylien määritykset
+  простые стили для поиска по таблице (только для мобильных)
+  yksinkertaiset hakutyylit mobiilille
   --- */
 
-/* Контейнер поиска / Hakukontin */
 .search-container {
   display: flex;
+  flex-direction: row;
   align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
   justify-content: center;
-  margin-bottom: 15px;
-  gap: 8px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-/* Поле ввода поиска / Hakusyöttökenttä */
 #searchInput {
-  width: 100%;
-  max-width: 400px;
-  padding: 8px 12px;
+  flex: 1;
+  min-width: 180px;
+  padding: 10px 14px;
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  transition: border-color 0.3s;
 }
 
-#searchInput:focus {
-  outline: none;
-  border-color: #357ab8;
-  box-shadow: 0 0 5px rgba(53, 122, 184, 0.3);
-}
-
-/* Кнопка очистки поиска / Haun tyhjennys painike */
 #clearSearchBtn {
-  padding: 8px 12px;
+  display: inline-block;
+  min-width: 36px;
+  padding: 10px 10px;
   background: #f0f0f0;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 50%;
   cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-#clearSearchBtn:hover {
-  background: #e0e0e0;
+  text-align: center;
+  font-size: 18px;
+  line-height: 1;
 }
 
 /* ---
-   УЛУЧШЕННАЯ МОБИЛЬНАЯ АДАПТАЦИЯ
-   PARANNETTU MOBIILISOVITUS
+   Простая мобильная адаптация / Yksinkertainen mobiilisovitus
    --- */
 
-/* Планшеты и большие мобильные устройства / Tabletit ja isot mobiililaitteet */
-@media (max-width: 768px) {
+@media (max-width: 600px) {
   body {
-    font-size: 14px;
+    font-size: 16px;
+    padding: 5px;
+  }
+
+  .container {
+    width: 100%;
+    margin: 0;
+    padding: 5px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 8px 5px;
+    margin-bottom: 10px;
   }
 
   .header h1 {
-    font-size: 36px;
+    font-size: 24px;
+    margin: 0 0 10px 0;
+    text-align: center;
+    line-height: 1.2;
   }
 
-  /* Улучшенные модальные окна для планшетов / Parannetut modaali-ikkunat tableteille */
-  .modal-window {
-    max-width: 95vw !important;
-    margin: 10px;
+  #burgerMenu {
+    position: static;
+    margin: 0;
+    align-self: flex-end;
+    width: 36px;
+    height: 36px;
   }
 
-  /* Компактные кнопки / Kompakti painikkeet */
-  .side-btn,
-  .submenu-parent {
-    font-size: 18px;
-    padding: 10px 0;
-  }
-}
-
-/* Мобильные устройства / Mobiililaitteet */
-@media (max-width: 600px) {
-  .search-container {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
-
-  #searchInput {
-    max-width: none;
-    margin-bottom: 0;
-    font-size: 16px; /* Предотвращает зум на iOS / Estää zoomauksen iOS:llä */
-    padding: 12px 16px;
-  }
-
-  /* Улучшенные кнопки для мобильных устройств / Parannetut painikkeet mobiililaitteille */
   button,
   .side-btn,
   .submenu-btn {
-    min-height: 44px; /* Apple рекомендует минимум 44px для тач-целей / Apple suosittelee vähintään 44px kosketusalueille */
+    min-height: 44px;
     padding: 12px 16px;
     font-size: 16px;
   }
 
-  /* Touch-friendly навигация / Kosketusystävällinen navigointi */
-  #burgerMenu {
-    width: 50px;
-    height: 50px;
+  table {
+    width: 100%;
+    font-size: 13px;
+    border-collapse: collapse;
+    display: table;
   }
 
-  .bar {
-    height: 4px; /* Толще для лучшей видимости / Paksumpi paremman näkyvyyden vuoksi */
-  }
-}
-
-/* Очень маленькие экраны / Hyvin pienet näytöt */
-@media (max-width: 480px) {
-  .header h1 {
-    font-size: 28px;
-    line-height: 1.2;
-  }
-
-  /* Стэкинг форм / Lomakkeiden pinottaminen */
-  .form-row {
-    flex-direction: column !important;
-  }
-
-  .form-row > * {
-    width: 100% !important;
-    margin-bottom: 10px;
+  td,
+  th {
+    padding: 8px 6px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
   }
 }
 
@@ -246,17 +222,15 @@
   background: #e0e0e0;
 }
 
-/* Адаптивность для поиска студентов на мобильных / Responsiivisuus opiskelijahaulle mobiilissa */
+/* Адаптация поиска студентов только для мобильных */
 @media (max-width: 600px) {
   .student-search-container {
     flex-direction: column;
-    align-items: stretch;
+    width: 100%;
   }
-
   #studentSearchInput,
   #groupFilterSelect {
     width: 100%;
-    margin-bottom: 8px;
   }
 }
 
@@ -320,17 +294,15 @@
   background: #e0e0e0;
 }
 
-/* Адаптивность для поиска компаний на мобильных / Responsiivisuus yrityshaulla mobiilissa */
+/* Адаптация поиска компаний только для мобильных */
 @media (max-width: 600px) {
   .company-search-container {
     flex-direction: column;
-    align-items: stretch;
+    width: 100%;
   }
-
   #companySearchInput,
   #addressFilterSelect {
     width: 100%;
-    margin-bottom: 8px;
   }
 }
 /* стили для отключенных кнопок меню / tyylit poistetuilla valikkopainikkeilla */
@@ -848,28 +820,6 @@ footer > div {
   }
 }
 
-/* Дополнительные улучшения для очень маленьких экранов / Lisäparannuksia erittäin pienille näytöille */
-@media (max-width: 360px) {
-  .header h1 {
-    font-size: 20px;
-  }
-
-  table {
-    font-size: 12px;
-  }
-
-  td,
-  th {
-    padding: 6px 4px !important;
-    max-width: 100px;
-  }
-
-  /* Скрываем менее важные колонки на очень маленьких экранах / Hide less important columns on very small screens */
-  .hide-on-tiny {
-    display: none !important;
-  }
-}
-
 h1 {
   font-size: 48px;
   color: #242323;
@@ -1129,7 +1079,7 @@ h1 {
   padding: 10px !important;
 }
 
-/* Улучшенные кнопки для мобильных */
+/* Улучшенные кнопки для мобильных / Parannuksia mobiililaitteiden painikkeille */
 .mobile-device button,
 .mobile-device .side-btn {
   min-height: 44px;
@@ -1147,124 +1097,25 @@ h1 {
 }
 
 /* ---
-   СТИЛИ ДЛЯ ОТЧЕТОВ НА МОБИЛЬНЫХ УСТРОЙСТВАХ
-   RAPORTTITYYLIEN MÄÄRITTELYT MOBIILILAITTEILLE
+   простые стили для отчетов на мобильных
+   yksinkertaiset raporttityylit mobiilille
    --- */
 
-/* Контейнер отчета */
 #reportContent {
-  width: 100% !important;
-  max-width: 100% !important;
-  overflow-x: auto !important;
-  -webkit-overflow-scrolling: touch !important;
+  width: 100%;
+  overflow-x: auto;
 }
 
-/* Таблицы в отчетах */
 #reportContent table {
-  width: 100% !important;
-  min-width: 600px !important;
-  max-width: none !important;
-  table-layout: auto !important;
-  border-collapse: collapse !important;
+  width: 100%;
+  font-size: 12px;
+  border-collapse: collapse;
 }
 
-/* Мобильные улучшения для отчетов */
-@media (max-width: 768px) {
-  #ReportModalOverlay .modal-window {
-    width: 95vw !important;
-    max-width: 95vw !important;
-    margin: 10px !important;
-    padding: 15px !important;
-  }
-
-  #reportContent {
-    padding: 10px !important;
-    margin: 0 !important;
-  }
-
-  #reportContent table {
-    font-size: 11px !important;
-    min-width: 800px !important;
-  }
-
-  #reportContent th,
-  #reportContent td {
-    padding: 4px 6px !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-
-  /* Заголовки отчетов */
-  #reportContent h3 {
-    font-size: 18px !important;
-    margin-bottom: 15px !important;
-  }
-
-  /* Кнопки в отчетах */
-  #generateReportBtn,
-  #generateCompanyReportBtn,
-  #exportPdfBtn {
-    padding: 8px 12px !important;
-    font-size: 14px !important;
-    margin: 5px !important;
-  }
-}
-
-@media (max-width: 600px) {
-  #reportContent table {
-    font-size: 10px !important;
-    min-width: 700px !important;
-  }
-
-  #reportContent th,
-  #reportContent td {
-    padding: 3px 4px !important;
-    max-width: 80px !important;
-  }
-
-  /* Более компактные заголовки колонок */
-  #reportContent th {
-    font-size: 9px !important;
-    line-height: 1.2 !important;
-  }
-
-  /* Стэкинг кнопок на очень маленьких экранах */
-  .modal-window > div[style*="text-align: center"] {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 8px !important;
-  }
-
-  #generateReportBtn,
-  #generateCompanyReportBtn,
-  #exportPdfBtn {
-    width: 100% !important;
-    margin: 0 !important;
-  }
-}
-
-/* Улучшение прокрутки для отчетов */
-@media (max-width: 768px) {
-  #reportContent {
-    /* Градиентные тени для индикации прокрутки */
-    background: linear-gradient(90deg, white 30%, rgba(255, 255, 255, 0)),
-      linear-gradient(90deg, rgba(255, 255, 255, 0), white 70%);
-    background-size: 40px 100%, 40px 100%;
-    background-position: left, right;
-    background-repeat: no-repeat;
-    background-attachment: local, local;
-  }
-
-  #reportContent::before {
-    content: "← Vieritä taulukkoa vaakasuunnassa →";
-    display: block;
-    text-align: center;
-    font-size: 12px;
-    color: #666;
-    margin-bottom: 10px;
-    padding: 5px;
-    background: #f8f9fa;
-    border-radius: 4px;
-  }
+#reportContent th,
+#reportContent td {
+  padding: 6px 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
